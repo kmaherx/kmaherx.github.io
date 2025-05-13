@@ -1,15 +1,14 @@
 ---
 layout: about
-title: about
+title: Kamal Maher
 permalink: /
-subtitle: Kamal Maher
+subtitle:
 
 profile:
   align: center
   image: prof_pic.jpg
   image_circular: true # crops the image to make it circular
-  more_info: >
-    How it feels to find patterns in nature.
+  more_info: How it feels to find patterns in nature.
 selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 
@@ -32,10 +31,4 @@ However, I was discouraged by how hard it was to measure large neuronal populati
 For my PhD at MIT, [I pivoted toward spatial transcriptomics](https://www.biorxiv.org/content/10.1101/2024.08.14.607982v1.abstract), as it provided measurements of more cells in more accessible tissues.
 However, I was again discouraged by the lack of temporal information, as making such measurements necessarily kills the tissue.
 
-I'm now interested in mechanistic interpretability of large-scale models, since they offer interesting population activity *and* in silico measurability.
-
-<!-- Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
-
-Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
-
-Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them. -->
+I'm now interested in mechanistic interpretability of artificial neural networks, since they offer interesting population activity *and* in silico measurability.

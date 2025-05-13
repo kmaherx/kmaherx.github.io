@@ -3,9 +3,9 @@ layout: cv
 permalink: /cv/
 title: cv
 nav: true
-nav_order: 5
+nav_order: 2
 cv_pdf: resume_bio.pdf # you can also use external links here
-description: resume available for download on the top right
+description: Resume available for download to the right.
 toc:
   sidebar: left
 ---

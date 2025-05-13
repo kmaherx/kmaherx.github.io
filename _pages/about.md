@@ -10,7 +10,6 @@ profile:
   image_circular: true # crops the image to make it circular
   more_info: >
     How it feels to find patterns in nature.
-    [Hat](https://www.youtube.com/c/RickyTinez)
 selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 
@@ -28,9 +27,10 @@ latest_posts:
 I'm interested in computation through population activity.
 [Beautiful temporal orchestration of biological neurons](https://www.nature.com/articles/nn.3643) inspired me to [study neuroscience](https://journals.physiology.org/doi/full/10.1152/jn.00078.2018) at Cornell.
 However, I was discouraged by how hard it was to measure large neuronal populations in such a privileged tissue.
-For my PhD at MIT, [I pivoted toward spatial transcriptomics](https://www.biorxiv.org/content/10.1101/2024.08.14.607982v1.abstract), as it provided measurement of more cells in more accessible tissues.
+For my PhD at MIT, [I pivoted toward spatial transcriptomics](https://www.biorxiv.org/content/10.1101/2024.08.14.607982v1.abstract), as it provided measurements of more cells in more accessible tissues.
 However, I was again discouraged by the lack of temporal information, as making such measurements necessarily kills the tissue.
-I'm now interested in mechanistic interpretability of large-scale models, since they offer both population activity *and* measurability *in silico*.
+
+I'm now interested in mechanistic interpretability of large-scale models, since they offer interesting population activity *and* in silico measurability.
 
 <!-- Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
 

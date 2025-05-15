@@ -40,7 +40,7 @@
   "education": [
     {
       "institution": "MIT",
-      "location": "",
+      "location": "Cambridge, MA",
       "url": "",
       "area": "Computational Biology",
       "studyType": "PhD",
@@ -50,7 +50,7 @@
     },
     {
       "institution": "Cornell University",
-      "location": "",
+      "location": "Ithaca, NY",
       "url": "",
       "area": "Neuroscience",
       "studyType": "BS",

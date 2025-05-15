@@ -23,4 +23,4 @@ This path has led me to an interest in [mechanistic interpretability](https://ww
 [Not only can these models be trained to capture interesting biology -- they also provide *both* interesting population geometry *and* full measurability in silico](https://www.markov.bio/research/mech-interp-path-to-e2e-biology).
 
 My goal is to leverage my background in computation and biology to train and interpret such models.
-This blog will chronicle my adventures toward achieving my goal.
+This blog will chronicle my adventures toward achieving this goal.

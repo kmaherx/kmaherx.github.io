@@ -13,14 +13,14 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: false # includes social icons at the bottom of the page
 ---
 
-[The population geometry of biological neurons](https://www.nature.com/articles/nn.3643) inspired me to [study neuroscience](https://journals.physiology.org/doi/full/10.1152/jn.00078.2018) in college.
+[The temporal geometry of neuronal populations](https://www.nature.com/articles/nn.3643) inspired me to [study neuroscience](https://journals.physiology.org/doi/full/10.1152/jn.00078.2018) in college.
 However, only a small fraction of neurons in the brain can be measured at the same time due to technological and physiological limitations.
 
 For my PhD, I pivoted toward [spatial geometry of cells using spatial transcriptomics](https://www.biorxiv.org/content/10.1101/2024.08.14.607982v1.abstract), as it provides measurements of more cells in more accessible tissues.
 However, it lacks temporal information, as making such measurements necessarily kills the tissue.
 
 Ultimately, this path has led me to an interest in [mechanistic interpretability](https://www.anthropic.com/research#interpretability) of artificial neural networks.
-[Not only can these models be trained to capture interesting biology -- they provide *both* interesting population geometry *and* full measurability in silico](https://www.markov.bio/research/mech-interp-path-to-e2e-biology).
+[Not only can these models be trained to capture interesting biology -- they provide *both* interesting geometry *and* full measurability in silico](https://www.markov.bio/research/mech-interp-path-to-e2e-biology).
 
 My goal is to leverage my background in computation and biology to train and interpret such models.
 [This blog](/blog) will chronicle my steps toward achieving this goal.

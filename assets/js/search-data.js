@@ -114,6 +114,13 @@ ninja.data = [{
           window.open("mailto:%6B%61%6D%61%6C.%6D.%6D%61%68%65%72@%67%6D%61%69%6C.%63%6F%6D", "_blank");
         },
       },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/kmaherx", "_blank");
+        },
+      },{
         id: 'social-rss',
         title: 'RSS Feed',
         section: 'Socials',

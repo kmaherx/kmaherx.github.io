@@ -177,6 +177,7 @@ kramdown:
 # Includes & excludes
 include: ["_pages", "_scripts"]
 exclude:
+  - _posts/2018-12-22-distill.md
   - bin/
   - CONTRIBUTING.md
   - CUSTOMIZE.md

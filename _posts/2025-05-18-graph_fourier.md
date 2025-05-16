@@ -1,22 +1,11 @@
 ---
 layout: distill
 title: Transcriptional signals over tissue domains
-description: Applying graph signal processing to biological tissues
+description: An introduction to graph signal processing in biological tissues
 tags:
 giscus_comments: true
 date: 2025-05-18
 featured: true
-mermaid:
-  enabled: false
-  zoomable: false
-code_diff: true
-map: true
-chart:
-  chartjs: false
-  echarts: false
-  vega_lite: false
-tikzjax: false
-typograms: false
 
 authors:
   - name: Kamal Maher
@@ -32,7 +21,12 @@ bibliography: 2025-05-18-graph_fourier.bib
 #   - we may want to automate TOC generation in the future using
 #     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
 toc:
-  - name: Equations
+  - name: The Fourier transform
+  - name: The tissue domain
+  - name: Transcriptional signals
+  - name: Frequencies
+  - name: Spectra
+  - name: Filtering
     # if a section has subsections, you can add them as follows:
     # subsections:
     #   - name: Example Child Subsection 1

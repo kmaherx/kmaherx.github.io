@@ -4,7 +4,7 @@ title: Transcriptional signals over tissue domains
 description: An introduction to graph signal processing in biological tissues
 tags:
 giscus_comments: true
-date: 2025-05-18
+date: 2025-05-15
 featured: true
 
 authors:
@@ -12,7 +12,7 @@ authors:
     affiliations:
       name: MIT, Broad Institute
 
-bibliography: 2025-05-18-graph_fourier.bib
+bibliography: 2025-05-18-graph-fourier.bib
 
 # Optionally, you can add a table of contents to your post.
 # NOTES:

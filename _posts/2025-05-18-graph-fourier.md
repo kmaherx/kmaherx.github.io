@@ -3,8 +3,8 @@ layout: distill
 title: Transcriptional signals over tissue domains
 description: An introduction to graph signal processing in biological tissues
 tags:
-giscus_comments: true
-date: 2025-05-15
+giscus_comments: false
+date: 2025-05-14
 featured: true
 
 authors:

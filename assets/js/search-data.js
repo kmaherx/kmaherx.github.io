@@ -23,7 +23,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "books-the-godfather",
+        },{id: "post-transcriptional-signals-over-tissue-domains",
+        
+          title: "Transcriptional signals over tissue domains",
+        
+        description: "An introduction to graph signal processing in biological tissues",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/graph-fourier/";
+          
+        },
+      },{id: "books-the-godfather",
           title: 'The Godfather',
           description: "",
           section: "Books",handler: () => {

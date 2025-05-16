@@ -23,7 +23,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-transcriptional-signals-over-tissue-domains",
+        },{id: "post-defining-molecular-tissue-regions",
+        
+          title: "Defining molecular tissue regions",
+        
+        description: "A principled approach to deriving representations of regions in spatial omics data",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/regions/";
+          
+        },
+      },{id: "post-transcriptional-signals-over-tissue-domains",
         
           title: "Transcriptional signals over tissue domains",
         

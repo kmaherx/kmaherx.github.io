@@ -9,7 +9,9 @@ profile:
   image: prof_pic.jpeg
   image_circular: true # crops the image to make it circular
   more_info:
-latest_posts: true
+latest_posts:
+  enabled: true
+  limit: 3
 selected_papers: true # includes a list of papers marked as "selected={true}"
 ---
 

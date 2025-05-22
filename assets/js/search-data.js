@@ -23,11 +23,11 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-defining-molecular-tissue-regions",
+        },{id: "post-defining-multicellular-regions",
         
-          title: "Defining molecular tissue regions",
+          title: "Defining multicellular regions",
         
-        description: "A principled approach to deriving representations of regions in spatial omics data",
+        description: "A principled approach to representing molecularly-defined regions in spatial omics data",
         section: "Posts",
         handler: () => {
           

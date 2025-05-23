@@ -89,7 +89,7 @@ Our domain will simply consist of a bunch of cells scattered uniformly within a 
 </figure>
 
 Now we can define the key mathematical objects associated with this tissue domain.
-Our graph can be represented by the symmetric adjacency matrix $\mathbf{A} \in \{0,1\}^{n \times n}$.
+Our graph can be represented by the symmetric adjacency matrix $\mathbf{A} \in \{ 0,1 \}^{n \times n}$.
 Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
 While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity.
 We also will not consider self-loops, i.e. we have $\mathbf{A}_{ii} = 0$.

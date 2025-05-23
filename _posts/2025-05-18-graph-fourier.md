@@ -130,14 +130,15 @@ Allen atlas
 
 ## Frequencies
 
-<!-- {% details Why not the the first frequency? %}
+{% details Why not the the first frequency? %}
 The first of the frequency bases represents a constant signal over the graph, i.e. the smoothest signal possible.
-We could also see this by taking a signal we know is constant -- say the ones vector $$ -- and plugging it into the eigenvalue equation
+Alternatively, we could see this by taking a signal we know is constant -- say the ones vector $\mathbf{1} = [1,...,1]^{\top}$ -- and seeing if it satisfies the eigenvalue equation
 $$
-\mathbf{L} \mathbf{1} = \lambda \mathbf{1}
-$$.
-
-{% enddetails %} -->
+\mathbf{L} \mathbf{1} = \lambda \mathbf{1}.
+$$
+This is true for $\lambda = 0$; by definition, each row of the Laplacian sums to zero.
+Note that this is true for any multiple of the ones vector as well.
+{% enddetails %}
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/frequency.png"

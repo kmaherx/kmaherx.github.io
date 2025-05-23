@@ -89,7 +89,7 @@ After performing a Delaunay triangulation, we can zoom in to see that the cells 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/tissue_domain.png"
        alt=""
-       style="width:80%; display: block; margin: 0 auto;">
+       style="width:50%; display: block; margin: 0 auto;">
   <figcaption><strong>Figure 1:</strong> Cells arranged in a spatial graph to form a tissue domain. </figcaption>
 </figure>
 
@@ -108,10 +108,10 @@ Finally, the number of neighbors, or degree, of each cell $i$ is given by the di
 $
 \mathbf{D} \in \mathbb{R}^{n \times n}
 $
-<!-- with entries
+with entries
 $
 \mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}
-$ -->
+$
 
 ---
 

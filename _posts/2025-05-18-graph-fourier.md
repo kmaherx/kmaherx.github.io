@@ -105,14 +105,13 @@ $
 \mathbf{A}_{ii} = 0.
 $
 Finally, the number of neighbors, or degree, of each cell $i$ is given by the diagonal degree matrix
-<!-- $
+$
 \mathbf{D} \in \mathbb{R}^{n \times n}
 $
- with entries
+<!-- with entries
 $
 \mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}
-$
-. -->
+$ -->
 
 ---
 
@@ -141,10 +140,10 @@ Note that this is true for any multiple of the ones vector as well.
 {% enddetails %}
 
 <figure style="text-align: center;">
-  <img src="/assets/figures/fourier/frequency.png"
+  <img src="/assets/figures/fourier/frequencies.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 2:</strong> Cells arranged in a spatial graph form a tissue domain. </figcaption>
+  <figcaption><strong>Figure 3:</strong> Cells arranged in a spatial graph form a tissue domain. </figcaption>
 </figure>
 
 ---

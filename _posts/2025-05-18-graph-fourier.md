@@ -51,114 +51,55 @@ _styles: >
   }
 ---
 
+When we think of music, 
+
+This kind of thinking also applies to space rather than time.
+For instance, it could be applied to images, which are not one dimensional and continuous, but rather two dimensional and discrete.
+But the notion of frequency remains;
+
+But what if some of these connections between pixels were removed?
+What if some were added?
+In other words, we can ask more generally: what if our domain was a graph?
+
+Here, we will build an intuition for how to describe frequencies over graphs in terms of gene expression over biological tissues.
+
+
 ## The Fourier transform
-
-This theme supports rendering beautiful math in inline and display modes using [MathJax 3](https://www.mathjax.org/) engine.
-You just need to surround your math expression with `$$`, like `$$ E = mc^2 $$`.
-If you leave it inside a paragraph, it will produce an inline expression, just like $$ E = mc^2 $$.
-
-In fact, you can also use a single dollar sign `$` to create inline formulas, such as `$ E = mc^2 $`, which will render as $ E = mc^2 $. This approach provides the same effect during TeX-based compilation, but visually it appears slightly less bold compared to double-dollar signs `$$`, making it blend more naturally with surrounding text.
-
-To use display mode, again surround your expression with `$$` and place it as a separate paragraph.
-Here is an example:
-
-$$
-\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
-$$
-
-Note that MathJax 3 is [a major re-write of MathJax](https://docs.mathjax.org/en/latest/upgrading/whats-new-3.0.html) that brought a significant improvement to the loading and rendering speed, which is now [on par with KaTeX](http://www.intmath.com/cg5/katex-mathjax-comparison.php).
 
 ---
 
 ## The tissue domain
 
-Citations are then used in the article body with the `<d-cite>` tag.
-The key attribute is a reference to the id provided in the bibliography.
-The key attribute can take multiple ids, separated by commas.
+We can think of a ``tissue domain'' as an undirected graph over $n$ nodes, each of which represents a cell.
+We could construct this graph in many ways, including connecting each cell to its k nearest physical neighbors.
+Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's embeddable in 2D, which respects my visual intuition.
+It also [arguably simulates the mechanical forces of biological tissue](https://pubmed.ncbi.nlm.nih.gov/20082148/).
 
-The citation is presented inline like this: <d-cite key="gregor2015draw"></d-cite> (a number that displays more information on hover).
-If you have an appendix, a bibliography is automatically created and populated in it.
 
-Distill chose a numerical inline citation style to improve readability of citation dense articles and because many of the benefits of longer citations are obviated by displaying more information on hover.
-However, we consider it good style to mention author last names if you discuss something at length and it fits into the flow well — the authors are human and it’s nice for them to have the community associate them with their work.
+Now we can define the key variables associated with this tissue domain.
+The graph can be represented by the symmetric adjacency matrix $\mathbf{A} \in \{0,1\}^{n \times n}$.
+Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
+The edges could be weighted based on physical distances between cells, but we will stick to simple binary edges for simplicity.
+We wont consider self-loops, i.e. $\mathbf{A}_{ii}=0$.
+Finally, the number of neighbors (``degree'') for each cell $i$ is given by the diagonal degree matrix $\mathbf{D} \in \mathbb{R}^{n \times n}$ with entries $\mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}$.
+
+
 
 ---
 
 ## Transcriptional signals
 
-Just wrap the text you would like to show up in a footnote in a `<d-footnote>` tag.
-The number of the footnote will be automatically generated.<d-footnote>This will become a hoverable footnote.</d-footnote>
 
 ---
 
 ## Frequencies
 
-Syntax highlighting is provided within `<d-code>` tags.
-An example of inline code snippets: `<d-code language="html">let x = 10;</d-code>`.
-For larger blocks of code, add a `block` attribute:
-
-<d-code block language="javascript">
-  var x = 25;
-  function(x) {
-    return x * x;
-  }
-</d-code>
-
-**Note:** `<d-code>` blocks do not look good in the dark mode. You can instead use the standard Jekyll syntax highlight with the `highlight` liquid tag.
-
-{% highlight javascript %}
-var x = 25;
-function(x) {
-return x \* x;
-}
-{% endhighlight %}
-
-You can also write standard Markdown code blocks in triple ticks with a language tag, for instance:
-
-```python
-def foo(x):
-  return x
-```
 
 ---
 
 ## Spectra
 
-You can add interative plots using plotly + iframes :framed_picture:
-
-<div class="l-page">
-  <iframe src="{{ '/assets/plotly/demo.html' | relative_url }}" frameborder='0' scrolling='no' height="500px" width="100%" style="border: 1px dashed grey;"></iframe>
-</div>
-
-The plot must be generated separately and saved into an HTML file.
-To generate the plot that you see above, you can use the following code snippet:
-
-{% highlight python %}
-import pandas as pd
-import plotly.express as px
-df = pd.read_csv(
-'https://raw.githubusercontent.com/plotly/datasets/master/earthquakes-23k.csv'
-)
-fig = px.density_mapbox(
-df,
-lat='Latitude',
-lon='Longitude',
-z='Magnitude',
-radius=10,
-center=dict(lat=0, lon=180),
-zoom=0,
-mapbox_style="stamen-terrain",
-)
-fig.show()
-fig.write_html('assets/plotly/demo.html')
-{% endhighlight %}
 
 ---
 
 ## Filtering
-
-Details boxes are collapsible boxes which hide additional information from the user. They can be added with the `details` liquid tag:
-
-{% details Click here to know more %}
-Additional details, where math $$ 2x - 1 $$ and `code` is rendered correctly.
-{% enddetails %}

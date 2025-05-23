@@ -78,7 +78,7 @@ It also [arguably simulates the mechanical forces of biological tissue](https://
 
 
 Now we can define the key variables associated with this tissue domain.
-The graph can be represented by the symmetric adjacency matrix $$\mathbf{A} \in \{0,1\}^{n \times n}$$.
+<!-- The graph can be represented by the symmetric adjacency matrix $$\mathbf{A} \in \{0,1\}^{n \times n}$$. -->
 Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
 The edges could be weighted based on physical distances between cells, but we will stick to simple binary edges for simplicity.
 We wont consider self-loops, i.e. $\mathbf{A}_{ii}=0$.

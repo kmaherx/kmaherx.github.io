@@ -70,7 +70,7 @@ Here, we will build an intuition for how to describe frequencies over graphs in 
 
 ## The tissue domain
 
-We can think of a ``tissue domain'' as an undirected graph over $n$ nodes, each of which represents a cell.
+We can think of a "tissue domain" as an undirected graph over $n$ nodes, each of which represents a cell.
 We could construct this graph in many ways, including connecting each cell to its k nearest physical neighbors.
 Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's embeddable in 2D, which respects my visual intuition.
 It also [arguably simulates the mechanical forces of biological tissue](https://pubmed.ncbi.nlm.nih.gov/20082148/).
@@ -81,13 +81,19 @@ The graph can be represented by the symmetric adjacency matrix $\mathbf{A} \in \
 Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
 The edges could be weighted based on physical distances between cells, but we will stick to simple binary edges for simplicity.
 We wont consider self-loops, i.e. $\mathbf{A}_{ii}=0$.
-Finally, the number of neighbors (``degree'') for each cell $i$ is given by the diagonal degree matrix $\mathbf{D} \in \mathbb{R}^{n \times n}$ with entries $\mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}$.
+Finally, the number of neighbors ("degree") for each cell $i$ is given by the diagonal degree matrix $\mathbf{D} \in \mathbb{R}^{n \times n}$ with entries $\mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}$.
 
 
 
 ---
 
 ## Transcriptional signals
+
+A transcriptional signal is
+
+We can add some to our simulation.
+In real tissues, they might vary in their spatial scale, some looking like a region and some looking noisy.
+Allen atlas
 
 
 ---

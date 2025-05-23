@@ -101,10 +101,9 @@ $$
 Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
 While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity.
 We also will not consider self-loops, i.e. we have 
-<!-- $
-\mathbf{A}_{ii} = 0
 $
-. -->
+\mathbf{A}_{ii} = 0.
+$
 Finally, the number of neighbors, or degree, of each cell $i$ is given by the diagonal degree matrix
 <!-- $
 \mathbf{D} \in \mathbb{R}^{n \times n}
@@ -135,7 +134,7 @@ Allen atlas
   <img src="/assets/figures/fourier/frequency.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 1:</strong> Cells arranged in a spatial graph form a tissue domain. </figcaption>
+  <figcaption><strong>Figure 2:</strong> Cells arranged in a spatial graph form a tissue domain. </figcaption>
 </figure>
 
 ---

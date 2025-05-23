@@ -77,12 +77,19 @@ We could construct this graph in many ways, including connecting each cell to it
 Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's embeddable in 2D, which respects my own visual intuition.
 It also [arguably simulates the mechanical forces of biological tissue](https://pubmed.ncbi.nlm.nih.gov/20082148/).
 
+<figure style="text-align: center;">
+  <img src="/assets/figures/regions/region_gradient.png"
+       alt=""
+       style="width:50%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 1:</strong> Cells arranged in a graph. </figcaption>
+</figure>
+
 Now we can define the key variables associated with this tissue domain.
 Our graph can be represented by the symmetric adjacency matrix $\mathbf{A} \in \{0,1\}^{n \times n}$.
-Each entry of $\mathbbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
-While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity
+Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
+While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity.
 We also will not consider self-loops, i.e. we have $\mathbf{A}_{ii} = 0$.
-Finally, the number of neighbors, or "degree", of each cell $i$ is given by the diagonal degree matrix $\mathbf{D} \in \mathbb{R}^{n \times n}$ with entries $\mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}$.
+Finally, the number of neighbors, or degree, of each cell $i$ is given by the diagonal degree matrix $\mathbf{D} \in \mathbb{R}^{n \times n}$ with entries $\mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}$.
 
 ---
 

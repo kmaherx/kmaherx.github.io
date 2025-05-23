@@ -63,6 +63,7 @@ What if some were added?
 In other words, we can ask more generally: what if our domain was a graph?
 
 Here, we will build an intuition for how to describe frequencies over graphs in terms of gene expression over biological tissues.
+We will use simulations to
 
 
 ## The Fourier transform
@@ -75,16 +76,19 @@ Here, we will build an intuition for how to describe frequencies over graphs in 
 We can think of a "tissue domain" as an undirected graph over $n$ nodes, each of which represents a cell.
 We could construct this graph in many ways, including connecting each cell to its k nearest physical neighbors.
 Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's embeddable in 2D, which respects my own visual intuition.
-It also [arguably simulates the mechanical forces of biological tissue](https://pubmed.ncbi.nlm.nih.gov/20082148/).
+If you're optimistic, you might also believe that it [captures the mechanical forces present in biological tissues](https://pubmed.ncbi.nlm.nih.gov/20082148/).
+
+To demonstrate this process, let's create a simulated tissue domain.
+Our domain will simply consist of a bunch of cells scattered uniformly within a unit circle.
 
 <figure style="text-align: center;">
-  <img src="/assets/figures/regions/region_gradient.png"
+  <img src="/assets/figures/fourier/domain.png"
        alt=""
-       style="width:50%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 1:</strong> Cells arranged in a graph. </figcaption>
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 1:</strong> Cells arranged in a spatial graph form a tissue domain. </figcaption>
 </figure>
 
-Now we can define the key variables associated with this tissue domain.
+Now we can define the key mathematical objects associated with this tissue domain.
 Our graph can be represented by the symmetric adjacency matrix $\mathbf{A} \in \{0,1\}^{n \times n}$.
 Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
 While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity.

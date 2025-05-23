@@ -80,6 +80,7 @@ If you're optimistic, you might also believe that it [captures the mechanical fo
 
 To demonstrate this process, let's create a simulated tissue domain.
 Our domain will simply consist of a bunch of cells scattered uniformly within a unit circle.
+After performing a Delaunay triangulation, we can zoom in to see that the cells are indeed connected to their spatial neighbors to form a 2D mesh.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/domain.png"
@@ -88,12 +89,15 @@ Our domain will simply consist of a bunch of cells scattered uniformly within a 
   <figcaption><strong>Figure 1:</strong> Cells arranged in a spatial graph form a tissue domain. </figcaption>
 </figure>
 
-Now we can define the key mathematical objects associated with this tissue domain.
-Our graph can be represented by the symmetric adjacency matrix $\mathbf{A} \in \{ 0,1 \}^{n \times n}$.
-Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
+Now let's define the key mathematical objects associated with this tissue domain.
+Our graph can be represented by the symmetric adjacency matrix
+$$
+\mathbf{A} \in \{0,1\}^{n \times n}.
+$$
+Each entry of $\mathbf{A}$ is either $1,$ which represents two cells that are spatially adjacent, or $0,$ which represents two cells that are not adjacent.
 While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity.
-We also will not consider self-loops, i.e. we have $\mathbf{A}_{ii} = 0$.
-Finally, the number of neighbors, or degree, of each cell $i$ is given by the diagonal degree matrix $\mathbf{D} \in \mathbb{R}^{n \times n}$ with entries $\mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}$.
+We also will not consider self-loops, i.e. we have $\mathbf{A}_{ii} = 0.$
+Finally, the number of neighbors, or degree, of each cell $i$ is given by the diagonal degree matrix $\mathbf{D} \in \mathbb{R}^{n \times n}$ with entries $\mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}.$
 
 ---
 
@@ -111,8 +115,15 @@ Allen atlas
 
 ## Frequencies
 
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/frequency.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 1:</strong> Cells arranged in a spatial graph form a tissue domain. </figcaption>
+</figure>
 
 ---
+
 
 ## Spectra
 

@@ -52,6 +52,13 @@ _styles: >
   }
 ---
 
+
+Here, we will build an intuition for how to describe frequencies over graphs in terms of gene expression over biological tissues.
+We will use simulations to
+
+
+## The Fourier transform
+
 When we think of music, 
 
 This kind of thinking also applies to space rather than time.
@@ -62,16 +69,13 @@ But what if some of these connections between pixels were removed?
 What if some were added?
 In other words, we can ask more generally: what if our domain was a graph?
 
-Here, we will build an intuition for how to describe frequencies over graphs in terms of gene expression over biological tissues.
-We will use simulations to
-
-
-## The Fourier transform
-
 ---
 
 
 ## The tissue domain
+
+There are many different examples of graph domains, including social networks.
+The domain that we will focus on here is that of biological tissues, in which one might imagine hopping from cell to cell 
 
 We can think of a "tissue domain" as an undirected graph over $n$ nodes, each of which represents a cell.
 We could construct this graph in many ways, including connecting each cell to its k nearest physical neighbors.
@@ -83,10 +87,10 @@ Our domain will simply consist of a bunch of cells scattered uniformly within a 
 After performing a Delaunay triangulation, we can zoom in to see that the cells are indeed connected to their spatial neighbors to form a 2D mesh.
 
 <figure style="text-align: center;">
-  <img src="/assets/figures/fourier/domain.png"
+  <img src="/assets/figures/fourier/tissue_domain.png"
        alt=""
-       style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 1:</strong> Cells arranged in a spatial graph form a tissue domain. </figcaption>
+       style="width:80%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 1:</strong> Cells arranged in a spatial graph to form a tissue domain. </figcaption>
 </figure>
 
 Now let's define the key mathematical objects associated with this tissue domain.

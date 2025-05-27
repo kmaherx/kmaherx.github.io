@@ -77,7 +77,7 @@ In other words, we can ask more generally: what if our domain was a graph?
 There are many different examples of graph domains, including [molecules](https://arxiv.org/abs/1603.00856) and [social networks](https://arxiv.org/abs/1706.02216).
 The domain that we will focus on here is that of biological tissues, in which one might imagine hopping from cell to cell 
 
-We can think of a "tissue domain" as an undirected graph over $n$ nodes, each of which represents a cell.
+We can think of such a "tissue domain" as an undirected graph over $n$ nodes, each of which represents a cell.
 We could construct this graph in many ways, including connecting each cell to its k nearest physical neighbors.
 Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's embeddable in 2D, which respects my own visual intuition.
 If you're optimistic, you might also believe that it [captures the mechanical forces present in biological tissues](https://pubmed.ncbi.nlm.nih.gov/20082148/).
@@ -101,7 +101,7 @@ $$
 $$
 Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
 While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity.
-We also will not consider self-loops, i.e. we have 
+We also will not consider self-loops, i.e. we have
 $
 \mathbf{A}_{ii} = 0.
 $

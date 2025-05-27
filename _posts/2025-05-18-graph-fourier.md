@@ -120,8 +120,6 @@ $ -->
 
 Now that we have a tissue domain, we can begin to 
 
----
-
 
 ## Transcriptional signals
 

@@ -108,6 +108,10 @@ Finally, the number of neighbors, or degree, of each cell $i$ is given by the di
 $
 \mathbf{D} \in \mathbb{R}^{n \times n}
 $
+with diagonal entries
+$
+\mathbf{D}_{ii} = \sum_j A_{ij}
+$
 .
 
 ---
@@ -126,14 +130,12 @@ Allen atlas
 
 ## Frequencies
 
-{% details Why not the the first frequency? %}
-The first of the frequency bases represents a constant signal over the graph, i.e. the smoothest signal possible.
-Alternatively, we could see this by taking a signal we know is constant -- say the ones vector $\mathbf{1} = [1,...,1]^{\top}$ -- and seeing if it satisfies the eigenvalue equation
-$$
-\mathbf{L} \mathbf{1} = \lambda \mathbf{1}.
-$$
-This is true for $\lambda = 0$; by definition, each row of the Laplacian sums to zero.
-Note that this is true for any multiple of the ones vector as well.
+{% details Why do highs appear constrained to one part of the tissue? %}
+Localization
+Uncertainty principle
+How I see it: consequence of "irregular" topology
+If all cells had the same degree:
+But because they don't, we have:
 {% enddetails %}
 
 <figure style="text-align: center;">

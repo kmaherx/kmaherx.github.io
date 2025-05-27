@@ -110,7 +110,7 @@ $
 $
 with entries
 $
-\mathbf{D}_{ii}
+\mathbf{D_{ii}}
 $
 .
 

@@ -109,11 +109,7 @@ Finally, the number of neighbors, or degree, of each cell $i$ is given by the di
 $
 \mathbf{D} \in \mathbb{R}^{n \times n}
 $
-with diagonal entries
-$
-\mathbf{D}_{ii}
-$
-
+.
 ---
 
 

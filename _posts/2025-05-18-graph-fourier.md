@@ -74,7 +74,7 @@ In other words, we can ask more generally: what if our domain was a graph?
 
 ## The tissue domain
 
-There are many different examples of graph domains, including molecules and social networks.
+There are many different examples of graph domains, including [molecules](https://arxiv.org/abs/1603.00856) and [social networks]().
 The domain that we will focus on here is that of biological tissues, in which one might imagine hopping from cell to cell 
 
 We can think of a "tissue domain" as an undirected graph over $n$ nodes, each of which represents a cell.
@@ -105,11 +105,21 @@ We also will not consider self-loops, i.e. we have
 $
 \mathbf{A}_{ii} = 0.
 $
-Finally, the number of neighbors, or degree, of each cell $i$ is given by the diagonal degree matrix
+The number of neighbors for cell $i$ -- i.e. the degree -- is given by
 $
-\mathbf{D} \in \mathbb{R}^{n \times n}
+d_i = \sum_j \mathbf{A}_{ij}
 $
 .
+These values are often combined to form the diagonal degree matrix
+$
+\mathbf{D} = diag(d_1, ..., d_n) \in \mathbb{R}^{n \times n}
+$
+.
+<!-- Finally, the number of neighbors, or degree, of each cell $i$ is given by the diagonal degree matrix
+$
+\mathbf{D} \in \mathbb{R}^{n \times n}
+$ -->
+
 ---
 
 

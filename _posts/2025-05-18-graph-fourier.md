@@ -74,7 +74,7 @@ In other words, we can ask more generally: what if our domain was a graph?
 
 ## The tissue domain
 
-There are many different examples of graph domains, including [molecules](https://arxiv.org/abs/1603.00856) and [social networks]().
+There are many different examples of graph domains, including [molecules](https://arxiv.org/abs/1603.00856) and [social networks](https://arxiv.org/abs/1706.02216).
 The domain that we will focus on here is that of biological tissues, in which one might imagine hopping from cell to cell 
 
 We can think of a "tissue domain" as an undirected graph over $n$ nodes, each of which represents a cell.

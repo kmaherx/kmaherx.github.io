@@ -110,7 +110,7 @@ $
 $
 with diagonal entries
 $
-\mathbf{D}_{ii} \sum_j A_{ij}
+\mathbf{D}_{ii}
 $
 .
 

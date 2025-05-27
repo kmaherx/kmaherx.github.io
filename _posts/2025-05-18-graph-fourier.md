@@ -110,8 +110,9 @@ $
 $
 with entries
 $
-\mathbf{D}_{ii} = \sum_j \mathbf{A}_{ij}
+\mathbf{D}_{ii}
 $
+.
 
 ---
 

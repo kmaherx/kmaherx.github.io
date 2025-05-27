@@ -110,7 +110,7 @@ $
 $
 with diagonal entries
 $
-\mathbf{D}_{ii} = \sum_j A_{ij}
+\mathbf{D}_{ii} =
 $
 .
 
@@ -131,7 +131,7 @@ Allen atlas
 ## Frequencies
 
 {% details Why do highs appear constrained to one part of the tissue? %}
-Localization
+Fluctuations appear localized to the lower left of the tissue
 Uncertainty principle
 How I see it: consequence of "irregular" topology
 If all cells had the same degree:

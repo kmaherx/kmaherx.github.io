@@ -74,7 +74,7 @@ In other words, we can ask more generally: what if our domain was a graph?
 
 ## The tissue domain
 
-There are many different examples of graph domains, including social networks.
+There are many different examples of graph domains, including molecules and social networks.
 The domain that we will focus on here is that of biological tissues, in which one might imagine hopping from cell to cell 
 
 We can think of a "tissue domain" as an undirected graph over $n$ nodes, each of which represents a cell.
@@ -83,8 +83,9 @@ Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's
 If you're optimistic, you might also believe that it [captures the mechanical forces present in biological tissues](https://pubmed.ncbi.nlm.nih.gov/20082148/).
 
 To demonstrate this process, let's create a simulated tissue domain.
-Our domain will simply consist of a bunch of cells scattered uniformly within a unit circle.
+Our domain will simply consist of a bunch of cells -- 2000 to be exact -- scattered uniformly within a unit circle.
 After performing a Delaunay triangulation, we can zoom in to see that the cells are indeed connected to their spatial neighbors to form a 2D mesh.
+These connections define the space within which we can hop from cell to cell.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/tissue_domain.png"
@@ -112,7 +113,6 @@ with diagonal entries
 $
 \mathbf{D}_{ii}
 $
-.
 
 ---
 
@@ -131,7 +131,10 @@ Allen atlas
 ## Frequencies
 
 {% details Why do highs appear constrained to one part of the tissue? %}
-Fluctuations appear localized to the lower left of the tissue
+When taking a look at 
+$\mathbf{v}_{300}
+$
+, the fluctuations appear constrained to the lower left portion of the tissue.
 Uncertainty principle
 How I see it: consequence of "irregular" topology
 If all cells had the same degree:

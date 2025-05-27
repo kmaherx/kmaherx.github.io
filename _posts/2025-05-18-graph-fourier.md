@@ -107,27 +107,29 @@ $
 $
 The number of neighbors for cell $i$ -- i.e. the degree -- is given by
 $
-d_i = \sum_j \mathbf{A}_{ij}
+d_i = \sum_j \mathbf{A}_{ij}.
 $
-.
-These values are often combined to form the diagonal degree matrix
+These values are often consolidated into the diagonal degree matrix
 $
-\mathbf{D} = diag(d_1, ..., d_n) \in \mathbb{R}^{n \times n}
+\mathbf{D} = diag(d_1, ..., d_n) \in \mathbb{R}^{n \times n}.
 $
-.
 <!-- Finally, the number of neighbors, or degree, of each cell $i$ is given by the diagonal degree matrix
 $
 \mathbf{D} \in \mathbb{R}^{n \times n}
 $ -->
+
+Now that we have a tissue domain, we can begin to 
 
 ---
 
 
 ## Transcriptional signals
 
-A transcriptional signal is
+A signal is a value associated with each node in our graph.
+For instance, we could consider the amount that a given gene is expressed in each cell within a tissue.
+Spatial transcriptomics provides exactly this type of information, typically for hundreds of different genes.
 
-We can add some to our simulation.
+Before discussing transcriptional signals in mathematical detail, let's first gain some intuition from biology for what they look like and then add some to our simulation.
 In real tissues, they might vary in their spatial scale, some looking like a region and some looking noisy.
 Allen atlas
 

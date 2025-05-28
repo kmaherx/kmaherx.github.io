@@ -103,8 +103,8 @@ $$
 
 Each entry of $\mathbf{A}$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
 While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity.
-We also will not consider self-loops, i.e. we have $\mathbf{A}_{ii} = 0.$
-The number of neighbors for cell $i$ -- i.e. the degree -- is given by $d_i = \sum_j \mathbf{A}_{ij}.$
+We also will not consider self loops, i.e. we have $\mathbf{A}_{ii} = 0.$
+The number of neighbors for cell $i$ -- the "degree" -- is given by $d_i = \sum_j \mathbf{A}_{ij}.$
 These values are often consolidated into the diagonal degree matrix $\mathbf{D} = diag(d_1, ..., d_n) \in \mathbb{R}^{n \times n}.$
 
 Now that we have a tissue domain, we can begin to 

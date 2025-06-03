@@ -222,6 +222,8 @@ But because they don't, we have:
 
 ### Filtering
 
+---
+
 
 ## Real data
 

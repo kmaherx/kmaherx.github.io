@@ -2,7 +2,7 @@
 layout: distill
 title: >
   Spatial Omics I: Transcriptional Signals Over Tissue Domains
-description: An introduction to graph signal processing in biological tissues
+description: An introduction to graph signal processing in spatial omics data
 tags:
 giscus_comments: false
 date: 2025-05-14
@@ -30,11 +30,18 @@ toc:
       - name: Domains and signals
       - name: Signal processing
   - name: Simulation
-  - name: The tissue domain
-  - name: Transcriptional signals
-  - name: Frequencies
-  - name: Spectra
-  - name: Filtering
+    subsections:
+      - name: Construction
+      - name: The tissue domain
+      - name: Transcriptional signals
+      - name: Frequencies
+      - name: Spectra
+      - name: Filtering
+  - name: Real data
+    subsections:
+      - name: Frequencies
+      - name: Spectra
+      - name: Filtering
   - name: Conclusion
 
 ---
@@ -75,12 +82,20 @@ Images (denoising by removing highs)
 
 ---
 
+
 ## Simulation
 
-We'll rely on a simple simulation to demonstrate core concepts.
+We'll first demonstrate the fundamental concepts in a simple simulation.
+This will allow us to build up some intuition before approaching data gathered from real tissues, which is full of both technical artifacts and true biological complexity.
+
+
+### Construction
 
 Take the brain as inspiration.
 We'll start off by creating a simple tissue made up of $n=2000$ cells randomly scattered throughout a unit circle.
+One should ask why a circle and not a sphere.
+It's because, while tissues are 3D objects, we tend to measure them in 2D slices.
+That being said, everything presented in this series of posts can be generalized to data in arbitrary dimensions, including 3D.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/tissue_domain_nozoom.png"
@@ -113,21 +128,24 @@ We can simulate this by
        style="width:100%; display: block; margin: 0 auto;">
   <figcaption><strong>Figure 1:</strong> Schematic for simulating intercellular interaction patterns. </figcaption>
 </figure>
----
+
+Note that this simulation is not nearly as complex as a real biological tissue or the data measured from one.
+That being said, it should at least provide a simple playground in which we can explore some fundamental quantitative concepts that we will later apply to real data.
 
 
-## The tissue domain
+### The tissue domain
 
-There are many different examples of graph domains, including [molecules](https://arxiv.org/abs/1603.00856) and [social networks](https://arxiv.org/abs/1706.02216).
-The domain that we will focus on here is that of biological tissues, in which one might imagine hopping from cell to cell 
+Just as in music or images, tissues can be thought of in terms of signal processing.
+Namely, that can be broken down into gene expression signals over a "tissue domain".
+However, this tissue domain isn't continuous like time, as it's composed of discrete cells.
+We might instead compare it to an image in which each pixel is akin to a cell.
+However, cells are not arranged neatly into perfect grids like pixels are.
+Thus, we need a different structure to represent our tissue.
 
-We can think of such a "tissue domain" as an undirected graph over $n$ nodes, each of which represents a cell.
+We can think of such a tissue domain as an undirected graph over $n$ nodes, each of which represents a cell.
 We could construct this graph in many ways, including connecting each cell to its k nearest physical neighbors.
 Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's embeddable in 2D, which respects my own visual intuition.
 If you're optimistic, you might also believe that it [captures the mechanical forces present in biological tissues](https://pubmed.ncbi.nlm.nih.gov/20082148/).
-
-To demonstrate this process, let's create a simulated tissue domain.
-Our domain will simply consist of a bunch of cells -- $n=2000$ to be exact -- scattered uniformly within a unit circle.
 After performing a Delaunay triangulation, we can zoom in to see that the cells are indeed connected to their spatial neighbors to form a 2D mesh.
 These connections define the space within which we can hop from cell to cell.
 
@@ -164,10 +182,8 @@ $$
 
 Now that we have a tissue domain, we can begin to 
 
----
 
-
-## Transcriptional signals
+### Transcriptional signals
 
 A signal is a value associated with each node in our graph.
 For instance, we could consider the amount that a given gene is expressed in each cell within a tissue.
@@ -177,10 +193,8 @@ Before discussing transcriptional signals in mathematical detail, let's first ga
 In real tissues, they might vary in their spatial scale, some looking like a region and some looking noisy.
 Allen atlas
 
----
 
-
-## Frequencies
+### Frequencies
 
 Nice, looks great.
 
@@ -202,25 +216,36 @@ If all cells had the same degree:
 But because they don't, we have:
 {% enddetails %}
 
----
+
+### Spectra
 
 
-## Spectra
+### Filtering
 
 
----
+## Real data
 
-## Filtering
+### Frequencies
+
+### Spectra
+
+### Filtering
 
 
 ---
 
 ## Conclusion
 
-What are highs?
+How does this formalism enable us to capture regions and interactions?
+The key is that it provides us with a flexible quantitative framework to represent these features.
 
-What are mids?
+Take lows for example.
+It may be intuitive that they help us represent multicellular regions.
+After all, lows are just large-scale patterns.
+For instance, we should be able to low-pass filter gene expression patterns and then plug into the standard single-cell workflow to identify region clusters.
+Indeed, this is the cornerstone of all region identification methods in the field, from those based on simple spatial smoothing to those based on complex graph neural networks.
 
-How can we capture regions and interactions?
-
-Links to later posts.
+But what are *highs*?
+Are they just noise like in image processing?
+And what of the frequencies in between, i.e. *mids*?
+In the following posts, we'll explore these questions in detail, finding that lows indeed describe multicellular regions, highs describe intercellular interactions, and mids describe boundaries between regions.

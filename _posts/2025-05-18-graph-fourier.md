@@ -1,12 +1,14 @@
 ---
 layout: distill
-title: Transcriptional signals over tissue domains
+title: >
+  Spatial Omics I: Transcriptional Signals Over Tissue Domains
 description: An introduction to graph signal processing in biological tissues
 tags:
 giscus_comments: false
 date: 2025-05-14
 featured: true
-tags: spatial-omics
+# tags: spatial-omics
+categories: spatial-omics
 
 authors:
   - name: Kamal Maher
@@ -27,14 +29,15 @@ toc:
       - name: Tissues
       - name: Domains and signals
       - name: Signal processing
+  - name: Simulation
   - name: The tissue domain
   - name: Transcriptional signals
   - name: Frequencies
   - name: Spectra
   - name: Filtering
+  - name: Conclusion
 
 ---
-
 
 ## Introduction
 
@@ -42,16 +45,74 @@ Here, we will build an intuition for how to describe frequencies over graphs in 
 We'll assume familiarity with linear algebra.
 We will use simulations to
 
-When we think of music, 
 
-This kind of thinking also applies to space rather than time.
-For instance, it could be applied to images, which are not one dimensional and continuous, but rather two dimensional and discrete.
-But the notion of frequency remains;
+### Tissues
 
-But what if some of these connections between pixels were removed?
-What if some were added?
-In other words, we can ask more generally: what if our domain was a graph?
+Cells are important
 
+But so are the relationships between them
+
+Multicellular regions
+
+Intercellular interactions
+
+
+### Domains and signals
+
+Sound (Continuous, 1D)
+
+Images (discrete, 2D)
+
+Graphs? (discrete, but what dimension? will come back to this)
+
+
+### Signal processing
+
+Sound (music, bass/mids/treble)
+
+Images (denoising by removing highs)
+
+
+---
+
+## Simulation
+
+We'll rely on a simple simulation to demonstrate core concepts.
+
+Take the brain as inspiration.
+We'll start off by creating a simple tissue made up of $n=2000$ cells randomly scattered throughout a unit circle.
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/tissue_domain_nozoom.png"
+       alt=""
+       style="width:30%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 1:</strong> Simulation of a simple, circular tissue. </figcaption>
+</figure>
+
+Some spatial cells that form layers (neurons), some non-spatial cells scattered throughout (glia, for the most part).
+
+Ground truth region patterns.
+Add different noise patterns to make multiple gene markers for each ground truth pattern.
+One marker per pattern shown in Figure <>.
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/simulation_lows.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 1:</strong> Schematic for simulating multicellular region patterns. </figcaption>
+</figure>
+
+On the other hand, spatial patterns also arise from interactions between cells.
+For instance, two *neighboring* cells might interact when *one* expresses a ligand and *the other* expresses the corresponding receptor.
+This would produce a mutually exclusive pattern between two genes: one associated with the ligand and the other associated with the receptor.
+We can simulate this by
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/simulation_highs.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 1:</strong> Schematic for simulating intercellular interaction patterns. </figcaption>
+</figure>
 ---
 
 
@@ -121,6 +182,15 @@ Allen atlas
 
 ## Frequencies
 
+Nice, looks great.
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/frequencies.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 3:</strong> Examples of different frequencies over the tissue domain.  </figcaption>
+</figure>
+
 {% details Why do highs appear constrained to one part of the tissue? %}
 When taking a look at 
 $\mathbf{v}_{300}
@@ -132,13 +202,6 @@ If all cells had the same degree:
 But because they don't, we have:
 {% enddetails %}
 
-<figure style="text-align: center;">
-  <img src="/assets/figures/fourier/frequencies.png"
-       alt=""
-       style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> Cells arranged in a spatial graph form a tissue domain. </figcaption>
-</figure>
-
 ---
 
 
@@ -148,3 +211,16 @@ But because they don't, we have:
 ---
 
 ## Filtering
+
+
+---
+
+## Conclusion
+
+What are highs?
+
+What are mids?
+
+How can we capture regions and interactions?
+
+Links to later posts.

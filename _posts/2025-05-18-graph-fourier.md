@@ -22,42 +22,25 @@ bibliography: 2025-05-18-graph-fourier.bib
 #   - we may want to automate TOC generation in the future using
 #     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
 toc:
-  - name: The Fourier transform
+  - name: Introduction
+    subsections:
+      - name: Tissues
+      - name: Domains and signals
+      - name: Signal processing
   - name: The tissue domain
   - name: Transcriptional signals
   - name: Frequencies
   - name: Spectra
   - name: Filtering
-    # if a section has subsections, you can add them as follows:
-    # subsections:
-    #   - name: Example Child Subsection 1
-    #   - name: Example Child Subsection 2
 
-# Below is an example of injecting additional post-specific styles.
-# If you use this post as a template, delete this _styles block.
-_styles: >
-  .fake-img {
-    background: #bbb;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 12px;
-  }
-  .fake-img p {
-    font-family: monospace;
-    color: white;
-    text-align: left;
-    margin: 12px 0;
-    text-align: center;
-    font-size: 16px;
-  }
 ---
 
 
+## Introduction
+
 Here, we will build an intuition for how to describe frequencies over graphs in terms of gene expression over biological tissues.
+We'll assume familiarity with linear algebra.
 We will use simulations to
-
-
-## The Fourier transform
 
 When we think of music, 
 
@@ -83,7 +66,7 @@ Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's
 If you're optimistic, you might also believe that it [captures the mechanical forces present in biological tissues](https://pubmed.ncbi.nlm.nih.gov/20082148/).
 
 To demonstrate this process, let's create a simulated tissue domain.
-Our domain will simply consist of a bunch of cells -- 2000 to be exact -- scattered uniformly within a unit circle.
+Our domain will simply consist of a bunch of cells -- $n=2000$ to be exact -- scattered uniformly within a unit circle.
 After performing a Delaunay triangulation, we can zoom in to see that the cells are indeed connected to their spatial neighbors to form a 2D mesh.
 These connections define the space within which we can hop from cell to cell.
 
@@ -101,13 +84,26 @@ $$
 \mathbf{A} \in \{0,1\}^{n \times n}.
 $$
 
-Each entry of $ \mathbf{A} $ is either $ 1 $, which represents two cells that are spatially adjacent, or $ 0 $, which represents two cells that are not adjacent.
+Each entry $$\mathbf{A}_{ij}$$ is either $1$, which represents two cells that are spatially adjacent, or $0$, which represents two cells that are not adjacent.
 While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity.
-We also will not consider self loops: $ \mathbf{A}_{ii} = 0. $
-The number of neighbors for cell $ i $ -- the "degree" -- is given by $ d_i = \sum_j \mathbf{A}_{ij}. $
-These values are often consolidated into the diagonal degree matrix $ \mathbf{D} = diag(d_1, ..., d_n) \in \mathbb{R}^{n \times n}. $
+We also will not consider self loops: $$\mathbf{A}_{ii} = 0$$.
+The number of neighbors for cell $i$ -- the "degree" -- is given by $$d_i = \sum_j \mathbf{A}_{ij}$$.
+These values are often consolidated into the diagonal degree matrix
+
+$$
+% \mathbf{D} = \operatorname{diag}(d_1, ..., d_n) =
+\mathbf{D} =
+\begin{bmatrix}
+  d_{1} & & \\
+  & \ddots & \\
+  & & d_{n}
+\end{bmatrix}
+\in \mathbb{R}^{n \times n}.
+$$
 
 Now that we have a tissue domain, we can begin to 
+
+---
 
 
 ## Transcriptional signals
@@ -120,8 +116,8 @@ Before discussing transcriptional signals in mathematical detail, let's first ga
 In real tissues, they might vary in their spatial scale, some looking like a region and some looking noisy.
 Allen atlas
 
-
 ---
+
 
 ## Frequencies
 

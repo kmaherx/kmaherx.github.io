@@ -56,12 +56,31 @@ We will use simulations to
 ### Tissues
 
 Cells are important
+Have different roles in the tissue that can largely be described by their molecular patterns (Adler).
+Such "types" catalogued by efforts such as the human cell atlas.
 
-But so are the relationships between them
+But cells don't act independently.
+If you look at an organism, you'll notice a few things.
+First, it's an organism; there's some sense that it's a discrete collection of cells all working together.
+Second, you might notice that cells within a given organism are further organized into discrete multicellular structures, such as organs or the anatomical regions within them.
+Third, and perhaps most importantly, the very formation and function of such structures is driven by interactions between their constituent cells.
+Altogether, it is critical to look beyond cells in isolation to recognize their 
 
+We can break these patterns down into two broad categories.
 Multicellular regions
-
 Intercellular interactions
+
+Both of these patterns are inherently spatial.
+Regions
+Interactions
+Thus, spatial omics technologies enable us to measure these patterns.
+
+Given the importance of this data, we should have a concrete way to quantitatively describe and analyze them.
+However, the current landscape of computational methods for spatial omics data is deeply fragmented.
+It largely consists of complicated methods based on graph neural networks and probabilistic models, and it lacks a fundamental basis for relating these approaches or even defining the core features one would like to quantify.
+
+In this series of posts, we will derive such a basis.
+The tools we will use are borrowed from the vast field of signal processing.
 
 
 ### Domains and signals

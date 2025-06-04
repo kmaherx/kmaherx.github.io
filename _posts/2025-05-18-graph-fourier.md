@@ -8,6 +8,7 @@ giscus_comments: true
 date: 2025-05-14
 featured: true
 categories: spatial-omics
+thumbnail: assets/img/freq10.png
 
 authors:
   - name: Kamal Maher
@@ -47,6 +48,14 @@ images:
   compare: true
   slider: true
 ---
+
+<style>
+  .slider-with-shadows {
+    --default-handle-shadow: 0px 0px 5px rgba(0, 0, 0, 1);
+    --divider-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+  }
+</style>
+
 
 ## Introduction
 
@@ -256,18 +265,12 @@ We perform filtering in frequency space by applying a kernel.
   <img src="/assets/figures/fourier/lowpass_spectra.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> A gene expression signal filtered in frequency space.  </figcaption>
+  <figcaption><strong>Figure 3:</strong> A gene expression signal low-pass filtered in frequency space.  </figcaption>
 </figure>
 
 We then put the resulting spectrum back into the tissue to visualize the result.
 Use the slider to visualize before (left) and after (right) filtering.
 
-<style>
-  .slider-with-shadows {
-    --default-handle-shadow: 0px 0px 5px rgba(0, 0, 0, 1);
-    --divider-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-  }
-</style>
 <div style="width: 50%; max-width: 768px; margin: 0 auto;">
   <img-comparison-slider class="slider-with-shadows">
     {% include figure.liquid path="assets/figures/fourier/tissue_before_filtering.png" class="img-fluid rounded z-depth-1" slot="first" %}
@@ -275,6 +278,7 @@ Use the slider to visualize before (left) and after (right) filtering.
   </img-comparison-slider>
 </div>
 <figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) low-pass filtering. </figcaption>
+<br>
 
 Alternatively, we could emphasize the highs by applying a square-root filter.
 
@@ -282,17 +286,11 @@ Alternatively, we could emphasize the highs by applying a square-root filter.
   <img src="/assets/figures/fourier/highpass_spectra.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> A gene expression signal filtered in frequency space.  </figcaption>
+  <figcaption><strong>Figure 3:</strong> A gene expression signal high-pass filtered in frequency space.  </figcaption>
 </figure>
 
 Rather than grouping neighboring cells together, this filter appears to emphasize their differences.
 
-<style>
-  .slider-with-shadows {
-    --default-handle-shadow: 0px 0px 5px rgba(0, 0, 0, 1);
-    --divider-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-  }
-</style>
 <div style="width: 50%; max-width: 768px; margin: 0 auto;">
   <img-comparison-slider class="slider-with-shadows">
     {% include figure.liquid path="assets/figures/fourier/tissue_before_filtering.png" class="img-fluid rounded z-depth-1" slot="first" %}
@@ -300,6 +298,9 @@ Rather than grouping neighboring cells together, this filter appears to emphasiz
   </img-comparison-slider>
 </div>
 <figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) high-pass filtering. </figcaption>
+<br>
+
+Note that these particular kernels were chosen because they each have biological significance that will be explained in future blog posts.
 
 ---
 

@@ -4,10 +4,9 @@ title: >
   Spatial Omics I: Transcriptional Signals Over Tissue Domains
 description: An introduction to graph signal processing in spatial omics data
 tags:
-giscus_comments: false
+giscus_comments: true
 date: 2025-05-14
 featured: true
-# tags: spatial-omics
 categories: spatial-omics
 
 authors:
@@ -44,6 +43,9 @@ toc:
       - name: Filtering
   - name: Conclusion
 
+images:
+  compare: true
+  slider: true
 ---
 
 ## Introduction
@@ -56,7 +58,7 @@ We will use simulations to
 ### Tissues
 
 Cells are important
-Have different roles in the tissue that can largely be described by their molecular patterns (Adler).
+Have different roles in the tissue that can largely be described by their molecular patterns <d-cite key="adler_div_labor"></d-cite>.
 Such "types" catalogued by efforts such as the human cell atlas.
 
 But cells don't act independently.
@@ -238,8 +240,42 @@ But because they don't, we have:
 
 ### Spectra
 
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/spectra.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 3:</strong> An example gene expression signal in tissue space and in frequency space.  </figcaption>
+</figure>
+
 
 ### Filtering
+
+We perform filtering in frequency space by applying a kernel.
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/filtering_spectra.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 3:</strong> A gene expression signal filtered in frequency space.  </figcaption>
+</figure>
+
+We then put the resulting spectrum back into the tissue to visualize the result.
+Use the slider to visualize before (left) and after (right) filtering.
+
+<style>
+  .slider-with-shadows {
+    --default-handle-shadow: 0px 0px 5px rgba(0, 0, 0, 1);
+    --divider-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+  }
+</style>
+<div style="width: 50%; max-width: 768px; margin: 0 auto;">
+  <img-comparison-slider class="slider-with-shadows">
+    {% include figure.liquid path="assets/figures/fourier/tissue_before_filtering.png" class="img-fluid rounded z-depth-1" slot="first" %}
+    {% include figure.liquid path="assets/figures/fourier/tissue_after_filtering.png" class="img-fluid rounded z-depth-1" slot="second" %}
+  </img-comparison-slider>
+</div>
+<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) filtering. </figcaption>
+
 
 ---
 

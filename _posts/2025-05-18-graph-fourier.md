@@ -29,6 +29,7 @@ toc:
       - name: Tissues
       - name: Domains and signals
       - name: Signal processing
+      - name: Overview
   - name: Simulation
     subsections:
       - name: Construction
@@ -40,8 +41,8 @@ toc:
   - name: Real data
     subsections:
       - name: Frequencies
-      - name: Spectra
       - name: Filtering
+      - name: Multiple samples
   - name: Conclusion
 
 images:
@@ -67,7 +68,7 @@ We will use simulations to
 ### Tissues
 
 Cells are important
-Have different roles in the tissue that can largely be described by their molecular patterns <d-cite key="adler_div_labor"></d-cite>.
+Have different [roles in the tissue that can largely be described by their molecular patterns](https://www.cell.com/cell-systems/fulltext/S2405-4712(18)30482-4).
 Such "types" catalogued by efforts such as the human cell atlas.
 
 But cells don't act independently.
@@ -108,6 +109,17 @@ Graphs? (discrete, but what dimension? will come back to this)
 Sound (music, bass/mids/treble)
 
 Images (denoising by removing highs)
+
+
+### Overview
+
+Simulations then real data
+
+This isn't a new idea.
+Fundamentals of GSP.
+GNNs based on GSP, just overshadow the basics.
+But when we thoroughly explore the basics, we can find previously overlooked ideas.
+This chapter will only cover the basics, with applications covered in future posts.
 
 
 ---
@@ -280,6 +292,9 @@ Use the slider to visualize before (left) and after (right) filtering.
 <figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) low-pass filtering. </figcaption>
 <br>
 
+Looks smoother.
+Image literature -> denoising?
+
 Alternatively, we could emphasize the highs by applying a square-root filter.
 
 <figure style="text-align: center;">
@@ -307,11 +322,86 @@ Note that these particular kernels were chosen because they each have biological
 
 ## Real data
 
+Next, we'll use [real data from the mouse brain](https://www.nature.com/articles/s41586-021-03705-x).
+
 ### Frequencies
 
-### Spectra
+First, the domain
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/tissue_domain_mop.png"
+       alt=""
+       style="width:70%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 3:</strong> A tissue domain calculated from real mouse brain data.  </figcaption>
+</figure>
+
+Then the frequencies
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/frequencies_mop.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 3:</strong> Example frequencies over the mouse brain tissue domain.  </figcaption>
+</figure>
+
+Then the spectrum
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/spectra_mop.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 3:</strong> An example gene expression signal in tissue space and in frequency space.  </figcaption>
+</figure>
+
 
 ### Filtering
+
+First, low-pass
+
+<div style="width: 50%; max-width: 768px; margin: 0 auto;">
+  <img-comparison-slider class="slider-with-shadows">
+    {% include figure.liquid path="assets/figures/fourier/tissue_before_filtering_mop.png" class="img-fluid rounded z-depth-1" slot="first" %}
+    {% include figure.liquid path="assets/figures/fourier/tissue_after_lowpass_mop.png" class="img-fluid rounded z-depth-1" slot="second" %}
+  </img-comparison-slider>
+</div>
+<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) low-pass filtering. </figcaption>
+<br>
+
+Then high-pass
+
+<div style="width: 50%; max-width: 768px; margin: 0 auto;">
+  <img-comparison-slider class="slider-with-shadows">
+    {% include figure.liquid path="assets/figures/fourier/tissue_before_filtering_mop.png" class="img-fluid rounded z-depth-1" slot="first" %}
+    {% include figure.liquid path="assets/figures/fourier/tissue_after_highpass_mop.png" class="img-fluid rounded z-depth-1" slot="second" %}
+  </img-comparison-slider>
+</div>
+<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) high-pass filtering. </figcaption>
+<br>
+
+
+### Multiple samples
+
+Now on multiple slices.
+The exact values differ based on the exact graph structure, but the meaning of the values is shared.
+Lower values indicate lower frequencies, etc.
+The distribution of frequency values for a given graph really just reflects the degree distribution.
+Because cells are largely uniformly scattered throughout a given slice, these distributions are similar across slices.
+Thus, we can compare frequencies across samples, and the meaning of a given kernel is conserved.
+One could come up with ways to overcome the difference in dimensions to compare spectral patterns across datasets, but that's a topic we'll leave for another post.
+
+In parallel
+Approximation, PyGSP, Hammond
+
+To keep things brief, we'll just look at the low-pass results.
+
+<div style="width: 100%; max-width: 768px; margin: 0 auto;">
+  <img-comparison-slider class="slider-with-shadows">
+    {% include figure.liquid path="assets/figures/fourier/tissue_before_filtering_mop_all.png" class="img-fluid rounded z-depth-1" slot="first" %}
+    {% include figure.liquid path="assets/figures/fourier/tissue_after_lowpass_mop_all.png" class="img-fluid rounded z-depth-1" slot="second" %}
+  </img-comparison-slider>
+</div>
+<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) low-pass filtering. </figcaption>
+<br>
 
 
 ---

@@ -253,7 +253,7 @@ But because they don't, we have:
 We perform filtering in frequency space by applying a kernel.
 
 <figure style="text-align: center;">
-  <img src="/assets/figures/fourier/filtering_spectra.png"
+  <img src="/assets/figures/fourier/lowpass_spectra.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
   <figcaption><strong>Figure 3:</strong> A gene expression signal filtered in frequency space.  </figcaption>
@@ -271,11 +271,35 @@ Use the slider to visualize before (left) and after (right) filtering.
 <div style="width: 50%; max-width: 768px; margin: 0 auto;">
   <img-comparison-slider class="slider-with-shadows">
     {% include figure.liquid path="assets/figures/fourier/tissue_before_filtering.png" class="img-fluid rounded z-depth-1" slot="first" %}
-    {% include figure.liquid path="assets/figures/fourier/tissue_after_filtering.png" class="img-fluid rounded z-depth-1" slot="second" %}
+    {% include figure.liquid path="assets/figures/fourier/tissue_after_lowpass.png" class="img-fluid rounded z-depth-1" slot="second" %}
   </img-comparison-slider>
 </div>
-<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) filtering. </figcaption>
+<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) low-pass filtering. </figcaption>
 
+Alternatively, we could emphasize the highs by applying a square-root filter.
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/highpass_spectra.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 3:</strong> A gene expression signal filtered in frequency space.  </figcaption>
+</figure>
+
+Rather than grouping neighboring cells together, this filter appears to emphasize their differences.
+
+<style>
+  .slider-with-shadows {
+    --default-handle-shadow: 0px 0px 5px rgba(0, 0, 0, 1);
+    --divider-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+  }
+</style>
+<div style="width: 50%; max-width: 768px; margin: 0 auto;">
+  <img-comparison-slider class="slider-with-shadows">
+    {% include figure.liquid path="assets/figures/fourier/tissue_before_filtering.png" class="img-fluid rounded z-depth-1" slot="first" %}
+    {% include figure.liquid path="assets/figures/fourier/tissue_after_highpass.png" class="img-fluid rounded z-depth-1" slot="second" %}
+  </img-comparison-slider>
+</div>
+<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) high-pass filtering. </figcaption>
 
 ---
 

@@ -344,7 +344,7 @@ Then the frequencies
   <figcaption><strong>Figure 3:</strong> Example frequencies over the mouse brain tissue domain.  </figcaption>
 </figure>
 
-Then the spectrum
+Then the spectrum of *Cux2*, a neocortical layer marker gene.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/spectra_mop.png"

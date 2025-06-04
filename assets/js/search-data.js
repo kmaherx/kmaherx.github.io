@@ -23,22 +23,22 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-defining-multicellular-regions",
+        },{id: "post-spatial-omics-ii-defining-multicellular-regions",
         
-          title: "Defining multicellular regions",
+          title: "Spatial Omics II: Defining Multicellular Regions",
         
-        description: "A principled approach to representing molecularly-defined regions in spatial omics data",
+        description: "A principled approach to representing multicellular regions in spatial omics data",
         section: "Posts",
         handler: () => {
           
             window.location.href = "/blog/2025/regions/";
           
         },
-      },{id: "post-transcriptional-signals-over-tissue-domains",
+      },{id: "post-spatial-omics-i-transcriptional-signals-over-tissue-domains",
         
-          title: "Transcriptional signals over tissue domains",
+          title: "Spatial Omics I: Transcriptional Signals Over Tissue Domains",
         
-        description: "An introduction to graph signal processing in biological tissues",
+        description: "An introduction to graph signal processing in spatial omics data",
         section: "Posts",
         handler: () => {
           

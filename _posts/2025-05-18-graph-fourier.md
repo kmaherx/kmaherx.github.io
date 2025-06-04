@@ -4,7 +4,7 @@ title: >
   Spatial Omics I: Transcriptional Signals Over Tissue Domains
 description: An introduction to graph signal processing in spatial omics data
 tags:
-giscus_comments: true
+giscus_comments: false
 date: 2025-05-14
 featured: true
 categories: spatial-omics

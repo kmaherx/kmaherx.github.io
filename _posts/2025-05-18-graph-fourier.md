@@ -174,17 +174,12 @@ We can simulate this by
 Note that this simulation is not nearly as complex as a real biological tissue or the data measured from one.
 That being said, it should at least provide a simple playground in which we can explore some fundamental quantitative concepts that we will later apply to real data.
 
+That being said, let's start exploring these quantitative fundamentals.
+
 
 ### The tissue domain
 
-Just as in music or images, tissues can be thought of in terms of signal processing.
-Namely, that can be broken down into gene expression signals over a "tissue domain".
-However, this tissue domain isn't continuous like time, as it's composed of discrete cells.
-We might instead compare it to an image in which each pixel is akin to a cell.
-However, cells are not arranged neatly into perfect grids like pixels are.
-Thus, we need a different structure to represent our tissue.
-
-We can think of such a tissue domain as an undirected graph over $n$ nodes, each of which represents a cell.
+We can think of the tissue domain as an undirected graph over $n$ nodes, each of which represents a cell.
 We could construct this graph in many ways, including connecting each cell to its k nearest physical neighbors.
 Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's embeddable in 2D, which respects my own visual intuition.
 If you're optimistic, you might also believe that it [captures the mechanical forces present in biological tissues](https://pubmed.ncbi.nlm.nih.gov/20082148/).
@@ -222,23 +217,167 @@ $$
 \in \mathbb{R}^{n \times n}.
 $$
 
-Now that we have a tissue domain, we can begin to 
+Finally, we can introduce the Laplacian matrix
+
+$$
+\mathbf{L} = \mathbf{D} - \mathbf{A}
+$$
+
+***give intuition***
+For convenience, we will instead consider the edge-normalized Laplacian $\mathbf{L} = \mathbf{I} - \mathbf{D}^{-\frac{1}{2}} \mathbf{A} \mathbf{D}^{-\frac{1}{2}}$, since it's eigenvalues have some nice properties that we will leverage later.
+
+Note that the order of cells in these matrices is arbitrary.
+It doesn't matter so long as it is consistent across all related vectors and matrices.
+
+Now that we have a simulated tissue domain, we can create gene expression signals over it.
 
 
 ### Transcriptional signals
 
-A signal is a value associated with each node in our graph.
-For instance, we could consider the amount that a given gene is expressed in each cell within a tissue.
-Spatial transcriptomics provides exactly this type of information, typically for hundreds of different genes.
+A signal is a vector of values associated with each node in our graph.
+In our case, we are interested in the amount that a given gene is expressed within each cell of a tissue.
+We can collect all of these values into a list, yielding the vector $\mathbf{x} \in \mathbb{R}^n$, where $\mathbf{x}_i$ is the amount of gene $x$ expressed in cell $i$.
+<!-- While the ordering of these values is generally arbitrary, it is critical that they follow the same ordering of cells used in the adjacency matrix and all other associated mathematical objects.
+In other words, $\mathbf{A}_i$ (the row of values indicating neighbors of cell $i$) and $\mathbf{x}_i$ (the amount of gene $x$ expressed in cell $i$) are talking about the same cell $i$. -->
+We can further collect all of these gene signals into the matrix
 
-Before discussing transcriptional signals in mathematical detail, let's first gain some intuition from biology for what they look like and then add some to our simulation.
-In real tissues, they might vary in their spatial scale, some looking like a region and some looking noisy.
-Allen atlas
+$$
+\mathbf{X} = [\mathbf{x}_1 | ... | \mathbf{x}_g] \in \mathbb{R}^{n \times g},
+$$
+
+where $g$ is the number of genes measured.
+This is the "cell-by-gene matrix", the [fundamental data structure underlying all of single-cell omics](https://cellxgene.cziscience.com/).
+
+Now that we've quantitatively defined both our domain and our signals, our challenge is to combine them.
 
 
 ### Frequencies
 
-Nice, looks great.
+While it's often said that spatial data offers more information than dissociated single-cell data, we might be better served by the intuition that spatial coordinates enable us to strategically *remove* information.
+Namely, it allows us to focus on gene expression over particular length scales of interest, disentangling the mess of information into more interpretable components.
+But how can we isolate a given length scale?
+The first step is defining what a length scale is in the first place.
+
+Take music for instance, in which the different frequency ranges of bass, mids, and trebles define different *time* scales along which a sound can vary.
+Similarly, our notion of *length* scale can be made quantitatively rigorous in terms of *spatial* frequencies.
+While a straightforward extension of this concept to two dimensions captures spatial frequencies in an image, it's not so straightforward to extend to graphs due to their irregular topology.
+Thus, we have to do a little leg work to extend this concept to our tissue domain.
+
+We can start by slowly deriving a definition of frequency in a graph setting.
+Consider a hypothetical signal $\mathbf{v}$ over the tissue.
+The notion of frequency is simply "how much does the signal tend to change as I take a step in the domain?"
+Taking a step in our tissue domain corresponds to moving between neighboring cells $i$ and $j$.
+The change in our signal as we take this step is thus given by $\mathbf{v}_i - \mathbf{v}_j$.
+However, we don't really care about the sign, so we can just square it to get $(\mathbf{v}_i - \mathbf{v}_j)^2$.
+This is just one step, and we care about how the signal tends to change with steps throughout the whole tissue in general.
+To capture this tendency, we can simply sum over all pairs of neighboring cells, yielding our final definition of frequency
+
+\begin{equation} \label{eq:freqdef}
+  \lambda = \sum_{ij} \mathbf{A}_{ij} (\mathbf{v}_i - \mathbf{v}_j)^2
+\end{equation}
+
+Note that because we are summing over *all* possible pairs of cells $i$ and $j$, we have to multiply each one by $\mathbf{A}_{ij}$ so that we only consider *neighboring* pairs.
+
+This definition of frequency might make sense, but what we are really looking for is an ideal set of *all possible frequencies*, much as time scales are given by sine waves of all possible frequencies.
+It turns out that, because our tissue domain is finite and discrete, we can actually solve for a finite set of all possible frequencies, and it turns out to be a basis in the linear algebraic sense.
+
+First, we can rewrite eq. \eqref{eq:freqdef} as a "[quadratic form](https://gregorygundersen.com/blog/2022/02/27/positive-definite/)", which works in our favor by getting us a step further into the realm of linear algebra:
+
+$$
+\lambda = \mathbf{v}^{\top} \mathbf{L} \mathbf{v}.
+$$
+
+{% details How do we derive that? %}
+
+Eq. \eqref{eq:freqdef} can be converted into a quadratic form via a process reminiscent of annealing.
+First, we heat it up by factoring the
+$\mathbf{v}$
+terms to get
+
+$$
+\sum_{i,j}\mathbf{A}_{ij}(
+v_i v_i +
+v_j v_j -
+v_i v_j -
+v_j v_i
+).
+$$
+
+We can then begin to cool it down by combining positive and negative terms, respectively, yielding
+
+$$
+2 \sum_{i,j}\mathbf{A}_{ij}
+v_i v_i -
+2 \sum_{i,j}\mathbf{A}_{ij}
+v_i v_j.
+$$
+
+Note that, for a fixed row $i$, the left-hand term corresponds to summing
+$v_i v_i$ together
+$d_i$ times, where $d_i$ is the sum of the $i$th row of
+$\mathbf{A}$.
+Thus, one could equivalently express the left-hand term as
+
+$$
+2 \sum_{i}\mathbf{D}_{ii}
+v_i v_i.
+$$
+
+Now both the left and right terms themselves correspond to quadratic forms, yielding
+
+$$
+2 \mathbf{v}^{\top} \mathbf{D} \mathbf{v} - 
+2 \mathbf{v}^{\top} \mathbf{A} \mathbf{v}.
+$$
+
+Further simplifying, we have
+
+$$
+2 \mathbf{v}^{\top} (\mathbf{D}-\mathbf{A}) \mathbf{v}
+$$
+
+and further
+
+$$
+2 \mathbf{v}^{\top} \mathbf{L} \mathbf{v}.
+$$
+
+The factor of two arises from double counting each edge, which corresponds to a directed edge in each direction.
+Because we tend to think of each undirected edge as only a single edge going both ways, folks tend to omit this factor, yielding the final expression
+
+$$
+\mathbf{v}^{\top} \mathbf{L} \mathbf{v}.
+$$
+
+{% enddetails %}
+
+Next, we should normalize by the magnitude of $\mathbf{v}$ to guarantee that the overall expression strength doesn't matter.
+After all, we really only care about the relative spatial distribution of the signal, not its overall magnitude.
+We can do that by modifying the equation to get
+
+$$
+\lambda = \frac{\mathbf{v}^{\top} \mathbf{L} \mathbf{v}}{\mathbf{v}^{\top} \mathbf{v}}.
+$$
+
+Finally, it turns out we can actually rearrange this expression to get an eigenvalue problem:
+
+$$
+\begin{align}
+    & \lambda = {\frac{\mathbf{v}^{\top} \mathbf{L} \mathbf{v}}{\mathbf{v}^{\top} \mathbf{v}}} \nonumber \\
+    &\rightarrow \lambda \mathbf{v}^{\top} \mathbf{v} = \mathbf{v}^{\top} \mathbf{L} \mathbf{v} \\
+    &\rightarrow \lambda \mathbf{v} = \mathbf{L} \mathbf{v}. \nonumber
+\end{align}
+$$
+
+This is a critical insight because $\mathbf{L}$ is symmetric positive semidefinite and thus has an eigenbasis of eigenvectors with real, nonnegative eigenvalues.
+This eigenbasis is given by the matrix
+
+$$
+\mathbf{V} = [\mathbf{v}_1 |...| \mathbf{v}_n] \in \mathbb{R}^{n \times n}.
+$$
+
+Plugging all of this terminology into our context of interest, we find that there exists a finite set of ideal signals ${\mathbf{v}_1, ..., \mathbf{v}_n}$ that represent "all possible frequencies" -- and thus all possible length scales -- over our tissue domain.
+After visualizing a few of these frequencies, we can see that they indeed appear to represent abstract notions of variation across different scales in our tissue.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/frequencies.png"
@@ -257,6 +396,8 @@ How I see it: consequence of "irregular" topology
 If all cells had the same degree:
 But because they don't, we have:
 {% enddetails %}
+
+Now that we've derived a concrete notion of length scale, we can use it to describe the spatial properties of gene expression patterns.
 
 
 ### Spectra

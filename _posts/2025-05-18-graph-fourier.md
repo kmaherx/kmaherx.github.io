@@ -258,7 +258,7 @@ Namely, it allows us to focus on gene expression over particular length scales o
 But how can we isolate a given length scale?
 The first step is defining what a length scale is in the first place.
 
-Take music for instance, in which the different frequency ranges of bass, mids, and trebles define different *time* scales along which a sound can vary.
+Take music, for instance, in which the different frequency ranges of bass, mids, and trebles define different *time* scales along which a sound can vary.
 Similarly, our notion of *length* scale can be made quantitatively rigorous in terms of *spatial* frequencies.
 While a straightforward extension of this concept to two dimensions captures spatial frequencies in an image, it's not so straightforward to extend to graphs due to their irregular topology.
 Thus, we have to do a little leg work to extend this concept to our tissue domain.
@@ -278,16 +278,16 @@ To capture this tendency, we can simply sum over all pairs of neighboring cells,
 
 Note that because we are summing over *all* possible pairs of cells $i$ and $j$, we have to multiply each one by $\mathbf{A}_{ij}$ so that we only consider *neighboring* pairs.
 
-This definition of frequency might make sense, but what we are really looking for is an ideal set of *all possible frequencies*, much as time scales are given by sine waves of all possible frequencies.
-It turns out that, because our tissue domain is finite and discrete, we can actually solve for a finite set of all possible frequencies, and it turns out to be a basis in the linear algebraic sense.
+This definition of frequency for a given signal might make sense, but what we are really looking for is an ideal *set* of signals that represent *all possible frequencies*, much as time scales are given by sine waves of all possible frequencies.
+It turns out that, because our tissue domain is finite and discrete, we can actually solve for a finite set of all possible frequencies, and it ends up being a basis in the linear algebraic sense.
 
-First, we can rewrite eq. \eqref{eq:freqdef} as a "[quadratic form](https://gregorygundersen.com/blog/2022/02/27/positive-definite/)", which works in our favor by getting us a step further into the realm of linear algebra:
+To see this, let's first rewrite eq. \eqref{eq:freqdef} as a "[quadratic form](https://gregorygundersen.com/blog/2022/02/27/positive-definite/)", which works in our favor by getting us a step further into the realm of linear algebra:
 
 $$
 \lambda = \mathbf{v}^{\top} \mathbf{L} \mathbf{v}.
 $$
 
-{% details How do we derive that? %}
+{% details How? %}
 
 Eq. \eqref{eq:freqdef} can be converted into a quadratic form via a process reminiscent of annealing.
 First, we heat it up by factoring the
@@ -351,15 +351,23 @@ $$
 
 {% enddetails %}
 
-Next, we should normalize by the magnitude of $\mathbf{v}$ to guarantee that the overall expression strength doesn't matter.
+It turns out we can rearrange this expression into an eigenvalue problem:
+
+$$
+\lambda \mathbf{v} = \mathbf{L} \mathbf{v}.
+$$
+
+{% details How? %}
+
+Starting with the quadratic form $\lambda = \mathbf{v}^{\top} \mathbf{L} \mathbf{v}$, we can normalize it to guarantee that the overall expression strength doesn't influence the frequency value.
 After all, we really only care about the relative spatial distribution of the signal, not its overall magnitude.
-We can do that by modifying the equation to get
+We can thus normalize by dividing out the magnitude:
 
 $$
 \lambda = \frac{\mathbf{v}^{\top} \mathbf{L} \mathbf{v}}{\mathbf{v}^{\top} \mathbf{v}}.
 $$
 
-Finally, it turns out we can actually rearrange this expression to get an eigenvalue problem:
+Then, with a bit of rearranging, we end up with an eigenvalue problem:
 
 $$
 \begin{align}
@@ -369,6 +377,9 @@ $$
 \end{align}
 $$
 
+{% enddetails %}
+
+
 This is a critical insight because $\mathbf{L}$ is symmetric positive semidefinite and thus has an eigenbasis of eigenvectors with real, nonnegative eigenvalues.
 This eigenbasis is given by the matrix
 
@@ -376,8 +387,11 @@ $$
 \mathbf{V} = [\mathbf{v}_1 |...| \mathbf{v}_n] \in \mathbb{R}^{n \times n}.
 $$
 
-Plugging all of this terminology into our context of interest, we find that there exists a finite set of ideal signals ${\mathbf{v}_1, ..., \mathbf{v}_n}$ that represent "all possible frequencies" -- and thus all possible length scales -- over our tissue domain.
-After visualizing a few of these frequencies, we can see that they indeed appear to represent abstract notions of variation across different scales in our tissue.
+Let's plug all of this terminology into our context of interest by realizing two key points.
+**First** of all, we found that there exists a finite set of ideal signals ${\mathbf{v}_1, ..., \mathbf{v}_n}$ that represent "all possible frequencies" -- and thus all possible length scales -- over our tissue domain.
+This is great because it means we can rigorously talk about any length scale of interest.
+Below are some examples plotted in the tissue to illustrate this intuition.
+Note that no gene expression information went into calculating these frequencies; rather, they are an abstract representation of variation on different length scales.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/frequencies.png"
@@ -387,20 +401,28 @@ After visualizing a few of these frequencies, we can see that they indeed appear
 </figure>
 
 {% details Why do highs appear constrained to one part of the tissue? %}
-When taking a look at 
-$\mathbf{v}_{300}
-$
-, the fluctuations appear constrained to the lower left portion of the tissue.
+When taking a look at $\mathbf{v}_{301}$, the fluctuations appear constrained to the lower left portion of the tissue.
 Uncertainty principle
 How I see it: consequence of "irregular" topology
 If all cells had the same degree:
 But because they don't, we have:
 {% enddetails %}
 
-Now that we've derived a concrete notion of length scale, we can use it to describe the spatial properties of gene expression patterns.
+The **second** key point is that this set of ideal frequencies forms a basis in the linear algebraic sense.
+This means that when we do measure a gene expression signal, we can project it into this "frequency space" to quantify its prevalence on each length scale.
+
+That's what we'll do next.
 
 
 ### Spectra
+
+We can think of projecting a given gene expression signal $\mathbf{x}$ into frequency space as comparing it to each frequency $\mathbf{v}_i$.
+For a single frequency, this is given by the inner product $\mathbf{v}_i^{\top} \mathbf{x} \in \mathbb{R}$.
+For all frequencies, this is given by the matrix product $\mathbf{s} = \mathbf{V}^{\top} \mathbf{x} \in \mathbb{R}^n$, where the output is the similarity of $\mathbf{x}$ to each of $\mathbf{v}_1, ..., \mathbf{v}_n$.
+The vector $\mathbf{s}$ is often referred to as the signal's "spectrum".
+An analogy I tend to think of is that the original gene expression signal over the tissue is like a dish you might cook.
+You could always think of that dish in terms of its corresponding *recipe*, i.e. the amounts of each ingredient necessary to construct it.
+In this case, the recipe is the spectrum, and the ingredients are the frequencies.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/spectra.png"
@@ -409,10 +431,27 @@ Now that we've derived a concrete notion of length scale, we can use it to descr
   <figcaption><strong>Figure 3:</strong> An example gene expression signal in tissue space and in frequency space.  </figcaption>
 </figure>
 
+Note that spectra generally do contain negative values.
+Our visualization above involved taking the absolute value of the spectrum to better convey the intuition of how prevalent a signal is over a given length scale.
+Additionally, we chose not to visualize the first value $s_1$, as it just corresponds a scaling factor.
+
+{% details How is $s_1$ is just a scaling factor? %}
+Nice
+{% enddetails %}
+
+There are many interesting things we could do with spectra.
+You might think of comparing gene expression signals based on their spectra, perhaps to find classes of spectral patterns (i.e. biologically-relevant length scales) using PCA or NMF.
+However, there are also many interesting issues with these ideas.
+For instance, a spectrum has the same dimension as its corresponding tissue.
+This makes comparison across different tissues difficult because the dimensions of spectra likely differ.
+We'll explore these pitfalls and opportunities in a future blog post.
+
+For now, let's instead focus on modifying these spectra, i.e. performing filtering.
+
 
 ### Filtering
 
-We perform filtering in frequency space by applying a kernel.
+In the language of the above analogy, modifying spectra allows us to ask "what happens to the dish when I remove this ingredient?"
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/lowpass_spectra.png"
@@ -436,7 +475,27 @@ Use the slider to visualize before (left) and after (right) filtering.
 Looks smoother.
 Image literature -> denoising?
 
-Alternatively, we could emphasize the highs by applying a square-root filter.
+We can put all of these steps together to define a single filter function
+
+$$
+\begin{align}
+  & \mathbf{V} e^{-\tau \mathbf{\Lambda}} \mathbf{V}^{\top} \\
+  & = e^{-\tau \mathbf{L}} \\
+  & = f(\mathbf{L}),
+\end{align}
+$$
+
+where f(\lambda)
+
+This gives a glimpse into an interesting fact: any (analytic) filter $h(\lambda)$ can be described as a function of the Laplacian matrix:
+
+$$
+h(\mathbf{L}) = \mathbf{V} h(\mathbf{\Lambda}) \mathbf{V}^{\top}
+$$
+
+
+Alternatively, we could emphasize the highs by applying, say, a square-root filter.
+(This will be an important kernel for defining interactions in a later post.)
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/highpass_spectra.png"
@@ -455,8 +514,6 @@ Rather than grouping neighboring cells together, this filter appears to emphasiz
 </div>
 <figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) high-pass filtering. </figcaption>
 <br>
-
-Note that these particular kernels were chosen because they each have biological significance that will be explained in future blog posts.
 
 ---
 

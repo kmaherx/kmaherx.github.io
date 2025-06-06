@@ -591,21 +591,21 @@ $$
 
 where $\mathbf{\Lambda}$ is the diagonal matrix of eigenvalues and $\mathbf{V}$ is the matrix of corresponding eigenvectors.
 The only difference is that we applied a function to each of the eigenvalues, i.e. $f(\mathbf{\Lambda})$.
-Interestingly, for any (analytical) function $h(\lambda)$, we have
+Interestingly, for any (analytic) function $h(\lambda)$, we have
 
 $$
 \mathbf{V} h(\mathbf{\Lambda}) \mathbf{V}^{\top} = h(\mathbf{V} \mathbf{\Lambda} \mathbf{V}^{\top}) = h(\mathbf{L}).
 $$
 
-{% detail Why "analytic" functions? %}
+{% details Why "analytic" functions? %}
 
 Functions of matrices are often defined in terms of series, [e.g. the exponential function](https://sassafras13.github.io/MatrixExps/).
 A function that can be described in this way is referred to as "[analytic](https://en.wikipedia.org/wiki/Analytic_function#Definitions)".
 Thus, for our kernel function to apply to matrix arguments, it must be analytic.
 
-{% enddetail %}
+{% enddetails %}
 
-Thus, any (analytical) filter can be expressed as a function of the Laplacian.
+Thus, any (analytic) filter can be expressed as a function of the Laplacian.
 This is cool for a few reasons.
 First of all, it's pretty.
 Second, it will actually help us interpret equations that emerge en route to deriving interactions in a future post.

@@ -223,8 +223,8 @@ $$
 \mathbf{L} = \mathbf{D} - \mathbf{A}
 $$
 
-***give intuition***
 For convenience, we will instead consider the edge-normalized Laplacian $\mathbf{L} = \mathbf{I} - \mathbf{D}^{-\frac{1}{2}} \mathbf{A} \mathbf{D}^{-\frac{1}{2}}$, since it's eigenvalues have some nice properties that we will leverage later.
+We can think of the Laplacian as a slight modification of the adjacency matrix that's more closely related to the notion of frequency, as we will see below.
 
 Note that the order of cells in these matrices is arbitrary.
 It doesn't matter so long as it is consistent across all related vectors and matrices.
@@ -531,9 +531,8 @@ By pointwise multiplying this kernel with the gene expression spectrum from earl
 
 Now let's represent this mathematically.
 Pointwise multiplication of two vectors can be represented by turning one of them into a diagonal matrix and then multiplying.
-Arranging all the kernel-weighted frequency values into a diagonal matrix yields
-
-$$
+<!-- Arranging all the kernel-weighted frequency values into a diagonal matrix $f(\mathbf{\Lambda})$. -->
+<!-- $$
 f(\mathbf{\Lambda}) =
 \begin{bmatrix}
   f(\lambda_{1}) & & \\
@@ -541,11 +540,14 @@ f(\mathbf{\Lambda}) =
   & & f(\lambda_{n})
 \end{bmatrix}
 \in \mathbb{R}^{n \times n}.
-$$
-
-Multiplication with the spectrum is then given by $f(\mathbf{\Lambda}) \mathbf{V}^{\top} \mathbf{x} \in \mathbb{R}^n$.
-While it might look a little ugly in it's current form, it's important that we keep this equation in this form for later.
-It'll allow us to see a neat simplification in a moment.
+$$ -->
+Let's do this with the kernel.
+We can first arrange all of the frequency values into a diagonal matrix $\mathbf{\Lambda}$.
+Applying the kernel function to each of the values is the same as applying it to the whole matrix, i.e. $f(\mathbf{\Lambda})$.
+Multiplication of this diagonal kernel matrix with the spectrum is then given by $f(\mathbf{\Lambda}) \mathbf{V}^{\top} \mathbf{x} \in \mathbb{R}^n$.
+Altogether, this equation describes modification of the gene's spectrum.
+While it might look a little ugly in it's current form, it's nice to keep it this way for later;
+it'll allow us to see a neat simplification in a moment.
 
 The **second** step is to project the modified spectrum back into the tissue to visualize the result.
 We can do this by multiplying by the inverse of the frequency basis, i.e. $(\mathbf{V}^{\top})^{-1}$.
@@ -577,11 +579,11 @@ Use the slider to visualize the signal before filtering (left) and after filteri
 
 This filter appears to have blurred the underlying gene expression signal.
 That's exactly what we expect given that blurring corresponds to getting rid of small-scale fluctuations.
-Some might think of this as [denoising](), which makes sense in the context of images.
-However, in a later post I'll argue that high frequencies are not noise in tissues.
+Some might think of this as [denoising](https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-024-01283-x), which makes sense in the context of images.
+However, in a later post I'll argue that high frequencies are not noise in the context of tissues.
 
 Using a final bit of math, let's finish interpreting our filtering function, which is currently a bit lengthy.
-If you stare at eq. \eqref{eq:filterdef} long enough, you might notice that it looks a lot like the [diagonalized]() form of the Laplacian
+If you stare at eq. \eqref{eq:filterdef} long enough, you might notice that it looks a lot like the [diagonalized](https://intuitive-math.club/linear-algebra/eigenbasis/) form of the Laplacian
 
 $$
 \mathbf{L} = \mathbf{V} \mathbf{\Lambda} \mathbf{V}^{\top},
@@ -589,17 +591,25 @@ $$
 
 where $\mathbf{\Lambda}$ is the diagonal matrix of eigenvalues and $\mathbf{V}$ is the matrix of corresponding eigenvectors.
 The only difference is that we applied a function to each of the eigenvalues, i.e. $f(\mathbf{\Lambda})$.
-Interestingly, for any ([analytical]()) function $h(\lambda)$, we have
+Interestingly, for any (analytical) function $h(\lambda)$, we have
 
 $$
 \mathbf{V} h(\mathbf{\Lambda}) \mathbf{V}^{\top} = h(\mathbf{V} \mathbf{\Lambda} \mathbf{V}^{\top}) = h(\mathbf{L}).
 $$
 
+{% detail Why "analytic" functions? %}
+
+Functions of matrices are often defined in terms of series, [e.g. the exponential function](https://sassafras13.github.io/MatrixExps/).
+A function that can be described in this way is referred to as "[analytic](https://en.wikipedia.org/wiki/Analytic_function#Definitions)".
+Thus, for our kernel function to apply to matrix arguments, it must be analytic.
+
+{% enddetail %}
+
 Thus, any (analytical) filter can be expressed as a function of the Laplacian.
 This is cool for a few reasons.
-First of all, it's kind of pretty.
+First of all, it's pretty.
 Second, it will actually help us interpret equations that emerge en route to deriving interactions in a future post.
-Third, it gives us a concise notation to work with;
+Third, it gives us a concise notation to work with for the remainder of this post;
 given a kernel such as the one above, $f$, filtering can simply be expressed as
 
 $$
@@ -647,8 +657,8 @@ On the other hand, cells with little differences with their neighbors end up wit
 Thus, *high*-pass filtering appears to emphasize *differences* in gene expression between neighboring cells, unlike the *similarities* highlighted by *low*-pass filtering.
 
 Despite our analytical treatment of filtering, explicit eigendecomposition of the Laplacian is prohibitive for tissues (graphs) with greater than approximately $n=20000$ cells (nodes).
-For that reason, filtering is often calculated using [wavelet approximations]().
-The *de facto* package for performing this analysis is [PyGSP](), and that's what we will use for all real biological datasets going forward.
+For that reason, filtering is often calculated using [wavelet approximations](https://arxiv.org/abs/0912.3848).
+The *de facto* package for performing this analysis is [PyGSP](https://pygsp.readthedocs.io/en/stable/), and that's what we will use for all real biological datasets going forward.
 
 ---
 

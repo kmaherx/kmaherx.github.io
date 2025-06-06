@@ -204,10 +204,8 @@ Each entry $$\mathbf{A}_{ij}$$ is either $1$, which represents two cells that ar
 While we could weight these edges based on physical distances between cells, we will instead stick to simple binary edges for simplicity.
 We also will not consider self loops: $$\mathbf{A}_{ii} = 0$$.
 The number of neighbors for cell $i$ -- the "degree" -- is given by $$d_i = \sum_j \mathbf{A}_{ij}$$.
-These values are often consolidated into the diagonal degree matrix
-
-$$
-% \mathbf{D} = \operatorname{diag}(d_1, ..., d_n) =
+These values are often consolidated into the diagonal degree matrix $\mathbf{D} = \operatorname{diag}(d_1, ..., d_n)$.
+<!-- $$
 \mathbf{D} =
 \begin{bmatrix}
   d_{1} & & \\
@@ -215,16 +213,15 @@ $$
   & & d_{n}
 \end{bmatrix}
 \in \mathbb{R}^{n \times n}.
-$$
-
+$$ -->
 Finally, we can introduce the Laplacian matrix
 
 $$
 \mathbf{L} = \mathbf{D} - \mathbf{A}
 $$
 
-For convenience, we will instead consider the edge-normalized Laplacian $\mathbf{L} = \mathbf{I} - \mathbf{D}^{-\frac{1}{2}} \mathbf{A} \mathbf{D}^{-\frac{1}{2}}$, since it's eigenvalues have some nice properties that we will leverage later.
 We can think of the Laplacian as a slight modification of the adjacency matrix that's more closely related to the notion of frequency, as we will see below.
+For convenience, we will instead consider the edge-normalized Laplacian $\mathbf{L} = \mathbf{I} - \mathbf{D}^{-\frac{1}{2}} \mathbf{A} \mathbf{D}^{-\frac{1}{2}}$, since it's eigenvalues have some nice properties that we will leverage later.
 
 Note that the order of cells in these matrices is arbitrary.
 It doesn't matter so long as it is consistent across all related vectors and matrices.
@@ -559,12 +556,7 @@ Thus, we have the full filtering equation
 \end{equation}
 
 where $\mathbf{\bar x}$ is the filtered version of $\mathbf{x}$.
-
-{% details Is the bar notation standard? %}
-No.
-I just like it because it reminds me that the result is smooth, and the bar is a smooth pattern from left to right.
-{% enddetails%}
-
+I like to use the bar notation for the smoothed signal because the bar itself is smooth.
 We can visualize the result of this process below.
 Use the slider to visualize the signal before filtering (left) and after filtering (right).
 
@@ -621,16 +613,13 @@ While the above filtering example was low-pass, we could instead perform high-pa
 First, let's define a kernel that preferentially weights highs.
 We can use the square-root kernel $g(\lambda) = \lambda^{\frac{1}{2}}$, as it is monotonically increasing with frequency.
 (This will be an important kernel for defining interactions in a later post.)
-Using the concise notation from above, we can apply this filter to calculate the high-pass filtered signal
+Using the concise notation from above (along with a hat to convey the "opposite" of smoothness), we can apply this filter to calculate the high-pass filtered signal
 
 $$
 \mathbf{\hat x} = g(\mathbf{\Lambda}) \mathbf{x}.
 $$
 
-{% details Is the hat notation standard? %}
-No.
-I just like it because it reminds me that the result is not smooth, and the hat is not a smooth pattern from left to right.
-{% enddetails%}
+In contrast to low-pass filtering, we can see in the modified spectrum that the high-pass kernel emphasizes the higher frequency components of our signal.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/highpass_spectra.png"
@@ -639,8 +628,10 @@ I just like it because it reminds me that the result is not smooth, and the hat 
   <figcaption><strong>Figure 3:</strong> A gene expression signal high-pass filtered in frequency space.  </figcaption>
 </figure>
 
-In contrast to low-pass filtering, we can see in the modified spectrum that the high-pass kernel emphasizes the higher frequency components of our signal.
-But what does this look like when visualized in the tissue?
+When visualized in the tissue, it appears that the "roughness" of our signal is preserved, and everything else is washed away.
+Cells with large differences with their neighbors in the original signal maintain their differences after filtering, ending up with extremal values.
+On the other hand, cells with little differences with their neighbors end up with values in the middle after filtering.
+Thus, *high*-pass filtering appears to emphasize *differences* in gene expression between neighboring cells, unlike the *similarities* highlighted by *low*-pass filtering.
 
 <div style="width: 50%; max-width: 768px; margin: 0 auto;">
   <img-comparison-slider class="slider-with-shadows">
@@ -650,11 +641,6 @@ But what does this look like when visualized in the tissue?
 </div>
 <figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) high-pass filtering. </figcaption>
 <br>
-
-It appears that the "roughness" of our signal is preserved, and everything else is washed away.
-Cells with large differences with their neighbors in the original signal maintain their differences after filtering, ending up with extremal values.
-On the other hand, cells with little differences with their neighbors end up with values in the middle after filtering.
-Thus, *high*-pass filtering appears to emphasize *differences* in gene expression between neighboring cells, unlike the *similarities* highlighted by *low*-pass filtering.
 
 Despite our analytical treatment of filtering, explicit eigendecomposition of the Laplacian is prohibitive for tissues (graphs) with greater than approximately $n=20000$ cells (nodes).
 For that reason, filtering is often calculated using [wavelet approximations](https://arxiv.org/abs/0912.3848).

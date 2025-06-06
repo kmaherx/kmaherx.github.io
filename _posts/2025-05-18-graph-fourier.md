@@ -287,7 +287,7 @@ $$
 \lambda = \mathbf{v}^{\top} \mathbf{L} \mathbf{v}.
 $$
 
-{% details How? %}
+{% details How exactly can we show that? %}
 
 Eq. \eqref{eq:freqdef} can be converted into a quadratic form via a process reminiscent of annealing.
 First, we heat it up by factoring the
@@ -351,23 +351,24 @@ $$
 
 {% enddetails %}
 
-It turns out we can rearrange this expression into an eigenvalue problem:
+We can further rearrange this expression into an eigenvalue problem:
 
 $$
 \lambda \mathbf{v} = \mathbf{L} \mathbf{v}.
 $$
 
-{% details How? %}
+{% details How exactly can we show that? %}
 
-Starting with the quadratic form $\lambda = \mathbf{v}^{\top} \mathbf{L} \mathbf{v}$, we can normalize it to guarantee that the overall expression strength doesn't influence the frequency value.
+We should probably normalize $\lambda = \mathbf{v}^{\top} \mathbf{L} \mathbf{v}$ to guarantee that the overall expression strength doesn't influence the frequency value.
 After all, we really only care about the relative spatial distribution of the signal, not its overall magnitude.
-We can thus normalize by dividing out the magnitude:
+We can do this normalization by dividing the magnitude out:
 
 $$
 \lambda = \frac{\mathbf{v}^{\top} \mathbf{L} \mathbf{v}}{\mathbf{v}^{\top} \mathbf{v}}.
 $$
 
-Then, with a bit of rearranging, we end up with an eigenvalue problem:
+Note that this is a Rayleigh quotient, which is intimately tied to eigendecomposition.
+With a bit of rearranging, we end up with an eigenvalue problem:
 
 $$
 \begin{align}
@@ -380,7 +381,7 @@ $$
 {% enddetails %}
 
 
-This is a critical insight because $\mathbf{L}$ is symmetric positive semidefinite and thus has an eigenbasis of eigenvectors with real, nonnegative eigenvalues.
+This is a critical insight because $\mathbf{L}$ is symmetric positive semidefinite (PSD) and thus has an eigenbasis of eigenvectors with real, nonnegative eigenvalues.
 This eigenbasis is given by the matrix
 
 $$
@@ -401,11 +402,13 @@ Note that no gene expression information went into calculating these frequencies
 </figure>
 
 {% details Why do highs appear constrained to one part of the tissue? %}
-When taking a look at $\mathbf{v}_{301}$, the fluctuations appear constrained to the lower left portion of the tissue.
+When taking a look at $\mathbf{v}_{301}$, the fluctuations appear constrained a bit toward the lower left of the tissue.
+This asymmetry is due to the "irregularity" of the graph domain.
+Consider the time and image domains in which you always have the same choice of how to move no matter where you are in the tissue (apart from the boundaries).
+Graphs generally lack this regularity due to the variation in degree across different nodes.
+
 Uncertainty principle
-How I see it: consequence of "irregular" topology
-If all cells had the same degree:
-But because they don't, we have:
+
 {% enddetails %}
 
 The **second** key point is that this set of ideal frequencies forms a basis in the linear algebraic sense.
@@ -423,6 +426,7 @@ The vector $\mathbf{s}$ is often referred to as the signal's "spectrum".
 An analogy I tend to think of is that the original gene expression signal over the tissue is like a dish you might cook.
 You could always think of that dish in terms of its corresponding *recipe*, i.e. the amounts of each ingredient necessary to construct it.
 In this case, the recipe is the spectrum, and the ingredients are the frequencies.
+This process of representing a signal in terms of its spectrum is known as the [Fourier transform](https://betterexplained.com/articles/an-interactive-guide-to-the-fourier-transform/).
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/spectra.png"
@@ -431,12 +435,42 @@ In this case, the recipe is the spectrum, and the ingredients are the frequencie
   <figcaption><strong>Figure 3:</strong> An example gene expression signal in tissue space and in frequency space.  </figcaption>
 </figure>
 
-Note that spectra generally do contain negative values.
-Our visualization above involved taking the absolute value of the spectrum to better convey the intuition of how prevalent a signal is over a given length scale.
-Additionally, we chose not to visualize the first value $s_1$, as it just corresponds a scaling factor.
+Note that the gene we chose to visualize is a region marker.
+By design, it forms a large-scale pattern.
+Thus, it should make some sense that there's a spike in the lows in its spectrum.
 
-{% details How is $s_1$ is just a scaling factor? %}
-Nice
+Note that, while the spectrum shown above is entirely positive, spectra generally do contain negative values.
+We just chose to take the absolute value of the spectrum to better convey the intuition of how prevalent a signal is over a given length scale, i.e. omitting its sign.
+Additionally, we chose not to visualize the first value $s_1$, as it just corresponds a translation factor.
+
+{% details Why is $s_1$ is just a translation factor? %}
+
+What I mean by a "translation factor" here is just an "intercept" or "bias" term that is added to all cells to shift their expression values up/down all by the same amount.
+Thus, we can think of it as some vector with entries that are all the same value, i.e. a scaled version of the ones vector $\mathbf{1} = [1, ..., 1]^{\top}$.
+We are assuming that it corresponds to the first eigenvalue of $\mathbf{L}$, so let's first confirm that it's an eigenvector by multiplying them.
+It turns out that
+
+$$
+\mathbf{L} \mathbf{1} = 0.
+$$
+
+This follows from the fact that we've constructed the Laplacian such that the degree of each node is on the diagonal and the instances of each neighbor on the off diagonal sum up to an amount of equal but opposite sign.
+Thus, the sum over each row, as calculated above by multiplying with the ones vector, is simply $0$.
+We can write this out in the form of an eigenvalue problem:
+
+$$
+\mathbf{L} \mathbf{1} = \lambda \mathbf{1} = 0.
+$$
+
+This holds true for $\lambda = 0$, which is the minimal eigenvalue (i.e. "first" when sorted) since $\mathbf{L}$ is PSD.
+So the first eigenvalue corresponds to the all ones vector, i.e. the uniform shift in all the values over the graph that we wanted to get rid of.
+
+Note that this generalizes to any vector with all equal entries because we could just express it as the ones vector scaled by some scalar $p$, which yields the same result:
+
+$$
+p \mathbf{L} \mathbf{1} = p \lambda \mathbf{1} = 0.
+$$
+
 {% enddetails %}
 
 There are many interesting things we could do with spectra.
@@ -461,6 +495,7 @@ In the language of the above analogy, modifying spectra allows us to ask "what h
 </figure>
 
 We then put the resulting spectrum back into the tissue to visualize the result.
+V is an [orthogonal matrix](https://gregorygundersen.com/blog/2018/10/24/matrices/), which means that its inverse is its transpose, i.e. $\mathbf{V}^{-1} = \mathbf{V}^{\top}$.
 Use the slider to visualize before (left) and after (right) filtering.
 
 <div style="width: 50%; max-width: 768px; margin: 0 auto;">

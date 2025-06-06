@@ -373,7 +373,7 @@ With a bit of rearranging, we end up with an eigenvalue problem:
 $$
 \begin{align}
     & \lambda = {\frac{\mathbf{v}^{\top} \mathbf{L} \mathbf{v}}{\mathbf{v}^{\top} \mathbf{v}}} \nonumber \\
-    &\rightarrow \lambda \mathbf{v}^{\top} \mathbf{v} = \mathbf{v}^{\top} \mathbf{L} \mathbf{v} \\
+    &\rightarrow \lambda \mathbf{v}^{\top} \mathbf{v} = \mathbf{v}^{\top} \mathbf{L} \mathbf{v} \nonumber \\
     &\rightarrow \lambda \mathbf{v} = \mathbf{L} \mathbf{v}. \nonumber
 \end{align}
 $$
@@ -403,11 +403,31 @@ Note that no gene expression information went into calculating these frequencies
 
 {% details Why do highs appear constrained to one part of the tissue? %}
 When taking a look at $\mathbf{v}_{301}$, the fluctuations appear constrained a bit toward the lower left of the tissue.
-This asymmetry is due to the "irregularity" of the graph domain.
+I'll just provide some intuition for this observation.
+
+This asymmetry (or "localization") is due to the irregularity of the graph domain.
 Consider the time and image domains in which you always have the same choice of how to move no matter where you are in the tissue (apart from the boundaries).
 Graphs generally lack this regularity due to the variation in degree across different nodes.
+At one node, you may have four options of where to move next.
+At the next node, you may have seven options.
 
-Uncertainty principle
+Consequences of this irregularity arise when considering the maximum frequency patterns over the graph, which we can think of as
+
+$$
+\mathbf{v}_{max} = \operatorname{argmax}_{\mathbf{v}} \frac{\mathbf{v}^{\top} \mathbf{L} \mathbf{v}}{\mathbf{v}^{\top} \mathbf{v}}
+$$
+
+Because of its normalization, $$\mathbf{v}_{max}$$ should ideally be concentrated on a single node and its immediate neighbors.
+Furthermore, it should specifically be concentrated on the node with the most neighbors, i.e. the highest degree.
+Indeed, when visualizing $\mathbf{v}_{1994}$, we can see that it's concentrated on nodes with relatively high degrees (compared to the [degree of six we'd expect here](https://en.wikipedia.org/wiki/Delaunay_triangulation#Properties)).
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/freq_localization.png"
+       alt=""
+       style="width:70%; display: block; margin: 0 auto;">
+</figure>
+
+Interestingly, this phenomenon has deep connections to the [Heisenberg uncertainty principle](https://arxiv.org/abs/2306.15810).
 
 {% enddetails %}
 
@@ -428,6 +448,9 @@ You could always think of that dish in terms of its corresponding *recipe*, i.e.
 In this case, the recipe is the spectrum, and the ingredients are the frequencies.
 This process of representing a signal in terms of its spectrum is known as the [Fourier transform](https://betterexplained.com/articles/an-interactive-guide-to-the-fourier-transform/).
 
+
+Let's visualize one of our region marker genes' spectra as an example.
+
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/spectra.png"
        alt=""
@@ -435,9 +458,9 @@ This process of representing a signal in terms of its spectrum is known as the [
   <figcaption><strong>Figure 3:</strong> An example gene expression signal in tissue space and in frequency space.  </figcaption>
 </figure>
 
-Note that the gene we chose to visualize is a region marker.
-By design, it forms a large-scale pattern.
-Thus, it should make some sense that there's a spike in the lows in its spectrum.
+By design, this gene forms a large-scale pattern over the tissue.
+As a result, its spectrum shows a spike in the low frequencies.
+Thus, we now have a way of calculating the freuqency contents (or length scale contents) of a given gene expression signal within a tissue.
 
 Note that, while the spectrum shown above is entirely positive, spectra generally do contain negative values.
 We just chose to take the absolute value of the spectrum to better convey the intuition of how prevalent a signal is over a given length scale, i.e. omitting its sign.
@@ -445,16 +468,16 @@ Additionally, we chose not to visualize the first value $s_1$, as it just corres
 
 {% details Why is $s_1$ is just a translation factor? %}
 
-What I mean by a "translation factor" here is just an "intercept" or "bias" term that is added to all cells to shift their expression values up/down all by the same amount.
+What I mean by a "translation factor" here is just an "intercept" or "bias" term that is added to all cells to shift their expression values up/down by the same amount.
 Thus, we can think of it as some vector with entries that are all the same value, i.e. a scaled version of the ones vector $\mathbf{1} = [1, ..., 1]^{\top}$.
 We are assuming that it corresponds to the first eigenvalue of $\mathbf{L}$, so let's first confirm that it's an eigenvector by multiplying them.
-It turns out that
+Notice that
 
 $$
 \mathbf{L} \mathbf{1} = 0.
 $$
 
-This follows from the fact that we've constructed the Laplacian such that the degree of each node is on the diagonal and the instances of each neighbor on the off diagonal sum up to an amount of equal but opposite sign.
+This follows from how we've constructed the Laplacian; the degree of each node is on the diagonal and the instances of each neighbor on the off diagonal sum up to an amount of equal but opposite sign.
 Thus, the sum over each row, as calculated above by multiplying with the ones vector, is simply $0$.
 We can write this out in the form of an eigenvalue problem:
 
@@ -478,7 +501,7 @@ You might think of comparing gene expression signals based on their spectra, per
 However, there are also many interesting issues with these ideas.
 For instance, a spectrum has the same dimension as its corresponding tissue.
 This makes comparison across different tissues difficult because the dimensions of spectra likely differ.
-We'll explore these pitfalls and opportunities in a future blog post.
+We'll leave these pitfalls and opportunities to a future blog post.
 
 For now, let's instead focus on modifying these spectra, i.e. performing filtering.
 
@@ -486,6 +509,18 @@ For now, let's instead focus on modifying these spectra, i.e. performing filteri
 ### Filtering
 
 In the language of the above analogy, modifying spectra allows us to ask "what happens to the dish when I remove this ingredient?"
+More explicitly, it allows us to modify the frequency contents of a given signal and see how it looks in the tissue.
+We can think of this process as two steps.
+
+The **first** step is to modify the signal's spectrum.
+We could do this in a crude way by setting entries of the spectrum to zero to get rid of them entirely.
+However, more generally, we could *weight* them.
+For instance, we could define some function -- or "kernel" -- over frequency values that preferentially weights lows stronger than highs.
+This is known as a "low-pass" kernel.
+One popular example of such a function is the diffusion kernel $f(\lambda) = e^{-\tau \lambda}$, where $\tau$ is some parameter that adjusts how "quick" diffusion occurs.
+This kernel is indeed low-pass, as it is a monotonically decreasing function of frequency.
+(The intuition of diffusion will likely become clearer once we see the result of this modification in the tissue.)
+By pointwise multiplying this kernel with the gene expression spectrum from earlier, we end up with a modified spectrum where the lows are maintained and the highs are diminished.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/lowpass_spectra.png"
@@ -494,9 +529,42 @@ In the language of the above analogy, modifying spectra allows us to ask "what h
   <figcaption><strong>Figure 3:</strong> A gene expression signal low-pass filtered in frequency space.  </figcaption>
 </figure>
 
-We then put the resulting spectrum back into the tissue to visualize the result.
-V is an [orthogonal matrix](https://gregorygundersen.com/blog/2018/10/24/matrices/), which means that its inverse is its transpose, i.e. $\mathbf{V}^{-1} = \mathbf{V}^{\top}$.
-Use the slider to visualize before (left) and after (right) filtering.
+Now let's represent this mathematically.
+Pointwise multiplication of two vectors can be represented by turning one of them into a diagonal matrix and then multiplying.
+Arranging all the kernel-weighted frequency values into a diagonal matrix yields
+
+$$
+f(\mathbf{\Lambda}) =
+\begin{bmatrix}
+  f(\lambda_{1}) & & \\
+  & \ddots & \\
+  & & f(\lambda_{n})
+\end{bmatrix}
+\in \mathbb{R}^{n \times n}.
+$$
+
+Multiplication with the spectrum is then given by $f(\mathbf{\Lambda}) \mathbf{V}^{\top} \mathbf{x} \in \mathbb{R}^n$.
+While it might look a little ugly in it's current form, it's important that we keep this equation in this form for later.
+It'll allow us to see a neat simplification in a moment.
+
+The **second** step is to project the modified spectrum back into the tissue to visualize the result.
+We can do this by multiplying by the inverse of the frequency basis, i.e. $(\mathbf{V}^{\top})^{-1}$.
+However, because $\mathbf{V}$ is an [orthogonal matrix](https://gregorygundersen.com/blog/2018/10/24/matrices/), its inverse is just its transpose: $(\mathbf{V}^{\top})^{-1} = \mathbf{V}$.
+Thus, we have the full filtering equation
+
+\begin{equation} \label{eq:filterdef}
+  \mathbf{\bar x} = \mathbf{V} f(\mathbf{\Lambda}) \mathbf{V}^{\top} \mathbf{x},
+\end{equation}
+
+where $\mathbf{\bar x}$ is the filtered version of $\mathbf{x}$.
+
+{% details Is the bar notation standard? %}
+No.
+I just like it because it reminds me that the result is smooth, and the bar is a smooth pattern from left to right.
+{% enddetails%}
+
+We can visualize the result of this process below.
+Use the slider to visualize the signal before filtering (left) and after filtering (right).
 
 <div style="width: 50%; max-width: 768px; margin: 0 auto;">
   <img-comparison-slider class="slider-with-shadows">
@@ -507,30 +575,52 @@ Use the slider to visualize before (left) and after (right) filtering.
 <figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) low-pass filtering. </figcaption>
 <br>
 
-Looks smoother.
-Image literature -> denoising?
+This filter appears to have blurred the underlying gene expression signal.
+That's exactly what we expect given that blurring corresponds to getting rid of small-scale fluctuations.
+Some might think of this as [denoising](), which makes sense in the context of images.
+However, in a later post I'll argue that high frequencies are not noise in tissues.
 
-We can put all of these steps together to define a single filter function
-
-$$
-\begin{align}
-  & \mathbf{V} e^{-\tau \mathbf{\Lambda}} \mathbf{V}^{\top} \\
-  & = e^{-\tau \mathbf{L}} \\
-  & = f(\mathbf{L}),
-\end{align}
-$$
-
-where f(\lambda)
-
-This gives a glimpse into an interesting fact: any (analytic) filter $h(\lambda)$ can be described as a function of the Laplacian matrix:
+Using a final bit of math, let's finish interpreting our filtering function, which is currently a bit lengthy.
+If you stare at eq. \eqref{eq:filterdef} long enough, you might notice that it looks a lot like the [diagonalized]() form of the Laplacian
 
 $$
-h(\mathbf{L}) = \mathbf{V} h(\mathbf{\Lambda}) \mathbf{V}^{\top}
+\mathbf{L} = \mathbf{V} \mathbf{\Lambda} \mathbf{V}^{\top},
+$$
+
+where $\mathbf{\Lambda}$ is the diagonal matrix of eigenvalues and $\mathbf{V}$ is the matrix of corresponding eigenvectors.
+The only difference is that we applied a function to each of the eigenvalues, i.e. $f(\mathbf{\Lambda})$.
+Interestingly, for any ([analytical]()) function $h(\lambda)$, we have
+
+$$
+\mathbf{V} h(\mathbf{\Lambda}) \mathbf{V}^{\top} = h(\mathbf{V} \mathbf{\Lambda} \mathbf{V}^{\top}) = h(\mathbf{L}).
+$$
+
+Thus, any (analytical) filter can be expressed as a function of the Laplacian.
+This is cool for a few reasons.
+First of all, it's kind of pretty.
+Second, it will actually help us interpret equations that emerge en route to deriving interactions in a future post.
+Third, it gives us a concise notation to work with;
+given a kernel such as the one above, $f$, filtering can simply be expressed as
+
+$$
+\mathbf{\bar x} = f(\mathbf{L}) \mathbf{x}.
 $$
 
 
-Alternatively, we could emphasize the highs by applying, say, a square-root filter.
+While the above filtering example was low-pass, we could instead perform high-pass filtering.
+First, let's define a kernel that preferentially weights highs.
+We can use the square-root kernel $g(\lambda) = \lambda^{\frac{1}{2}}$, as it is monotonically increasing with frequency.
 (This will be an important kernel for defining interactions in a later post.)
+Using the concise notation from above, we can apply this filter to calculate the high-pass filtered signal
+
+$$
+\mathbf{\hat x} = g(\mathbf{\Lambda}) \mathbf{x}.
+$$
+
+{% details Is the hat notation standard? %}
+No.
+I just like it because it reminds me that the result is not smooth, and the hat is not a smooth pattern from left to right.
+{% enddetails%}
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/highpass_spectra.png"
@@ -539,7 +629,8 @@ Alternatively, we could emphasize the highs by applying, say, a square-root filt
   <figcaption><strong>Figure 3:</strong> A gene expression signal high-pass filtered in frequency space.  </figcaption>
 </figure>
 
-Rather than grouping neighboring cells together, this filter appears to emphasize their differences.
+In contrast to low-pass filtering, we can see in the modified spectrum that the high-pass kernel emphasizes the higher frequency components of our signal.
+But what does this look like when visualized in the tissue?
 
 <div style="width: 50%; max-width: 768px; margin: 0 auto;">
   <img-comparison-slider class="slider-with-shadows">
@@ -549,6 +640,15 @@ Rather than grouping neighboring cells together, this filter appears to emphasiz
 </div>
 <figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) high-pass filtering. </figcaption>
 <br>
+
+It appears that the "roughness" of our signal is preserved, and everything else is washed away.
+Cells with large differences with their neighbors in the original signal maintain their differences after filtering, ending up with extremal values.
+On the other hand, cells with little differences with their neighbors end up with values in the middle after filtering.
+Thus, *high*-pass filtering appears to emphasize *differences* in gene expression between neighboring cells, unlike the *similarities* highlighted by *low*-pass filtering.
+
+Despite our analytical treatment of filtering, explicit eigendecomposition of the Laplacian is prohibitive for tissues (graphs) with greater than approximately $n=20000$ cells (nodes).
+For that reason, filtering is often calculated using [wavelet approximations]().
+The *de facto* package for performing this analysis is [PyGSP](), and that's what we will use for all real biological datasets going forward.
 
 ---
 

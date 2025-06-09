@@ -18,19 +18,14 @@ bibliography: 2025-05-18-graph-fourier.bib
 
 toc:
   - name: Introduction
-    subsections:
-      - name: Tissues
-      - name: Domains and signals
-      - name: Signal processing
-      - name: Overview
-  - name: Simulation
+  - name: Simulated data
     subsections:
       - name: The tissue domain
       - name: Transcriptional signals
       - name: Frequencies
       - name: Spectra
       - name: Filtering
-  - name: Real data
+  - name: Mouse brain data
     subsections:
       - name: One sample
       - name: Multiple samples
@@ -51,104 +46,62 @@ images:
 
 ## Introduction
 
-Here, we will build an intuition for how to describe frequencies over graphs in terms of gene expression over biological tissues.
-Based on [this manuscript](/assets/pdf/harmonics.pdf).
-We'll assume familiarity with linear algebra.
-We will use simulations to
-
-
-### Tissues
-
-Cells are important
-Have different [roles in the tissue that can largely be described by their molecular patterns](https://www.cell.com/cell-systems/fulltext/S2405-4712(18)30482-4).
-Such "types" catalogued by efforts such as the human cell atlas.
-
-But cells don't act independently.
+Cells are arguably the fundamental unit of biology.
+They have different [roles in the tissue that can largely be ascribed their molecular contents](https://www.cell.com/cell-systems/fulltext/S2405-4712(18)30482-4).
+Such "cell types" are often catalogued by efforts such as the [Human Cell Atlas](https://www.humancellatlas.org/) which serve as valuable references for identifying [disease-associated cell types](https://www.cell.com/cell/fulltext/S0092-8674(17)30578-0).
+**But cells don't act independently.**
 If you look at an organism, you'll notice a few things.
 First, it's an organism; there's some sense that it's a discrete collection of cells all working together.
 Second, you might notice that cells within a given organism are further organized into discrete multicellular structures, such as organs or the anatomical regions within them.
 Third, and perhaps most importantly, the very formation and function of such structures is driven by interactions between their constituent cells.
-Altogether, it is critical to look beyond cells in isolation to recognize their 
+Altogether, it is critical to look beyond isolated cells to recognize how they collectively govern tissue structure and function.
 
 We can break these patterns down into two broad categories.
-Multicellular regions
-Intercellular interactions
+1. **Multicellular regions** are what we'll call molecularly-distinct collections of adjacent cells in physical space. We expect to observe these repeatedly within the same or across different tissues.
+2. **Intercellular interactions** are what we'll call the communication patterns between neighboring cells that likely define or even give rise to these regions.
 
 Both of these patterns are inherently spatial.
-Regions
-Interactions
-Thus, spatial omics technologies enable us to measure these patterns.
-
-Given the importance of this data, we should have a concrete way to quantitatively describe and analyze them.
-However, the current landscape of computational methods for spatial omics data is deeply fragmented.
-It largely consists of complicated methods based on graph neural networks and probabilistic models, and it lacks a fundamental basis for relating these approaches or even defining the core features one would like to quantify.
-
-In this series of posts, we will derive such a basis.
-The tools we will use are borrowed from the vast field of signal processing.
-
-
-### Domains and signals
-
-Sound (Continuous, 1D)
-
-Images (discrete, 2D)
-
-Graphs? (discrete, but what dimension? will come back to this)
-
-
-### Signal processing
-
-Sound (music, bass/mids/treble)
-
-Images (denoising by removing highs)
-
-
-### Overview
-
+However, it's not clear what **length scale** they occur on: are we talking about pairs of cells or entire tissues?
+In this series of posts, we will leverage [graph signal processing (GSP)](https://arxiv.org/abs/2303.12211) in [single-cell resolved spatial transcriptomics data](https://www.nature.com/articles/s41587-022-01448-2) to isolate and investigate patterns on specific length scales.
+This will allow us to rigorously define regions and interactions in future posts.
 We'll first demonstrate the fundamental concepts in a simple simulation.
-This will allow us to build up some intuition before approaching data gathered from real tissues, which is full of both technical artifacts and true biological complexity.
+This will allow us to build up some intuition before approaching data gathered from real tissues, which are full of both technical artifacts and true biological complexity.
 It'll also come in handy for future blog posts covering more complex ideas.
-
-To be clear, signal processing on graphs is not a new idea.
-Over the past decade or so, the [field of graph signal processing (GSP) has steadily emerged](https://arxiv.org/abs/2303.12211).
-Much as signal processing in images formed a basis for convolutional neural networks, [graph signal processing underlies much of graph neural networks (GNNs)](https://arxiv.org/abs/1312.6203).
-But when we thoroughly explore the basics, we can find previously overlooked ideas.
-This chapter will only cover the basics, with applications covered in future posts.
-
-Starting off with simulations.
+The work in this series of posts is based on [this manuscript](/assets/pdf/harmonics.pdf).
 
 
 ---
 
-## Simulation
+## Simulated data
 
-To construct our simulation, we'll take inspiration from the mammalian brain, which has a [simple layered structure with clearly defined molecular markers](https://www.nature.com/articles/s41586-021-03705-x).
+To construct a simulated tissue, we'll take inspiration from the mammalian brain, which has a [simple layered structure with clearly defined molecular markers for each layer region](https://www.nature.com/articles/s41586-021-03705-x).
+This will inform how we decide where the cells are (i.e. the **domain**) and what gene expression patterns they display (i.e. the **signals**).
 
 
 ### The tissue domain
 
-Take the brain as inspiration.
-
 We'll start off by creating a simple tissue made up of $n=2000$ cells randomly scattered throughout a unit circle.
-One should ask why a circle and not a sphere.
-It's because, while tissues are 3D objects, we tend to measure them in 2D slices.
-That being said, everything presented in this series of posts can be generalized to data in arbitrary dimensions, including 3D.
+Such a [Poisson point process](https://en.wikipedia.org/wiki/Poisson_point_process) may not be a perfectly accurate reflection of the more structured physical distribution of cells in tissues, but [it is capable of yielding valuable insight nonetheless](https://www.nature.com/articles/s41592-025-02697-0).
+Furthermore, while tissues are inherently three-dimensional and might be more accurately simulated within a sphere, experimental technologies typically measure them in two-dimensional slices.
+Thus, we will rely on two-dimensional simulations.
+That being said, everything presented in this series of posts can be generalized to distributions of cells in three-dimensional space.
+
+Mathematically, we can think of the tissue domain as an undirected graph over $n$ nodes, each of which represents a cell.
+We could construct this graph in many ways, including connecting each cell to its $k$ nearest physical neighbors.
+However, I personally prefer using a Delaunay triangulation, as it creates a mesh that's embeddable in 2D, which respects my own visual intuition.
+If you're optimistic, you might also believe that it [captures the mechanical forces present in biological tissues](https://pubmed.ncbi.nlm.nih.gov/20082148/).
+After performing a Delaunay triangulation, we can zoom in to see that the cells are indeed connected to their spatial neighbors to form a 2D mesh.
+These connections define how we can hop from cell to cell.
+Altogether, this graph constitutes a domain: a set of positions and the movements we can make between them.
 
 <figure style="text-align: center;">
   <img src="/assets/figures/fourier/tissue_domain.png"
        alt=""
        style="width:50%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 1:</strong> Cells arranged in a spatial graph to form a tissue domain. </figcaption>
+  <figcaption><strong>Figure 1:</strong> Uniformly distributed points triangulated into a spatial graph to form a simulated tissue domain. </figcaption>
 </figure>
 
-We can think of the tissue domain as an undirected graph over $n$ nodes, each of which represents a cell.
-We could construct this graph in many ways, including connecting each cell to its k nearest physical neighbors.
-Personally, I prefer using a Delaunay triangulation, as it creates a mesh that's embeddable in 2D, which respects my own visual intuition.
-If you're optimistic, you might also believe that it [captures the mechanical forces present in biological tissues](https://pubmed.ncbi.nlm.nih.gov/20082148/).
-After performing a Delaunay triangulation, we can zoom in to see that the cells are indeed connected to their spatial neighbors to form a 2D mesh.
-These connections define the space within which we can hop from cell to cell.
-
-Our graph can be represented by the symmetric adjacency matrix
+More explicitly, our graph can be represented by the symmetric adjacency matrix
 
 $$
 \mathbf{A} \in \{0,1\}^{n \times n}.
@@ -180,45 +133,16 @@ For convenience, we will instead consider the edge-normalized Laplacian $\mathbf
 Note that the order of cells in these matrices is arbitrary.
 It doesn't matter so long as it is consistent across all related vectors and matrices.
 
-Now that we have a simulated tissue domain, we can create gene expression signals over it.
-
 
 ### Transcriptional signals
 
-Some spatial cells that form layers (neurons), some non-spatial cells scattered throughout (glia, for the most part).
-
-Ground truth region patterns.
-Add different noise patterns to make multiple gene markers for each ground truth pattern.
-One marker per pattern shown in Figure <>.
-
-<figure style="text-align: center;">
-  <img src="/assets/figures/fourier/simulation_lows.png"
-       alt=""
-       style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 1:</strong> Schematic for simulating multicellular region patterns. </figcaption>
-</figure>
-
-On the other hand, spatial patterns also arise from interactions between cells.
-For instance, two *neighboring* cells might interact when *one* expresses a ligand and *the other* expresses the corresponding receptor.
-This would produce a mutually exclusive pattern between two genes: one associated with the ligand and the other associated with the receptor.
-We can simulate this by
-
-<figure style="text-align: center;">
-  <img src="/assets/figures/fourier/simulation_highs.png"
-       alt=""
-       style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 1:</strong> Schematic for simulating intercellular interaction patterns. </figcaption>
-</figure>
-
-Note that this simulation is not nearly as complex as a real biological tissue or the data measured from one.
-That being said, it should at least provide a simple playground in which we can explore some fundamental quantitative concepts that we will later apply to real data.
-
+Now that we have a simulated tissue domain, we can create gene expression (i.e. transcriptional) signals over it.
 A signal is a vector of values associated with each node in our graph.
 In our case, we are interested in the amount that a given gene is expressed within each cell of a tissue.
 We can collect all of these values into a list, yielding the vector $\mathbf{x} \in \mathbb{R}^n$, where $\mathbf{x}_i$ is the amount of gene $x$ expressed in cell $i$.
 <!-- While the ordering of these values is generally arbitrary, it is critical that they follow the same ordering of cells used in the adjacency matrix and all other associated mathematical objects.
 In other words, $\mathbf{A}_i$ (the row of values indicating neighbors of cell $i$) and $\mathbf{x}_i$ (the amount of gene $x$ expressed in cell $i$) are talking about the same cell $i$. -->
-We can further collect all of these gene signals into the matrix
+We can collect all of these gene signals into the matrix
 
 $$
 \mathbf{X} = [\mathbf{x}_1 | ... | \mathbf{x}_g] \in \mathbb{R}^{n \times g},
@@ -227,22 +151,58 @@ $$
 where $g$ is the number of genes measured.
 This is the "cell-by-gene matrix", the [fundamental data structure underlying all of single-cell omics](https://cellxgene.cziscience.com/).
 
-Now that we've quantitatively defined both our domain and our signals, our challenge is to combine them.
+Let's add some signals to our simulation.
+The first type of spatial pattern we are interested in is **multicellular regions**.
+In the neocortex, [gene expression patterns define distinct layers](https://atlas.brain-map.org/atlas?atlas=1&plate=100960348).
+To simulate such patterns, we can first assign ground truth region labels to all cells in our tissue.
+We'll do so by splitting the tissue into four layers radially, creating a bullseye pattern.
+However, in the brain, these layer-specific genes are mainly expressed by only a subset of cells -- specifically neurons.
+To reflect this, we will take a subset of the cells within each ground truth region and assign them a ground truth "spatial" cell type identity.
+The rest of the cells will be grouped together and randomly assigned a "non-spatial" type, reminiscent of glial (i.e. non-neuronal) cells.
+Finally, each type is assigned multiple gene markers by adding different instances of uniform noise to its corresponding ground truth pattern (though only one gene marker is shown per type in the figure below).
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/simulation_lows.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 2:</strong> Schematic for simulating multicellular region patterns and their associated cell types and gene markers. </figcaption>
+</figure>
+
+The second type of spatial pattern we are interested in is **intercellular interactions**.
+Such interactions can be mediated by many molecular mechanisms, but one simple one that we will simulate here is [juxtacrine signaling](https://www.ncbi.nlm.nih.gov/books/NBK10072/), in which cells communicate via direct contact.
+For instance, a juxtacrine interaction may occur between two cells when one cell expresses a ligand, the other cell expresses the corresponding receptor, and the two cells are adjacent to one another.
+We'll refer to one of these cells as the "sender" and the other the "receiver".
+We can simulate this pattern by randomly assigning a sparse set of cells in the tissue a ground truth sender type and then assigning all of their neighbors a ground truth receiver type.
+If the ground truth sender signal is given by $$\mathbf{s} \in \{0,1\}^n$$, we can spread it to its neighbors by multiplying with the adjacency matrix, yielding the ground truth receiver signal $\mathbf{r} = \mathbf{A} \mathbf{s}$.
+(For consistency, we can ensure that $$\mathbf{r} \in \{0,1\}^n$$ by thresholding to assign unit value to anything nonzero.)
+Just as above, we can then add uniform noise to create gene markers.
+
+<figure style="text-align: center;">
+  <img src="/assets/figures/fourier/simulation_highs.png"
+       alt=""
+       style="width:100%; display: block; margin: 0 auto;">
+  <figcaption><strong>Figure 3:</strong> Schematic for simulating intercellular interaction patterns and their associated cell types and gene markers. </figcaption>
+</figure>
+
+Together, our Laplacian and cell-by-gene matrices $\mathbf{L}$ and $\mathbf{X}$ describe a domain and a set of signals with which we can perform signal processing to identify patterns on specific length scales.
+<!-- Note that this simulation is not nearly as complex as a real biological tissue or the data measured from one.
+That being said, it should at least provide a simple playground in which we can explore some fundamental quantitative concepts that we will later apply to real data. -->
 
 
 ### Frequencies
 
-While it's often said that spatial data offers more information than dissociated single-cell data, we might be better served by the intuition that spatial coordinates enable us to strategically *remove* information.
+<!-- While it's often said that spatial data offers more information than dissociated single-cell data, we might be better served by the intuition that spatial coordinates enable us to strategically *remove* information.
 Namely, it allows us to focus on gene expression over particular length scales of interest, disentangling the mess of information into more interpretable components.
 But how can we isolate a given length scale?
-The first step is defining what a length scale is in the first place.
-
+The first step is defining what a length scale is in the first place. -->
+The first step in isolating a given length scale is to ask: **how do we define length scales?**
+In the language of signal processing, we define them in terms of **frequencies**.
 Take music, for instance, in which the different frequency ranges of bass, mids, and trebles define different *time* scales along which a sound can vary.
 Similarly, our notion of *length* scale can be made quantitatively rigorous in terms of *spatial* frequencies.
-While a straightforward extension of this concept to two dimensions captures spatial frequencies in an image, it's not so straightforward to extend to graphs due to their irregular topology.
+While a straightforward extension of this concept to two dimensions captures spatial frequencies in an image, it's not so straightforward to extend to graphs due to their irregular topology; an image is a uniform grid of points, whereas a graph can have arbitrary connections between them.
 Thus, we have to do a little leg work to extend this concept to our tissue domain.
 
-We can start by slowly deriving a definition of frequency in a graph setting.
+We can start with the intuitive definition of frequency in a graph setting.
 Consider a hypothetical signal $\mathbf{v}$ over the tissue.
 The notion of frequency is simply "how much does the signal tend to change as I take a step in the domain?"
 Taking a step in our tissue domain corresponds to moving between neighboring cells $i$ and $j$.
@@ -377,7 +337,7 @@ Note that no gene expression information went into calculating these frequencies
   <img src="/assets/figures/fourier/frequencies.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> Examples of different frequencies over the tissue domain.  </figcaption>
+  <figcaption><strong>Figure 4:</strong> Examples of different frequencies over the tissue domain.  </figcaption>
 </figure>
 
 {% details Why do highs appear constrained to one part of the tissue? %}
@@ -420,8 +380,8 @@ That's what we'll do next.
 
 We can think of projecting a given gene expression signal $\mathbf{x}$ into frequency space as comparing it to each frequency $\mathbf{v}_i$.
 For a single frequency, this is given by the inner product $\mathbf{v}_i^{\top} \mathbf{x} \in \mathbb{R}$.
-For all frequencies, this is given by the matrix product $\mathbf{s} = \mathbf{V}^{\top} \mathbf{x} \in \mathbb{R}^n$, where the output is the similarity of $\mathbf{x}$ to each of $\mathbf{v}_1, ..., \mathbf{v}_n$.
-The vector $\mathbf{s}$ is often referred to as the signal's "spectrum".
+For all frequencies, this is given by the matrix product $\mathbf{V}^{\top} \mathbf{x} \in \mathbb{R}^n$, where the output is the similarity of $\mathbf{x}$ to each of $\mathbf{v}_1, ..., \mathbf{v}_n$.
+This vector is often referred to as the signal's "spectrum".
 An analogy I tend to think of is that the original gene expression signal over the tissue is like a dish you might cook.
 You could always think of that dish in terms of its corresponding *recipe*, i.e. the amounts of each ingredient necessary to construct it.
 In this case, the recipe is the spectrum, and the ingredients are the frequencies.
@@ -434,7 +394,7 @@ Let's visualize one of our region marker genes' spectra as an example.
   <img src="/assets/figures/fourier/spectra.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> An example gene expression signal in tissue space and in frequency space.  </figcaption>
+  <figcaption><strong>Figure 5:</strong> An example gene expression signal in tissue space and in frequency space.  </figcaption>
 </figure>
 
 By design, this gene forms a large-scale pattern over the tissue.
@@ -443,9 +403,9 @@ Thus, we now have a way of calculating the freuqency contents (or length scale c
 
 Note that, while the spectrum shown above is entirely positive, spectra generally do contain negative values.
 We just chose to take the absolute value of the spectrum to better convey the intuition of how prevalent a signal is over a given length scale, i.e. omitting its sign.
-Additionally, we chose not to visualize the first value $s_1$, as it just corresponds a translation factor.
+Additionally, we chose not to visualize the first value, as it just corresponds a translation factor.
 
-{% details Why is $s_1$ is just a translation factor? %}
+{% details Why is the first value just a translation factor? %}
 
 What I mean by a "translation factor" here is just an "intercept" or "bias" term that is added to all cells to shift their expression values up/down by the same amount.
 Thus, we can think of it as some vector with entries that are all the same value, i.e. a scaled version of the ones vector $\mathbf{1} = [1, ..., 1]^{\top}$.
@@ -491,7 +451,7 @@ In the language of the above analogy, modifying spectra allows us to ask "what h
 More explicitly, it allows us to modify the frequency contents of a given signal and see how it looks in the tissue.
 We can think of this process as two steps.
 
-The **first** step is to modify the signal's spectrum.
+The first step is to **modify the signal's spectrum**.
 We could do this in a crude way by setting entries of the spectrum to zero to get rid of them entirely.
 However, more generally, we could *weight* them.
 For instance, we could define some function -- or "kernel" -- over frequency values that preferentially weights lows stronger than highs.
@@ -505,7 +465,7 @@ By pointwise multiplying this kernel with the gene expression spectrum from earl
   <img src="/assets/figures/fourier/lowpass_spectra.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> A gene expression signal low-pass filtered in frequency space.  </figcaption>
+  <figcaption><strong>Figure 6:</strong> Low-pass filtering of a gene expression signal in frequency space.  </figcaption>
 </figure>
 
 Now let's represent this mathematically.
@@ -528,7 +488,7 @@ Altogether, this equation describes modification of the gene's spectrum.
 While it might look a little ugly in it's current form, it's nice to keep it this way for later;
 it'll allow us to see a neat simplification in a moment.
 
-The **second** step is to project the modified spectrum back into the tissue to visualize the result.
+The second step is to **project the modified spectrum back into the tissue** to visualize the result.
 We can do this by multiplying by the inverse of the frequency basis, i.e. $(\mathbf{V}^{\top})^{-1}$.
 However, because $\mathbf{V}$ is an [orthogonal matrix](https://gregorygundersen.com/blog/2018/10/24/matrices/), its inverse is just its transpose: $(\mathbf{V}^{\top})^{-1} = \mathbf{V}$.
 Thus, we have the full filtering equation
@@ -548,7 +508,7 @@ Use the slider to visualize the signal before filtering (left) and after filteri
     {% include figure.liquid path="assets/figures/fourier/tissue_after_lowpass.png" class="img-fluid rounded z-depth-1" slot="second" %}
   </img-comparison-slider>
 </div>
-<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) low-pass filtering. </figcaption>
+<figcaption><strong>Figure 7:</strong> Comparison of a gene expression signal before (left image) and after (right image) low-pass filtering. </figcaption>
 <br>
 
 This filter appears to have blurred the underlying gene expression signal.
@@ -607,7 +567,7 @@ In contrast to low-pass filtering, we can see in the modified spectrum that the 
   <img src="/assets/figures/fourier/highpass_spectra.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> A gene expression signal high-pass filtered in frequency space.  </figcaption>
+  <figcaption><strong>Figure 8:</strong> High-pass filtering of a gene expression signal in frequency space.  </figcaption>
 </figure>
 
 When visualized in the tissue, it appears that the "roughness" of our signal is preserved, and everything else is washed away.
@@ -621,7 +581,7 @@ Thus, *high*-pass filtering appears to emphasize *differences* in gene expressio
     {% include figure.liquid path="assets/figures/fourier/tissue_after_highpass.png" class="img-fluid rounded z-depth-1" slot="second" %}
   </img-comparison-slider>
 </div>
-<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) high-pass filtering. </figcaption>
+<figcaption><strong>Figure 9:</strong> Comparison of a gene expression signal before (left image) and after (right image) high-pass filtering. </figcaption>
 <br>
 
 Low- and high-pass filters are just two examples at the extremes of the frequency range.
@@ -635,7 +595,7 @@ The *de facto* package for performing this analysis is [PyGSP](https://pygsp.rea
 ---
 
 
-## Real data
+## Mouse brain data
 
 <!-- Our simulation was inspired by the anatomy of the mammalian brain. -->
 Now, with the intuition gained from our simulation, we will pivot to [real data from the mouse brain](https://www.nature.com/articles/s41586-021-03705-x).
@@ -652,7 +612,7 @@ Just as in our simulation, we can create a spatial mesh over the tissue to creat
   <img src="/assets/figures/fourier/tissue_domain_mop.png"
        alt=""
        style="width:70%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> A tissue domain calculated from real mouse brain data.  </figcaption>
+  <figcaption><strong>Figure 10:</strong> A tissue domain calculated from real mouse brain data.  </figcaption>
 </figure>
 
 Once we have that domain, we can identify frequency patterns (length scales) over it by calculating the eigenbasis $\mathbf{V}$ of the Laplacian.
@@ -662,7 +622,7 @@ Again, we see that these eigenvectors and values capture different length scales
   <img src="/assets/figures/fourier/frequencies_mop.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> Example frequencies over the mouse brain tissue domain.  </figcaption>
+  <figcaption><strong>Figure 11:</strong> Example frequencies over the mouse brain tissue domain.  </figcaption>
 </figure>
 
 We can then project a given gene expression pattern $\mathbf{x}$ into frequency space by calculating $\mathbf{V}^{\top} \mathbf{x}$.
@@ -673,7 +633,7 @@ The spectrum conveys the prominent large-scale pattern in terms of a low-frequen
   <img src="/assets/figures/fourier/spectra_mop.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 3:</strong> An example gene expression signal in tissue space and in frequency space.  </figcaption>
+  <figcaption><strong>Figure 12:</strong> An example gene expression signal in tissue space and in frequency space.  </figcaption>
 </figure>
 
 Given the diffusion kernel $f(\lambda) = e^{-\tau \lambda}$, we can perform low-pass filtering using the equation $f(\mathbf{L}) \mathbf{x}$.
@@ -685,7 +645,7 @@ This smooths the original signal, in effect isolating the component of the signa
     {% include figure.liquid path="assets/figures/fourier/tissue_after_lowpass_mop.png" class="img-fluid rounded z-depth-1" slot="second" %}
   </img-comparison-slider>
 </div>
-<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) low-pass filtering. </figcaption>
+<figcaption><strong>Figure 13:</strong> Comparison of a gene expression signal before (left image) and after (right image) low-pass filtering. </figcaption>
 <br>
 
 We could instead high-pass filter to isolate the small-scale components by calculating $g(\mathbf{L}) \mathbf{x}$ where $g(\lambda) = \lambda^{\frac{1}{2}}$.
@@ -697,10 +657,9 @@ This emphasizes local variations in the signal by assigning them extreme values 
     {% include figure.liquid path="assets/figures/fourier/tissue_after_highpass_mop.png" class="img-fluid rounded z-depth-1" slot="second" %}
   </img-comparison-slider>
 </div>
-<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) high-pass filtering. </figcaption>
+<figcaption><strong>Figure 14:</strong> Comparison of a gene expression signal before (left image) and after (right image) high-pass filtering. </figcaption>
 <br>
 
-Altogether, the same approach derived from our simulation enables us to characterize gene expression along specific length scales in real biological data.
 But there are 63 other samples in the full dataset.
 How might we analyze all of them together?
 
@@ -738,28 +697,21 @@ The resulting smoothed patterns appear exactly as we saw for a single sample abo
     {% include figure.liquid path="assets/figures/fourier/tissue_after_lowpass_mop_all.png" class="img-fluid rounded z-depth-1" slot="second" %}
   </img-comparison-slider>
 </div>
-<figcaption><strong>Figure 1:</strong> Comparison of a gene expression signal before (left) and after (right) low-pass filtering. </figcaption>
+<figcaption><strong>Figure 15:</strong> Comparison of a gene expression signal before (left image) and after (right image) low-pass filtering. </figcaption>
 <br>
+
+Altogether, the same approach derived from our simulation enables us to characterize gene expression along specific length scales in real biological data.
 
 
 ---
 
 ## Conclusion
 
-We set out with the goal of describing multicellular regions and intercellular interactions.
-How does this formalism enable us to capture them?
-The key is that it provides us with a flexible quantitative framework to represent patterns on different length scales, from the large scales of regions to the small scales of interactions.
-
-Now that we've developed this framework for individual gene signals, the next step is to generalize it to multiple genes at a time to characterize the relationships between multiple genes on a given length scale.
-In the following posts, we will find that *positively* covarying *low*-frequency patterns define regions while *negatively* covarying *high*-frequency patterns define interactions.
-
-<!-- Take lows for example.
-It may be intuitive that they help us represent multicellular regions.
-After all, lows are just large-scale patterns.
-For instance, we should be able to low-pass filter gene expression patterns and then plug into the standard single-cell workflow to identify region clusters.
-Indeed, this is the cornerstone of all region identification methods in the field, from those based on simple spatial smoothing to those based on complex graph neural networks.
-
-But what are *highs*?
-Are they just noise like in image processing?
-And what of the frequencies in between, i.e. *mids*?
-In the following posts, we'll explore these questions in detail, finding that lows indeed describe multicellular regions, highs describe intercellular interactions, and mids describe boundaries between regions. -->
+We set out with the goal of describing gene expression signals on arbitrary length scales, which is the first step to identifying multicellular regions and intercellular interactions.
+We ended up showing that signal processing provides a rigorous framework for doing so.
+Now that we've developed this framework for individual gene signals, the next step is to generalize it to **multiple genes at a time** to characterize their relationships on a given length scale.
+It might be intuitive that this could help us represent multicellular regions, for instance.
+For instance, we should be able to low-pass filter gene expression patterns and then plug into the standard single-cell workflow to identify large-scale clusters, i.e. regions.
+Indeed, this is the cornerstone of all region identification methods in the field, from those based on [simple spatial smoothing](https://www.nature.com/articles/s41592-022-01657-2) to those based on [complex graph neural networks](https://www.nature.com/articles/s41467-023-36796-3).
+In the following posts, **we will leverage the tools we established here to establish a conceptually and quantitatively consistent framework for defining regions and interactions**.
+In particular, we will find that *positively* covarying *low*-frequency patterns define regions while *negatively* covarying *high*-frequency patterns define interactions.

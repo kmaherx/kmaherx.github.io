@@ -45,6 +45,17 @@ ninja.data = [{
             window.location.href = "/blog/2025/graph-fourier/";
           
         },
+      },{id: "post-principal-component-analysis",
+        
+          title: "Principal component analysis",
+        
+        description: "An intuitive derivation of PCA based on graphs",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pca/";
+          
+        },
       },{id: "books-the-godfather",
           title: 'The Godfather',
           description: "",

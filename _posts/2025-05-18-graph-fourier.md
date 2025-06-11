@@ -62,7 +62,7 @@ We can break these patterns down into two broad categories.
 
 Both of these patterns are inherently spatial.
 However, it's not clear what **length scale** they occur on: are we talking about pairs of cells or entire tissues?
-In this series of posts, we will leverage [graph signal processing (GSP)](https://arxiv.org/abs/2303.12211) in [single-cell resolved spatial transcriptomics data](https://www.nature.com/articles/s41587-022-01448-2) to isolate and investigate patterns on specific length scales.
+In this [series of posts](/blog/category/spatial-omics), we will leverage [graph signal processing (GSP)](https://arxiv.org/abs/2303.12211) in [single-cell resolved spatial transcriptomics data](https://www.nature.com/articles/s41587-022-01448-2) to isolate and investigate patterns on specific length scales.
 This will allow us to rigorously define regions and interactions in future posts.
 We'll first demonstrate the fundamental concepts in a simple simulation.
 This will allow us to build up some intuition before approaching data gathered from real tissues, which are full of both technical artifacts and true biological complexity.

@@ -600,7 +600,7 @@ The *de facto* package for performing this analysis is [PyGSP](https://pygsp.rea
 <!-- Our simulation was inspired by the anatomy of the mammalian brain. -->
 Now, with the intuition gained from our simulation, we will pivot to [real data from the mouse brain](https://www.nature.com/articles/s41586-021-03705-x).
 This dataset is composed of 64 samples from the mouse primary motor cortex (MOp), which displays the molecularly-defined layered structure that inspired our simulation.
-Each sample consists of 248 genes measured over ~5000 cells.
+Each sample was collected using [MERFISH](https://www.biorxiv.org/content/10.1101/2023.12.07.570603v2) and consists of 248 genes measured over ~5000 cells.
 We will start by visualizing the results from one sample before generalizing our analysis to multiple.
 
 
@@ -701,6 +701,7 @@ The resulting smoothed patterns appear exactly as we saw for a single sample abo
 <br>
 
 Altogether, the same approach derived from our simulation enables us to characterize gene expression along specific length scales in real biological data.
+Note that this process is the same as conventional single-cell analysis across multiple datasets with the addition of a preliminary spatial filtering step.
 
 
 ---

@@ -713,5 +713,5 @@ Now that we've developed this framework for individual gene signals, the next st
 It might be intuitive that this could help us represent multicellular regions, for instance.
 For instance, we should be able to low-pass filter gene expression patterns and then plug into the standard single-cell workflow to identify large-scale clusters, i.e. regions.
 Indeed, this is the cornerstone of all region identification methods in the field, from those based on [simple spatial smoothing](https://www.nature.com/articles/s41592-022-01657-2) to those based on [complex graph neural networks](https://www.nature.com/articles/s41467-023-36796-3).
-In the following posts, **we will leverage the tools we established here to establish a conceptually and quantitatively consistent framework for defining regions and interactions**.
-In particular, we will find that *positively* covarying *low*-frequency patterns define regions while *negatively* covarying *high*-frequency patterns define interactions.
+In [the following posts](/blog/category/spatial-omics), **we will leverage the tools we established here to establish a conceptually and quantitatively consistent framework for defining regions and interactions**.
+In particular, we will find that *positively* covarying *low*-frequency patterns define [regions](/blog/2025/regions) while *negatively* covarying *high*-frequency patterns define interactions.

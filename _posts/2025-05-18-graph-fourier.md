@@ -18,14 +18,14 @@ bibliography: 2025-05-18-graph-fourier.bib
 
 toc:
   - name: Introduction
-  - name: Simulated data
+  - name: Simulation
     subsections:
       - name: The tissue domain
       - name: Transcriptional signals
       - name: Frequencies
       - name: Spectra
       - name: Filtering
-  - name: Mouse brain data
+  - name: Mouse brain
     subsections:
       - name: One sample
       - name: Multiple samples
@@ -72,7 +72,7 @@ The work in this series of posts is based on [this manuscript](/assets/pdf/harmo
 
 ---
 
-## Simulated data
+## Simulation
 
 To construct a simulated tissue, we'll take inspiration from the mammalian brain, which has a [simple layered structure with clearly defined molecular markers for each layer region](https://www.nature.com/articles/s41586-021-03705-x).
 This will inform how we decide where the cells are (i.e. the **domain**) and what gene expression patterns they display (i.e. the **signals**).
@@ -595,7 +595,7 @@ The *de facto* package for performing this analysis is [PyGSP](https://pygsp.rea
 ---
 
 
-## Mouse brain data
+## Mouse brain
 
 <!-- Our simulation was inspired by the anatomy of the mammalian brain. -->
 Now, with the intuition gained from our simulation, we will pivot to [real data from the mouse brain](https://www.nature.com/articles/s41586-021-03705-x).

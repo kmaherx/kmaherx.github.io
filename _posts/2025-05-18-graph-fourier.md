@@ -47,7 +47,7 @@ images:
 ## Introduction
 
 Cells are arguably the fundamental unit of biology.
-They have different [roles in the tissue that can largely be ascribed their molecular contents](https://www.cell.com/cell-systems/fulltext/S2405-4712(18)30482-4).
+They have different [roles in the tissue that can largely be ascribed to their molecular contents](https://www.cell.com/cell-systems/fulltext/S2405-4712(18)30482-4).
 Such "cell types" are often catalogued by efforts such as the [Human Cell Atlas](https://www.humancellatlas.org/) which serve as valuable references for identifying [disease-associated cell types](https://www.cell.com/cell/fulltext/S0092-8674(17)30578-0).
 **But cells don't act independently.**
 If you look at an organism, you'll notice a few things.
@@ -337,7 +337,7 @@ Note that no gene expression information went into calculating these frequencies
   <img src="/assets/figures/fourier/frequencies.png"
        alt=""
        style="width:100%; display: block; margin: 0 auto;">
-  <figcaption><strong>Figure 4:</strong> Examples of different frequencies over the tissue domain.  </figcaption>
+  <figcaption><strong>Figure 4:</strong> Examples of different frequencies over the tissue domain.</figcaption>
 </figure>
 
 {% details Why do highs appear constrained to one part of the tissue? %}
@@ -399,7 +399,7 @@ Let's visualize one of our region marker genes' spectra as an example.
 
 By design, this gene forms a large-scale pattern over the tissue.
 As a result, its spectrum shows a spike in the low frequencies.
-Thus, we now have a way of calculating the freuqency contents (or length scale contents) of a given gene expression signal within a tissue.
+Thus, we now have a way of calculating the frequency contents (or length scale contents) of a given gene expression signal within a tissue.
 
 Note that, while the spectrum shown above is entirely positive, spectra generally do contain negative values.
 We just chose to take the absolute value of the spectrum to better convey the intuition of how prevalent a signal is over a given length scale, i.e. omitting its sign.
@@ -485,7 +485,7 @@ We can first arrange all of the frequency values into a diagonal matrix $\mathbf
 Applying the kernel function to each of the values is the same as applying it to the whole matrix, i.e. $f(\mathbf{\Lambda})$.
 Multiplication of this diagonal kernel matrix with the spectrum is then given by $f(\mathbf{\Lambda}) \mathbf{V}^{\top} \mathbf{x} \in \mathbb{R}^n$.
 Altogether, this equation describes modification of the gene's spectrum.
-While it might look a little ugly in it's current form, it's nice to keep it this way for later;
+While it might look a little ugly in its current form, it's nice to keep it this way for later;
 it'll allow us to see a neat simplification in a moment.
 
 The second step is to **project the modified spectrum back into the tissue** to visualize the result.
@@ -678,7 +678,7 @@ So if the eigenvalues of different Laplacians are somehow comparable, then the f
 These eigenvalues are determined by the graph's topology, i.e. structural features such as the distribution of node degrees.
 For two reasons, we argue that all tissue domains we construct have similar topologies and thus similar filter behavior.
 1. Edge-normalization of the Laplacian matrix yields eigenvalues in the range $[0,2]$, yielding consistent frequency ranges across different graphs.
-2. We assume that cells within a tissue generally resemble a uniform discrete sampling of continuous 2D space. In that case, given the consistenct Delaunay triangulation approach, [filtering behavior converges in the limit of sampling size]().
+2. We assume that cells within a tissue generally resemble a uniform discrete sampling of continuous 2D space. In that case, given the consistent Delaunay triangulation approach, [filtering behavior converges in the limit of sampling size]().
 
 Given these assumptions, we should be able to simply apply a given filter to each sample independently to yield comparable results.
 
@@ -712,7 +712,7 @@ We set out with the goal of describing gene expression signals on arbitrary leng
 We ended up showing that signal processing provides a rigorous framework for doing so.
 Now that we've developed this framework for individual gene signals, the next step is to generalize it to **multiple genes at a time** to characterize their relationships on a given length scale.
 It might be intuitive that this could help us represent multicellular regions, for instance.
-For instance, we should be able to low-pass filter gene expression patterns and then plug into the standard single-cell workflow to identify large-scale clusters, i.e. regions.
+For instance, we should be able to low-pass filter gene expression patterns and then plug them into the standard single-cell workflow to identify large-scale clusters, i.e. regions.
 Indeed, this is the cornerstone of all region identification methods in the field, from those based on [simple spatial smoothing](https://www.nature.com/articles/s41592-022-01657-2) to those based on [complex graph neural networks](https://www.nature.com/articles/s41467-023-36796-3).
 
 In [the following posts](/blog/category/spatial-omics), **we will leverage the tools we established here to establish a conceptually and quantitatively consistent framework for defining regions and interactions**.

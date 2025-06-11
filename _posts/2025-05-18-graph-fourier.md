@@ -678,7 +678,7 @@ So if the eigenvalues of different Laplacians are somehow comparable, then the f
 These eigenvalues are determined by the graph's topology, i.e. structural features such as the distribution of node degrees.
 For two reasons, we argue that all tissue domains we construct have similar topologies and thus similar filter behavior.
 1. Edge-normalization of the Laplacian matrix yields eigenvalues in the range $[0,2]$, yielding consistent frequency ranges across different graphs.
-2. We assume that cells within a tissue generally resemble a uniform discrete sampling of continuous 2D space. In that case, given the consistent Delaunay triangulation approach, [filtering behavior converges in the limit of sampling size]().
+2. We assume that cells within a tissue generally resemble a uniform discrete sampling of continuous 2D space. In that case, given the consistent Delaunay triangulation approach, [filtering behavior converges in the limit of sampling size](https://arxiv.org/abs/1907.12972).
 
 Given these assumptions, we should be able to simply apply a given filter to each sample independently to yield comparable results.
 

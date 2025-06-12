@@ -23,7 +23,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-spatial-omics-ii-defining-multicellular-regions",
+        },{id: "post-the-generalized-eigenvalue-problem",
+        
+          title: "The generalized eigenvalue problem",
+        
+        description: "Interpreting generalized eigenvalue problems as comparative PCA",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/geneig/";
+          
+        },
+      },{id: "post-spatial-omics-ii-defining-multicellular-regions",
         
           title: "Spatial Omics II: Defining Multicellular Regions",
         

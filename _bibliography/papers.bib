@@ -2,7 +2,7 @@
 ---
 
 @article{biorxiv2024,
-  abbr={bioRxiv},
+  abbr={A theory},
   title={Harmonic representations of regions and interactions in spatial transcriptomics},
   author={Maher, Kamal and Wang, Xiao},
   journal={bioRxiv},
@@ -14,8 +14,22 @@
   selected={true},
 }
 
+@article {Maher2023.06.30.547258,
+  abbr={A hack},
+	author = {Maher, Kamal and Wu, Morgan and Zhou, Yiming and Huang, Jiahao and Zhang, Qiangge and Wang, Xiao},
+	title = {Mitigating autocorrelation during spatially resolved transcriptomics data analysis},
+	elocation-id = {2023.06.30.547258},
+	year = {2023},
+	doi = {10.1101/2023.06.30.547258},
+	abstract = {Several computational methods have recently been developed for characterizing molecular tissue regions in spatially resolved transcriptomics (SRT) data. However, each method fundamentally relies on spatially smoothing transcriptomic features across neighboring cells. Here, we demonstrate that smoothing increases autocorrelation between neighboring cells, causing latent space to encode physical adjacency rather than spatial transcriptomic patterns. We find that randomly sub-sampling neighbors before smoothing mitigates autocorrelation, improving the performance of existing methods and further enabling a simpler, more efficient approach that we call spatial integration (SPIN). SPIN leverages the conventional single-cell toolkit, yielding spatial analogies to each tool: clustering identifies molecular tissue regions; differentially expressed gene analysis calculates region marker genes; trajectory inference reveals continuous, molecularly defined ana tomical axes; and integration allows joint analysis across multiple SRT datasets, regardless of tissue morphology, spatial resolution, or experimental technology. We apply SPIN to SRT datasets from mouse and marmoset brains to calculate shared and species-specific region marker genes as well as a molecularly defined neocortical depth axis along which several genes and cell types differ across species.Competing Interest StatementThe authors have declared no competing interest.},
+	url = {https://www.biorxiv.org/content/early/2023/07/02/2023.06.30.547258},
+	journal = {bioRxiv},
+  pdf={spin.pdf},
+  selected={true},
+}
+
 @article{shi2023spatial,
-  abbr={Nature},
+  abbr={An application},
   title={Spatial atlas of the mouse central nervous system at molecular resolution},
   author={Shi, Hailing and He, Yichun and Zhou, Yiming and Huang, Jiahao and Maher, Kamal and Wang, Brandon and Tang, Zefang and Luo, Shuchen and Tan, Peng and Wu, Morgan and Lin, Zuwan and Ren, Jingyi and Thapa, Yaman and Tang, Xin and Chan, Ken Y. and Deverman, Benjamin E. and Shen, Hao and Liu, Albert and Liu, Jia and Wang, Xiao},
   journal={Nature},
@@ -25,22 +39,5 @@
   doi={10.1038/s41586-023-06569-5},
   url={https://www.nature.com/articles/s41586-023-06569-5},
   abstract={Spatially charting molecular cell types at single-cell resolution across the 3D volume is critical for illustrating the molecular basis of brain anatomy and functions. Single-cell RNA sequencing has profiled molecular cell types in the mouse brain, but cannot capture their spatial organization. Here we used an in situ sequencing method, STARmap PLUS, to profile 1,022 genes in 3D at a voxel size of 194 × 194 × 345 nm3, mapping 1.09 million high-quality cells across the adult mouse brain and spinal cord. We developed computational pipelines to segment, cluster and annotate 230 molecular cell types by single-cell gene expression and 106 molecular tissue regions by spatial niche gene expression. Joint analysis of molecular cell types and molecular tissue regions enabled a systematic molecular spatial cell-type nomenclature and identification of tissue architectures that were undefined in established brain anatomy. To create a transcriptome-wide spatial atlas, we integrated STARmap PLUS measurements with a published single-cell RNA-sequencing atlas, imputing single-cell expression profiles of 11,844 genes. Finally, we delineated viral tropisms of a brain-wide transgene delivery tool, AAV-PHP.eB. Together, this annotated dataset provides a single-cell resource that integrates the molecular spatial atlas, brain anatomy and the accessibility to genetic manipulation of the mammalian central nervous system.},
-  selected={true},
-}
-
-@article{puzerey2018vocal,
-  abbr={NeuroPhys},
-  title={Vocal learning in songbirds requires cholinergic signaling in a motor cortex-like nucleus},
-  author={Puzerey, Pavel A. and Maher, Kamal and Prasad, Nikil and Goldberg, Jesse H.},
-  journal={Journal of Neurophysiology},
-  volume={120},
-  number={3},
-  pages={1237--1247},
-  year={2018},
-  doi={10.1152/jn.00078.2018},
-  publisher={American Physiological Society},
-  url={https://journals.physiology.org/doi/full/10.1152/jn.00078.2018},
-  abstract={Cholinergic inputs to cortex modulate plasticity and sensory processing, yet little is known about their role in motor control. Here, we show that cholinergic signaling in a songbird vocal motor cortical area, the robust nucleus of the arcopallium (RA), is required for song learning. Reverse microdialysis of nicotinic and muscarinic receptor antagonists into RA in juvenile birds did not significantly affect syllable timing or acoustic structure during vocal babbling. However, chronic blockade over weeks reduced singing quantity and impaired learning, resulting in an impoverished song with excess variability, abnormal acoustic features, and reduced similarity to tutor song. The demonstration that cholinergic signaling in a motor cortical area is required for song learning motivates the songbird as a tractable model system to identify roles of the basal forebrain cholinergic system in motor control.},
-  pdf={birdsong.pdf},
   selected={true},
 }

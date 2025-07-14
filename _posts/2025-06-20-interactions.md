@@ -287,6 +287,9 @@ clusters
 Note that the concept of higher-order interactions is analogous to [region gradients](/blog/2025/regions$simulated-region-gradients) in that it's a **generalization of the fundamental concept to multiple components**.
 Additionally,
 
+In the previous post, we found that vertices in low-pass space described discrete regions that together define the tissue.
+Here, however, we find that vertices in *high*-pass space describe discrete interactors that together define an *interaction*.
+
 ---
 
 

@@ -167,6 +167,27 @@
 <script defer src="{{ '/assets/js/common.js' | relative_url | bust_file_cache }}"></script>
 <script defer src="{{ '/assets/js/copy_code.js' | relative_url | bust_file_cache }}" type="text/javascript"></script>
 
+<!-- Strip invisible brace-suffix tokens from visible heading text while preserving ids
+     Example: heading text "Model training {pert}" keeps id="model-training-pert" but shows "Model training" -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Match headings h1-h6 that include a brace-suffix like " {token}" and remove the suffix from visible text
+    var headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    headings.forEach(function (h) {
+      var text = h.innerText || h.textContent;
+      if (!text) return;
+      // Find a trailing brace token starting with space then { and ending with }
+      var m = text.match(/^(.*)\s\{[^}]+\}\s*$/);
+      if (m) {
+        // Replace visible text but do not touch the element id
+        // Preserve child nodes formatting by updating only the text nodes inside the heading
+        // Simple fallback: set textContent to cleaned text
+        h.textContent = m[1];
+      }
+    });
+  });
+</script>
+
 <!-- Jupyter Open External Links New Tab -->
 <script defer src="{{ '/assets/js/jupyter_new_tab.js' | relative_url | bust_file_cache }}"></script>
 

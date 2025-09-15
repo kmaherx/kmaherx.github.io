@@ -23,7 +23,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-the-generalized-eigenvalue-problem",
+        },{id: "post-bilinear-mlps-for-single-cell-analysis",
+        
+          title: "Bilinear MLPs for Single-Cell Analysis",
+        
+        description: "Weights-based interpretability applied to single-cell transcriptomics analysis",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/scbmlp/";
+          
+        },
+      },{id: "post-the-generalized-eigenvalue-problem",
         
           title: "The generalized eigenvalue problem",
         

@@ -29,6 +29,7 @@ toc:
   - name: Mouse brain
     subsections:
       - name: Brain interaction components
+      - name: Brain higher-order interactions
   - name: Conclusion
 
 images:
@@ -46,10 +47,11 @@ images:
 
 ## Introduction
 
-Regions are a bit more intuitive of a concept.
-They're just large blobs that contain a particular set of genes.
-Interactions, however, are a bit more subtle.
-We'll tease apart this subtlety by first picturing what an interaction might look like, translating that into mathematics, demonstrating it in a simulation, and then validating in real datasets.
+In the previous posts, we focused on multicellular regions.
+However, **the mechanistic relevance of regions is not clear.**
+Instead, I think **we should be focusing on intercellular interactions**, which are the phenomena that shape the structure and function of tissues.
+
+In this post, we will establish a conceptual definition of interactions and then translate it into a quantitative definition that enables us to identify interactions in simulations as well as real data.
 
 
 ## Derivation
@@ -115,26 +117,26 @@ Thus, we can represent interactions in terms of negatively covarying high-freque
 \end{equation}
 
 {% details Alternate derivation %}
-Alternatively, we can derive this representation by looking at differences along the \textit{edges} between cells.
+Alternatively, we can derive this representation by looking at differences along the *edges* between cells.
 This leads to an understanding of interactions as "opposing flows" of gene expression between cells.
-Consider the differential matrix $\mathbf{\Delta} \in \mathbb{R}^{e \times c}$ where $e$ is the number of edges in the tissue domain graph.
-A given row of $\mathbf{\Delta}$ represents a directed edge between two cells with a $1$ at the sending cell's index and a $-1$ at the receiving cell's index.
+Consider the differential matrix $\Delta \in \mathbb{R}^{e \times c}$ where $e$ is the number of edges in the tissue domain graph.
+A given row of $\Delta$ represents a directed edge between two cells with a value of $1$ at the sending cell's index and a value of $-1$ at the receiving cell's index.
 Hence this matrix is often referred to as an "incidence matrix".
-An undirected edge can simply be represented as two directed edges with opposite signs.
+An undirected edge can simply be represented as two directed edges with opposite directions.
 Multiplying this differential matrix with a gene expression signal yields the differences in expression along each edge, i.e. between each pair of neighboring cells:
 \begin{equation}
-    \mathbf{\Delta} \mathbf{x} \in \mathbb{R}^{e}.
+    \Delta \mathbf{x} \in \mathbb{R}^{e}.
 \end{equation}
 This is equivalent to the derivative in continuous space;
 the tangent space in a graph domain is the edge space.
 We can then calculate the covariance between the resulting gene flows, expressing opposing flows in terms of negative covariance:
 \begin{equation}
-    (\mathbf{\Delta} \mathbf{x})^{\top} (\mathbf{\Delta} \mathbf{y}) < 0
+    (\Delta \mathbf{x})^{\top} (\Delta \mathbf{y}) < 0
 \end{equation}
-Finally, note that $\mathbf{L} = \mathbf{\Delta}^{\top} \mathbf{\Delta}$.
+Finally, note that $\mathbf{L} = \Delta^{\top} \Delta$.
 As a result, simplifying this equation yields
 \begin{equation}
-    \mathbf{x}^{\top} \mathbf{\Delta}^{\top} \mathbf{\Delta} \mathbf{y}
+    \mathbf{x}^{\top} \Delta^{\top} \Delta \mathbf{y}
     = \mathbf{x}^{\top} \mathbf{L} \mathbf{y} < 0,
 \end{equation}
 which can be rearranged as above into eq. (\ref{eq:ixndef}).
@@ -249,11 +251,11 @@ We can visualize each of these markers in the tissue as well, seeing that they a
 Altogether, we find that **each component represents a large-scale pattern between regions**.
 Note that the gene marker information shown in Figure 4 is the same as the information shown in Figure 3, just in a different form.
 
+But why is this ground truth interaction only present all the way back in component 7?
+It turns out this is because of a fundamental quantitative obstacle: linearity.
+
 
 ### The averaging out problem
-
-Noise
-Averaging out
 
 $$
 \sum_{ij} \mathbf{A}_{ij} (x_i - x_j) (y_i - y_j) < 0
@@ -261,6 +263,9 @@ $$
 
 essentially an avg over the whole tissue.
 If an interaction is sparse or only occurs within a specific part of the tissue, we will end up averaging this signal out.
+
+Noise
+Averaging out
 
 
 ### Simulated sample-specific interactions
@@ -300,5 +305,7 @@ Here, however, we find that vertices in *high*-pass space describe discrete inte
 ## Mouse brain
 
 ### Mouse brain interaction components
+
+### Mouse brain higher-order interactions
 
 ## Conclusion

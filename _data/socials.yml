@@ -51,5 +51,5 @@ x_username: fluorocore # your X handle
 #   url: https://www.alberteinstein.com/
 custom_social:
   logo: https://kmaherx.github.io/assets/img/calendar_logo.png # can be png, svg, jpg
-  title: ""
+  title: "Calendar"
   url: https://cal.com/kmaherx

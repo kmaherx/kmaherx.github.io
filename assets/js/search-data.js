@@ -23,18 +23,7 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-feature-manifolds",
-        
-          title: "Feature Manifolds",
-        
-        description: "Interpretable connected components of d-orthogonal feature graphs",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/blog/2025/feature-manifolds/";
-          
-        },
-      },{id: "post-bilinear-mlps-for-single-cell-analysis",
+        },{id: "post-bilinear-mlps-for-single-cell-analysis",
         
           title: "Bilinear MLPs for Single-Cell Analysis",
         

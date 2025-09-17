@@ -23,7 +23,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-bilinear-mlps-for-single-cell-analysis",
+        },{id: "post-feature-manifolds",
+        
+          title: "Feature Manifolds",
+        
+        description: "Interpretable connected components of d-orthogonal feature graphs",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/feature-manifolds/";
+          
+        },
+      },{id: "post-bilinear-mlps-for-single-cell-analysis",
         
           title: "Bilinear MLPs for Single-Cell Analysis",
         
@@ -166,5 +177,12 @@ ninja.data = [{
         section: 'Socials',
         handler: () => {
           window.open("https://twitter.com/fluorocore", "_blank");
+        },
+      },{
+        id: 'social-custom_social',
+        title: 'Custom_social',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://cal.com/kmaherx", "_blank");
         },
       },];

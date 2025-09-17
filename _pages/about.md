@@ -12,6 +12,11 @@ profile:
   enabled: false
   limit: 3
 selected_papers: false # includes a list of papers marked as "selected={true}"
+ 
 ---
 
-I'm a mechanistic interpretability researcher focused on extracting concepts from language models and teaching them to humans.
+I'm a mechanistic interpretability researcher focusing on [extracting concepts from language models](https://arxiv.org/abs/2501.16496) and [teaching them to humans](https://openreview.net/forum?id=O4LaRH4zSI).
+
+Ultimately, I'd like to extract/teach concepts from [biological models](https://transformer-circuits.pub/2025/july-update/index.html#bio).
+I believe this could be the [next generation of scientific research](https://www.markov.bio/research/mech-interp-path-to-e2e-biology).
+This is also a [critical component of AI safety](https://arxiv.org/abs/2404.14082), as these are the models that may well determine the next generation of medicines.

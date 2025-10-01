@@ -61,5 +61,21 @@
       "startDate": "2014.08",
       "endDate": "2018.05"
     }
+  ],
+  "publications": [
+    {
+      "name": "Harmonic representations of regions and interactions in spatial transcriptomics",
+      "publisher": "bioRxiv",
+      "releaseDate": "2024-08-14",
+      "url": "https://kmaherx.github.io/assets/pdf/harmonics.pdf",
+      "summary": "Mathematically principled representations of regions and interactions as positively/negatively covarying low-/high-frequency gene expression patterns over a spatial mesh of cells."
+    },
+    {
+      "name": "Spatial atlas of the mouse central nervous system at molecular resolution",
+      "publisher": "Nature",
+      "releaseDate": "2023-09-27",
+      "url": "https://www.nature.com/articles/s41586-023-06569-5",
+      "summary": "Application of the low-pass filtering approach in the above paper to a large-scale dataset."
+    }
   ]
 }

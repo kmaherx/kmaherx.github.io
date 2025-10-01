@@ -633,4 +633,4 @@ jekyll_get_json:
 jsonresume:
   - work
   - education
-  - skills
+  - publications

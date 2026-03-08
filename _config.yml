@@ -12,7 +12,7 @@ description: >
 footer_text: ""
 keywords: # add your own keywords or leave empty
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
-icon: cell.png # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
+icon: freq10.png # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
 
 url: https://kmaherx.github.io # the base hostname & protocol for your site
 baseurl: # the subpath of your site, e.g. /blog/. Leave blank for root
@@ -442,7 +442,7 @@ third_party_libraries:
     version: "5.5.0"
   google_fonts:
     url:
-      fonts: "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&display=swap"
+      fonts: "https://fonts.googleapis.com/css2?family=Libertinus+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Material+Icons&display=swap"
   highlightjs:
     integrity:
       css:

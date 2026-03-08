@@ -9,21 +9,7 @@ ninja.data = [{
     handler: () => {
       window.location.href = "/";
     },
-  },{id: "nav-cv",
-          title: "cv",
-          description: "Resume available for download on the right.",
-          section: "Navigation",
-          handler: () => {
-            window.location.href = "/cv/";
-          },
-        },{id: "nav-blog",
-          title: "blog",
-          description: "",
-          section: "Navigation",
-          handler: () => {
-            window.location.href = "/blog/";
-          },
-        },{id: "post-bilinear-mlps-for-single-cell-analysis",
+  },{id: "post-bilinear-mlps-for-single-cell-analysis",
         
           title: "Bilinear MLPs for Single-Cell Analysis",
         
@@ -166,12 +152,5 @@ ninja.data = [{
         section: 'Socials',
         handler: () => {
           window.open("https://twitter.com/fluorocore", "_blank");
-        },
-      },{
-        id: 'social-custom_social',
-        title: 'Custom_social',
-        section: 'Socials',
-        handler: () => {
-          window.open("https://cal.com/kmaherx", "_blank");
         },
       },];

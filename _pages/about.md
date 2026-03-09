@@ -13,12 +13,19 @@ social: false
 ---
 
 <style>
-.container {
-  max-width: none;
-  padding-left: 5rem;
-}
 .post {
-  max-width: none;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+.post .post-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 0;
+}
+.post .post-title {
+  margin-bottom: 0.25rem;
 }
 .header-socials {
   display: flex;
@@ -30,7 +37,7 @@ social: false
   color: #0000B3;
   text-decoration: none;
   opacity: 0.7;
-  transition: opacity 0.2s ease;
+  transition: none;
 }
 .header-socials a:hover {
   opacity: 1;
@@ -40,27 +47,35 @@ social: false
 .landing-links {
   margin-top: 1.5rem;
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  flex-direction: row;
+  gap: 0.75rem;
 }
 .landing-links > a,
-.landing-links .projects-toggle {
-  font-size: 1.2rem;
+.landing-links > div {
+  flex: 1;
+  text-align: center;
+  font-size: 1.1rem;
   color: #000;
   text-decoration: none;
-  opacity: 1;
-  transition: opacity 0.2s ease;
   cursor: pointer;
-  background: none;
+  background: #f0f0f0;
   border: none;
-  padding: 0;
+  border-radius: 8px;
+  padding: 0.5rem 0;
   font-family: inherit;
+  transition: none;
+}
+.landing-links .projects-toggle {
+  cursor: pointer;
+}
+.landing-links .projects-toggle.active {
+  background: rgba(0, 0, 179, 0.225);
 }
 .landing-links > a:hover,
-.landing-links .projects-toggle:hover {
-  opacity: 1;
+.landing-links > div:hover {
+  background: rgba(0, 0, 179, 0.225);
   text-decoration: none;
-  color: #0000B3;
+  color: #000;
 }
 .projects-expand {
   display: none;
@@ -68,17 +83,20 @@ social: false
   white-space: nowrap;
   opacity: 0;
   transition: opacity 0.3s ease;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  text-align: left;
 }
 .projects-expand.open {
-  display: inline-block;
+  display: block;
 }
 .projects-expand.visible {
   opacity: 1;
 }
 .projects-expand .tree-line,
 .projects-expand .tree-sym {
-  color: #0000B3;
-  opacity: 0.7;
+  color: #ccc;
 }
 .projects-expand .tree-item {
   display: block;
@@ -103,37 +121,39 @@ social: false
   color: #0000B3;
 }
 #resume-link {
-  transition: opacity 0.3s ease, color 0.3s ease;
+  transition: none;
 }
 #resume-link.muted {
-  color: #aaa;
+  background: #f0f0f0;
   opacity: 0.5;
 }
 #resume-link.muted:hover {
-  color: #0000B3;
+  background: rgba(0, 0, 179, 0.225);
+  color: #000;
   opacity: 1;
 }
 </style>
 
-<div style="display: inline-block; margin-top: -0.25rem;">
+<div class="blurb-block" style="display: inline-block; margin-top: -0.25rem;">
 <p class="blurb" style="font-size: 1.15rem; margin: 0; color: #666;">AI researcher &thinsp;—&thinsp; agents ∪ interpretability ∪ graphs ∪ biology</p>
 <hr style="border: none; border-top: 1px solid #ddd; margin: 0.75rem 0 0 0;">
 </div>
 
 <div class="landing-links">
-  <div style="display:flex; align-items:baseline; gap:1rem; height:1.5em; overflow:visible;">
-    <span class="projects-toggle" id="projects-toggle">projects</span>
-    <span class="projects-expand" id="projects-expand">{% assign sorted_projects = site.projects | sort: "importance" %}<span class="tree-line">──────┬── </span><a href="{% if sorted_projects.first.redirect %}{{ sorted_projects.first.redirect }}{% else %}{{ sorted_projects.first.url | relative_url }}{% endif %}"{% if sorted_projects.first.redirect %} target="_blank"{% endif %}>{{ sorted_projects.first.title }}</a>
-{% for project in sorted_projects %}{% if forloop.first %}{% continue %}{% endif %}<span class="tree-item"><span class="tree-sym"><span style="color:transparent; pointer-events:none;">──────</span>{% if forloop.last %}└── {% else %}├── {% endif %}</span><a href="{% if project.redirect %}{{ project.redirect }}{% else %}{{ project.url | relative_url }}{% endif %}"{% if project.redirect %} target="_blank"{% endif %}>{{ project.title }}</a></span>
+  <div style="position:relative;" class="projects-toggle" id="projects-toggle">
+    <span>projects</span>
+    <span class="projects-expand" id="projects-expand">{% assign sorted_projects = site.projects | sort: "importance" %}<span class="tree-item"><span class="tree-sym">│</span></span>
+{% for project in sorted_projects %}<span class="tree-item"><span class="tree-sym">{% if forloop.last %}└── {% else %}├── {% endif %}</span><a href="{% if project.redirect %}{{ project.redirect }}{% else %}{{ project.url | relative_url }}{% endif %}"{% if project.redirect %} target="_blank"{% endif %}>{{ project.title }}</a></span>
 {% endfor %}</span>
   </div>
-  <a id="resume-link" href="{{ '/assets/pdf/resume.pdf' | relative_url }}" target="_blank" style="align-self: flex-start;">resume</a>
+  <a id="resume-link" href="{{ '/assets/pdf/resume.pdf' | relative_url }}" target="_blank">resume</a>
   <script>
   function closeProjects() {
     var t = document.getElementById('projects-expand');
     var r = document.getElementById('resume-link');
     t.classList.remove('visible');
     r.classList.remove('muted');
+    document.getElementById('projects-toggle').classList.remove('active');
     setTimeout(function() { t.classList.remove('open'); }, 300);
   }
 
@@ -145,6 +165,7 @@ social: false
     } else {
       t.classList.add('open');
       document.getElementById('resume-link').classList.add('muted');
+      document.getElementById('projects-toggle').classList.add('active');
       requestAnimationFrame(function() { t.classList.add('visible'); });
     }
   });
@@ -159,6 +180,14 @@ social: false
       closeProjects();
     }
   });
+
+  // Match landing-links width to blurb
+  var blurb = document.querySelector('.blurb-block');
+  var links = document.querySelector('.landing-links');
+  if (blurb && links) {
+    links.style.width = blurb.offsetWidth + 'px';
+    links.style.margin = '1.5rem auto 0';
+  }
 
   </script>
 </div>

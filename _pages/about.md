@@ -13,6 +13,9 @@ social: false
 ---
 
 <style>
+:root {
+  --collapse-speed: 0.3s ease;
+}
 .post {
   max-width: 600px;
   margin: 0 auto;
@@ -36,7 +39,7 @@ social: false
   font-size: 1.5rem;
   color: #0000B3;
   text-decoration: none;
-  opacity: 0.7;
+  opacity: 0.775;
   transition: none;
 }
 .header-socials a:hover {
@@ -68,6 +71,9 @@ social: false
 .landing-links .projects-toggle {
   cursor: pointer;
 }
+.landing-links .projects-toggle {
+  transition: background var(--collapse-speed);
+}
 .landing-links .projects-toggle.active {
   background: rgba(0, 0, 179, 0.225);
 }
@@ -82,7 +88,7 @@ social: false
   font-family: monospace;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--collapse-speed);
   position: absolute;
   top: 100%;
   left: 0;
@@ -101,12 +107,14 @@ social: false
 .projects-expand .tree-item {
   display: block;
   line-height: 1.6;
-  pointer-events: none;
+  cursor: default;
 }
-.projects-expand .tree-item a {
-  pointer-events: auto;
-  position: relative;
-  z-index: 1;
+.projects-expand .tree-item:has(a):hover .tree-sym {
+  color: #0000B3;
+}
+.projects-expand .tree-item:has(a):hover a {
+  opacity: 1;
+  color: #0000B3;
 }
 .projects-expand a {
   font-size: 0.95rem;
@@ -114,14 +122,10 @@ social: false
   color: var(--global-text-color, inherit);
   text-decoration: none;
   font-family: monospace;
-}
-.projects-expand a:hover {
-  opacity: 1;
-  text-decoration: none;
-  color: #0000B3;
+  transition: none;
 }
 #resume-link {
-  transition: none;
+  transition: background var(--collapse-speed), opacity var(--collapse-speed);
 }
 #resume-link.muted {
   background: #f0f0f0;

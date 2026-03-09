@@ -15,6 +15,7 @@ social: false
 <style>
 :root {
   --collapse-speed: 0.3s ease;
+  --button-speed: 0.15s ease;
 }
 .post {
   max-width: 600px;
@@ -74,16 +75,23 @@ social: false
   cursor: pointer;
 }
 .landing-links .projects-toggle {
-  transition: background var(--collapse-speed);
+  transition: background var(--button-speed), color var(--button-speed);
 }
 .landing-links .projects-toggle.active {
-  background: rgba(0, 0, 179, 0.225);
+  background: rgba(0, 0, 179, 0.775);
+  color: #fff !important;
+}
+.landing-links .projects-toggle.active > span:first-child {
+  color: #fff !important;
 }
 .landing-links > a:hover,
 .landing-links > div:hover {
-  background: rgba(0, 0, 179, 0.225);
+  background: rgba(0, 0, 179, 0.775);
   text-decoration: none;
-  color: #000;
+  color: #fff !important;
+}
+.landing-links > div:hover > span:first-child {
+  color: #fff !important;
 }
 .projects-expand {
   display: none;
@@ -128,27 +136,43 @@ social: false
   color: #3333CC;
 }
 .projects-expand .tree-item:has(a):hover a {
-  opacity: 1;
   color: #3333CC;
 }
 .projects-expand a {
   font-size: 0.95rem;
-  opacity: 0.5;
-  color: var(--global-text-color, inherit);
+  color: #888;
   text-decoration: none;
   font-family: monospace;
   transition: none;
 }
+#projects-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  transition: opacity var(--collapse-speed);
+  z-index: 10;
+}
+#projects-overlay.visible {
+  opacity: 1;
+}
+.landing-links {
+  z-index: 11;
+}
 #resume-link {
-  transition: background var(--collapse-speed), opacity var(--collapse-speed);
+  transition: background var(--button-speed), color var(--button-speed), opacity var(--collapse-speed);
 }
 #resume-link.muted {
   background: #f0f0f0;
   opacity: 0.5;
 }
 #resume-link.muted:hover {
-  background: rgba(0, 0, 179, 0.225);
-  color: #000;
+  background: rgba(0, 0, 179, 0.775);
+  color: #fff !important;
   opacity: 1;
 }
 @media (max-width: 576px) {
@@ -190,14 +214,15 @@ social: false
 <hr style="border: none; border-top: 1px solid #ddd; margin: 0.75rem 0 0 0;">
 </div>
 
+<div id="projects-overlay"></div>
 <div class="landing-links">
   <div class="projects-toggle" id="projects-toggle">
-    <span>projects</span>
+    <span>Projects</span>
     <span class="projects-expand" id="projects-expand">{% assign sorted_projects = site.projects | sort: "importance" %}<span class="tree-item"><span class="tree-sym">│</span></span>
 {% for project in sorted_projects %}<span class="tree-item"><span class="tree-sym">{% if forloop.last %}└── {% else %}├── {% endif %}</span><a href="{% if project.redirect %}{{ project.redirect }}{% else %}{{ project.url | relative_url }}{% endif %}"{% if project.redirect %} target="_blank"{% endif %}>{{ project.title }}</a></span>
 {% endfor %}</span>
   </div>
-  <a id="resume-link" href="{{ '/assets/pdf/resume.pdf' | relative_url }}" target="_blank">resume</a>
+  <a id="resume-link" href="{{ '/assets/pdf/resume.pdf' | relative_url }}" target="_blank">Resume</a>
   <script>
   var staggerStep = 0.06; // seconds between each item
 
@@ -213,12 +238,17 @@ social: false
     var t = document.getElementById('projects-expand');
     var items = t.querySelectorAll('.tree-item');
     var r = document.getElementById('resume-link');
+    var overlay = document.getElementById('projects-overlay');
     staggerItems(items, true);
     for (var i = 0; i < items.length; i++) items[i].style.opacity = '0';
     r.classList.remove('muted');
+    overlay.classList.remove('visible');
     document.getElementById('projects-toggle').classList.remove('active');
     var totalTime = (items.length * staggerStep + 0.3) * 1000;
-    setTimeout(function() { t.classList.remove('open'); }, totalTime);
+    setTimeout(function() {
+      t.classList.remove('open');
+      overlay.style.display = 'none';
+    }, totalTime);
   }
 
   document.getElementById('projects-toggle').addEventListener('click', function(e) {
@@ -229,11 +259,14 @@ social: false
     } else {
       t.classList.add('open');
       var items = t.querySelectorAll('.tree-item');
+      var overlay = document.getElementById('projects-overlay');
       staggerItems(items, false);
       document.getElementById('resume-link').classList.add('muted');
       document.getElementById('projects-toggle').classList.add('active');
+      overlay.style.display = 'block';
       requestAnimationFrame(function() {
         for (var i = 0; i < items.length; i++) items[i].style.opacity = '1';
+        overlay.classList.add('visible');
       });
     }
   });

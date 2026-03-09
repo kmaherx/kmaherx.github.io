@@ -108,11 +108,11 @@ social: false
   transition: opacity var(--collapse-speed);
 }
 .projects-expand .tree-item:has(a):hover .tree-sym {
-  color: #0000B3;
+  color: #3333CC;
 }
 .projects-expand .tree-item:has(a):hover a {
   opacity: 1;
-  color: #0000B3;
+  color: #3333CC;
 }
 .projects-expand a {
   font-size: 0.95rem;

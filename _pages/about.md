@@ -53,6 +53,7 @@ social: false
   display: flex;
   flex-direction: row;
   gap: 0.75rem;
+  position: relative;
 }
 .landing-links > a,
 .landing-links > div {
@@ -87,10 +88,10 @@ social: false
 .projects-expand {
   display: none;
   font-family: monospace;
-  white-space: nowrap;
   position: absolute;
   top: 100%;
   left: 0;
+  right: 0;
   text-align: left;
 }
 .projects-expand.open {
@@ -101,11 +102,27 @@ social: false
   color: #ccc;
 }
 .projects-expand .tree-item {
-  display: block;
+  display: flex;
+  align-items: flex-start;
   line-height: 1.6;
+  padding-bottom: 0.3rem;
   cursor: default;
   opacity: 0;
   transition: opacity var(--collapse-speed);
+}
+.projects-expand .tree-sym {
+  flex-shrink: 0;
+  position: relative;
+  white-space: pre;
+  align-self: stretch;
+}
+.projects-expand .tree-item:not(:last-child) .tree-sym::after {
+  content: '';
+  position: absolute;
+  left: 0.25em;
+  top: 1.6em;
+  bottom: 0;
+  border-left: 1.8px solid #ccc;
 }
 .projects-expand .tree-item:has(a):hover .tree-sym {
   color: #3333CC;
@@ -134,6 +151,38 @@ social: false
   color: #000;
   opacity: 1;
 }
+@media (max-width: 576px) {
+  .post {
+    padding-top: 5vh;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .post .post-title {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+  }
+  .header-socials {
+    gap: 0.75rem;
+    justify-content: center;
+  }
+  .blurb-block {
+    width: 100% !important;
+  }
+  .blurb-block .blurb {
+    white-space: normal;
+  }
+  .landing-links {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    position: relative;
+  }
+  .projects-expand {
+    left: 0;
+    right: 0;
+  }
+}
 </style>
 
 <div class="blurb-block" style="display: inline-block; margin-top: -0.25rem;">
@@ -142,7 +191,7 @@ social: false
 </div>
 
 <div class="landing-links">
-  <div style="position:relative;" class="projects-toggle" id="projects-toggle">
+  <div class="projects-toggle" id="projects-toggle">
     <span>projects</span>
     <span class="projects-expand" id="projects-expand">{% assign sorted_projects = site.projects | sort: "importance" %}<span class="tree-item"><span class="tree-sym">│</span></span>
 {% for project in sorted_projects %}<span class="tree-item"><span class="tree-sym">{% if forloop.last %}└── {% else %}├── {% endif %}</span><a href="{% if project.redirect %}{{ project.redirect }}{% else %}{{ project.url | relative_url }}{% endif %}"{% if project.redirect %} target="_blank"{% endif %}>{{ project.title }}</a></span>

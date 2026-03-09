@@ -87,8 +87,6 @@ social: false
   display: none;
   font-family: monospace;
   white-space: nowrap;
-  opacity: 0;
-  transition: opacity var(--collapse-speed);
   position: absolute;
   top: 100%;
   left: 0;
@@ -96,9 +94,6 @@ social: false
 }
 .projects-expand.open {
   display: block;
-}
-.projects-expand.visible {
-  opacity: 1;
 }
 .projects-expand .tree-line,
 .projects-expand .tree-sym {
@@ -108,6 +103,8 @@ social: false
   display: block;
   line-height: 1.6;
   cursor: default;
+  opacity: 0;
+  transition: opacity var(--collapse-speed);
 }
 .projects-expand .tree-item:has(a):hover .tree-sym {
   color: #0000B3;
@@ -152,13 +149,26 @@ social: false
   </div>
   <a id="resume-link" href="{{ '/assets/pdf/resume.pdf' | relative_url }}" target="_blank">resume</a>
   <script>
+  var staggerStep = 0.06; // seconds between each item
+
+  function staggerItems(items, reverse) {
+    var count = items.length;
+    for (var i = 0; i < count; i++) {
+      var idx = reverse ? (count - 1 - i) : i;
+      items[idx].style.transitionDelay = (i * staggerStep) + 's';
+    }
+  }
+
   function closeProjects() {
     var t = document.getElementById('projects-expand');
+    var items = t.querySelectorAll('.tree-item');
     var r = document.getElementById('resume-link');
-    t.classList.remove('visible');
+    staggerItems(items, true);
+    for (var i = 0; i < items.length; i++) items[i].style.opacity = '0';
     r.classList.remove('muted');
     document.getElementById('projects-toggle').classList.remove('active');
-    setTimeout(function() { t.classList.remove('open'); }, 300);
+    var totalTime = (items.length * staggerStep + 0.3) * 1000;
+    setTimeout(function() { t.classList.remove('open'); }, totalTime);
   }
 
   document.getElementById('projects-toggle').addEventListener('click', function(e) {
@@ -168,9 +178,13 @@ social: false
       closeProjects();
     } else {
       t.classList.add('open');
+      var items = t.querySelectorAll('.tree-item');
+      staggerItems(items, false);
       document.getElementById('resume-link').classList.add('muted');
       document.getElementById('projects-toggle').classList.add('active');
-      requestAnimationFrame(function() { t.classList.add('visible'); });
+      requestAnimationFrame(function() {
+        for (var i = 0; i < items.length; i++) items[i].style.opacity = '1';
+      });
     }
   });
 

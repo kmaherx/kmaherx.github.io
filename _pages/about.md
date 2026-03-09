@@ -19,6 +19,7 @@ social: false
 .post {
   max-width: 600px;
   margin: 0 auto;
+  padding-top: 15vh;
   text-align: center;
 }
 .post .post-header {

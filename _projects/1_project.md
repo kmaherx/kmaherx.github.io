@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Bilinear MLPs enable powerful yet interpretable single-cell analysis
+title: Interpretable single-cell classification using bilinear MLPs
 description: with background image
 img: assets/img/12.jpg
 importance: 1

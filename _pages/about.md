@@ -57,7 +57,7 @@ social: false
   position: relative;
 }
 .landing-links > a,
-.landing-links > div {
+.landing-links > .projects-toggle {
   flex: 1;
   text-align: center;
   font-size: 1.1rem;
@@ -85,65 +85,45 @@ social: false
   color: #fff !important;
 }
 .landing-links > a:hover,
-.landing-links > div:hover {
+.landing-links > .projects-toggle:hover {
   background: rgba(0, 0, 179, 0.775);
   text-decoration: none;
   color: #fff !important;
 }
-.landing-links > div:hover > span:first-child {
+.landing-links > .projects-toggle:hover > span:first-child {
   color: #fff !important;
 }
 .projects-expand {
   display: none;
-  font-family: monospace;
   position: absolute;
   top: 100%;
-  left: 0;
-  right: 0;
-  text-align: left;
+  left: -10%;
+  right: -10%;
+  text-align: center;
+  padding-top: 1rem;
 }
 .projects-expand.open {
   display: block;
 }
-.projects-expand .tree-line,
-.projects-expand .tree-sym {
-  color: #ccc;
-}
-.projects-expand .tree-item {
-  display: flex;
-  align-items: flex-start;
-  line-height: 1.6;
+.projects-expand .project-item {
+  display: block;
+  position: relative;
+  line-height: 1.8;
   padding-bottom: 0.3rem;
-  cursor: default;
   opacity: 0;
   transition: opacity var(--collapse-speed);
+  max-width: 100%;
 }
-.projects-expand .tree-sym {
-  flex-shrink: 0;
-  position: relative;
-  white-space: pre;
-  align-self: stretch;
-}
-.projects-expand .tree-item:not(:last-child) .tree-sym::after {
-  content: '';
-  position: absolute;
-  left: 0.25em;
-  top: 1.6em;
-  bottom: 0;
-  border-left: 1.8px solid #ccc;
-}
-.projects-expand .tree-item:has(a):hover .tree-sym {
-  color: #3333CC;
-}
-.projects-expand .tree-item:has(a):hover a {
-  color: #3333CC;
-}
-.projects-expand a {
+.projects-expand .project-item a {
+  white-space: nowrap;
   font-size: 0.95rem;
   color: #888;
   text-decoration: none;
   font-family: monospace;
   transition: none;
+}
+.projects-expand .project-item:hover a {
+  color: #3333CC;
 }
 #projects-overlay {
   display: none;
@@ -202,10 +182,6 @@ social: false
     margin-right: 0 !important;
     position: relative;
   }
-  .projects-expand {
-    left: 0;
-    right: 0;
-  }
 }
 </style>
 
@@ -217,12 +193,16 @@ social: false
 <div id="projects-overlay"></div>
 <div class="landing-links">
   <div class="projects-toggle" id="projects-toggle">
-    <span>Projects</span>
-    <span class="projects-expand" id="projects-expand">{% assign sorted_projects = site.projects | sort: "importance" %}<span class="tree-item"><span class="tree-sym">│</span></span>
-{% for project in sorted_projects %}<span class="tree-item"><span class="tree-sym">{% if forloop.last %}└── {% else %}├── {% endif %}</span><a href="{% if project.redirect %}{{ project.redirect }}{% else %}{{ project.url | relative_url }}{% endif %}"{% if project.redirect %} target="_blank"{% endif %}>{{ project.title }}</a></span>
-{% endfor %}</span>
+    <span><i class="fa-solid fa-list"></i>&ensp;Projects</span>
   </div>
-  <a id="resume-link" href="{{ '/assets/pdf/resume.pdf' | relative_url }}" target="_blank">Resume</a>
+  <a id="resume-link" href="{{ '/assets/pdf/resume.pdf' | relative_url }}" target="_blank">
+    <i class="fa-solid fa-download"></i>&ensp;Resume
+  </a>
+  <div class="projects-expand" id="projects-expand">
+    {% assign sorted_projects = site.projects | sort: "importance" %}
+    {% for project in sorted_projects %}<span class="project-item"><a href="{% if project.redirect %}{{ project.redirect }}{% else %}{{ project.url | relative_url }}{% endif %}"{% if project.redirect %} target="_blank"{% endif %}>{{ project.title }}</a></span>
+    {% endfor %}
+  </div>
   <script>
   var staggerStep = 0.06; // seconds between each item
 
@@ -236,7 +216,7 @@ social: false
 
   function closeProjects() {
     var t = document.getElementById('projects-expand');
-    var items = t.querySelectorAll('.tree-item');
+    var items = t.querySelectorAll('.project-item');
     var r = document.getElementById('resume-link');
     var overlay = document.getElementById('projects-overlay');
     staggerItems(items, true);
@@ -258,7 +238,7 @@ social: false
       closeProjects();
     } else {
       t.classList.add('open');
-      var items = t.querySelectorAll('.tree-item');
+      var items = t.querySelectorAll('.project-item');
       var overlay = document.getElementById('projects-overlay');
       staggerItems(items, false);
       document.getElementById('resume-link').classList.add('muted');

@@ -84,22 +84,32 @@ social: false
 .landing-links .projects-toggle.active > span:first-child {
   color: #fff !important;
 }
-.landing-links > a:hover,
-.landing-links > .projects-toggle:hover {
+@media (hover: hover) {
+  .landing-links > a:hover,
+  .landing-links > .projects-toggle:hover {
+    background: rgba(0, 0, 179, 0.775);
+    text-decoration: none;
+    color: #fff !important;
+  }
+  .landing-links > .projects-toggle:hover > span:first-child {
+    color: #fff !important;
+  }
+}
+.landing-links > a:active,
+.landing-links > .projects-toggle:active {
   background: rgba(0, 0, 179, 0.775);
-  text-decoration: none;
   color: #fff !important;
 }
-.landing-links > .projects-toggle:hover > span:first-child {
+.landing-links > .projects-toggle:active > span:first-child {
   color: #fff !important;
 }
 .projects-expand {
   display: none;
   position: absolute;
   top: 100%;
-  left: -10%;
-  right: -10%;
-  text-align: center;
+  left: -1.5em;
+  right: 0;
+  text-align: left;
   padding-top: 1rem;
 }
 .projects-expand.open {
@@ -108,11 +118,19 @@ social: false
 .projects-expand .project-item {
   display: block;
   position: relative;
-  line-height: 1.8;
-  padding-bottom: 0.3rem;
+  line-height: 1.5;
+  padding-bottom: 0.6rem;
+  padding-left: 1.5em;
   opacity: 0;
   transition: opacity var(--collapse-speed);
   max-width: 100%;
+}
+.projects-expand .project-item::before {
+  content: '•';
+  position: absolute;
+  left: 0.4em;
+  color: #ccc;
+  font-family: monospace;
 }
 .projects-expand .project-item a {
   white-space: nowrap;
@@ -182,6 +200,13 @@ social: false
     margin-right: 0 !important;
     position: relative;
   }
+  .projects-expand {
+    left: -1.5em;
+    right: 0;
+  }
+  .projects-expand .project-item a {
+    white-space: normal;
+  }
 }
 </style>
 
@@ -193,10 +218,10 @@ social: false
 <div id="projects-overlay"></div>
 <div class="landing-links">
   <div class="projects-toggle" id="projects-toggle">
-    <span><i class="fa-solid fa-list"></i>&ensp;Projects</span>
+    <span><i class="fa-regular fa-folder-open"></i>&ensp;Projects</span>
   </div>
   <a id="resume-link" href="{{ '/assets/pdf/resume.pdf' | relative_url }}" target="_blank">
-    <i class="fa-solid fa-download"></i>&ensp;Resume
+    <i class="fa-regular fa-file-lines"></i>&ensp;Resume
   </a>
   <div class="projects-expand" id="projects-expand">
     {% assign sorted_projects = site.projects | sort: "importance" %}
@@ -222,6 +247,8 @@ social: false
     staggerItems(items, true);
     for (var i = 0; i < items.length; i++) items[i].style.opacity = '0';
     r.classList.remove('muted');
+    var lastDelay = (items.length - 1) * staggerStep;
+    overlay.style.transitionDelay = lastDelay + 's';
     overlay.classList.remove('visible');
     document.getElementById('projects-toggle').classList.remove('active');
     var totalTime = (items.length * staggerStep + 0.3) * 1000;
@@ -244,6 +271,7 @@ social: false
       document.getElementById('resume-link').classList.add('muted');
       document.getElementById('projects-toggle').classList.add('active');
       overlay.style.display = 'block';
+      overlay.style.transitionDelay = '0s';
       requestAnimationFrame(function() {
         for (var i = 0; i < items.length; i++) items[i].style.opacity = '1';
         overlay.classList.add('visible');

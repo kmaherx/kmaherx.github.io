@@ -294,6 +294,16 @@ let initTheme = () => {
   document.addEventListener("DOMContentLoaded", function () {
     const mode_toggle = document.getElementById("light-toggle");
 
+    // Sync slider position now that the DOM is ready.
+    const slider = document.querySelector(".theme-slider");
+    if (slider) {
+      if (determineComputedTheme() === "dark") {
+        slider.classList.add("dark");
+      } else {
+        slider.classList.remove("dark");
+      }
+    }
+
     mode_toggle.addEventListener("click", function () {
       toggleThemeSetting();
     });

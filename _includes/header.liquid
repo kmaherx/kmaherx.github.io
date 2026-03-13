@@ -1,6 +1,6 @@
 <header>
   <!-- Nav Bar -->
-  <nav id="navbar" class="navbar navbar-light navbar-expand-sm {% if site.navbar_fixed %}fixed-top{% else %}sticky-top{% endif %}" role="navigation">
+  <nav id="navbar" class="navbar navbar-light navbar-expand-sm {% if site.navbar_fixed %}fixed-top{% else %}sticky-top{% endif %}{% if page.permalink == '/' %} d-none{% endif %}" role="navigation">
     <div class="container">
       {% if page.permalink != '/' %}
         <a class="navbar-brand title font-weight-lighter" href="{{ site.baseurl }}/">
@@ -116,20 +116,18 @@
               </button>
             </li>
           {% endif %}
-          {% if site.enable_darkmode %}
-            <!-- Toogle theme mode -->
-            <li class="toggle-container">
-              <button id="light-toggle" title="Change theme">
-                <i class="ti ti-sun-moon" id="light-toggle-system"></i>
-                <i class="ti ti-moon-filled" id="light-toggle-dark"></i>
-                <i class="ti ti-sun-filled" id="light-toggle-light"></i>
-              </button>
-            </li>
-          {% endif %}
         </ul>
       </div>
     </div>
   </nav>
+  {% if site.enable_darkmode %}
+    <!-- Toggle theme mode (floating slider) -->
+    <button id="light-toggle" class="theme-slider" title="Change theme" aria-label="Toggle dark mode">
+      <i class="ti ti-sun-filled theme-slider-icon sun-icon"></i>
+      <i class="ti ti-moon-filled theme-slider-icon moon-icon"></i>
+      <span class="theme-slider-knob"></span>
+    </button>
+  {% endif %}
   {% if site.enable_progressbar %}
     <!-- Scrolling Progress Bar -->
     <progress id="progress" value="0">

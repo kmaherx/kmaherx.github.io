@@ -1,14 +1,12 @@
 // Has to be in the head tag, otherwise a flicker effect will occur.
 
-// Toggle through light, dark, and system theme settings.
+// Toggle between light and dark theme settings.
 let toggleThemeSetting = () => {
-  let themeSetting = determineThemeSetting();
-  if (themeSetting == "system") {
-    setThemeSetting("light");
-  } else if (themeSetting == "light") {
+  let theme = determineComputedTheme();
+  if (theme == "light") {
     setThemeSetting("dark");
   } else {
-    setThemeSetting("system");
+    setThemeSetting("light");
   }
 };
 
@@ -56,6 +54,16 @@ let applyTheme = () => {
   }
 
   document.documentElement.setAttribute("data-theme", theme);
+
+  // Update slider knob position.
+  const slider = document.querySelector(".theme-slider");
+  if (slider) {
+    if (theme === "dark") {
+      slider.classList.add("dark");
+    } else {
+      slider.classList.remove("dark");
+    }
+  }
 
   // Add class to tables.
   let tables = document.getElementsByTagName("table");
@@ -248,7 +256,7 @@ let transTheme = () => {
   document.documentElement.classList.add("transition");
   window.setTimeout(() => {
     document.documentElement.classList.remove("transition");
-  }, 500);
+  }, 750);
 };
 
 // Determine the expected state of the theme toggle, which can be "dark", "light", or

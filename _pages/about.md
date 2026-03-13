@@ -16,6 +16,28 @@ social: false
 :root {
   --collapse-speed: 0.3s ease;
   --button-speed: 0.15s ease;
+  --about-social-color: #0000B3;
+  --about-btn-bg: #f0f0f0;
+  --about-btn-text: #000;
+  --about-btn-hover: rgba(0, 0, 179, 0.775);
+  --about-blurb-color: #666;
+  --about-hr-color: #ddd;
+  --about-project-color: #888;
+  --about-project-hover: #3333CC;
+  --about-bullet-color: #ccc;
+  --about-overlay-bg: rgba(255, 255, 255, 0.8);
+}
+html[data-theme="dark"] {
+  --about-social-color: #6699FF;
+  --about-btn-bg: #2a2a2a;
+  --about-btn-text: #d3d3d3;
+  --about-btn-hover: #3a3a3a;
+  --about-blurb-color: #aaa;
+  --about-hr-color: #444;
+  --about-project-color: #aaa;
+  --about-project-hover: #6699FF;
+  --about-bullet-color: #666;
+  --about-overlay-bg: rgba(0, 0, 0, 0.8);
 }
 .post {
   max-width: 600px;
@@ -32,6 +54,9 @@ social: false
 .post .post-title {
   margin-bottom: 0.25rem;
 }
+a.blurb {
+  color: var(--about-blurb-color);
+}
 .header-socials {
   display: flex;
   gap: 1rem;
@@ -39,14 +64,14 @@ social: false
 }
 .header-socials a {
   font-size: 1.5rem;
-  color: #0000B3;
+  color: var(--about-social-color);
   text-decoration: none;
   opacity: 0.775;
   transition: none;
 }
 .header-socials a:hover {
   opacity: 1;
-  color: #0000B3;
+  color: var(--about-social-color);
   text-decoration: none;
 }
 .landing-links {
@@ -61,10 +86,10 @@ social: false
   flex: 1;
   text-align: center;
   font-size: 1.1rem;
-  color: #000;
+  color: var(--about-btn-text);
   text-decoration: none;
   cursor: pointer;
-  background: #f0f0f0;
+  background: var(--about-btn-bg);
   border: none;
   border-radius: 8px;
   padding: 0.5rem 0;
@@ -75,10 +100,10 @@ social: false
   cursor: pointer;
 }
 .landing-links .projects-toggle {
-  transition: background var(--button-speed), color var(--button-speed);
+  transition: background var(--collapse-speed), color var(--collapse-speed);
 }
 .landing-links .projects-toggle.active {
-  background: rgba(0, 0, 179, 0.775);
+  background: var(--about-btn-hover);
   color: #fff !important;
 }
 .landing-links .projects-toggle.active > span:first-child {
@@ -87,7 +112,7 @@ social: false
 @media (hover: hover) {
   .landing-links > a:hover,
   .landing-links > .projects-toggle:hover {
-    background: rgba(0, 0, 179, 0.775);
+    background: var(--about-btn-hover);
     text-decoration: none;
     color: #fff !important;
   }
@@ -97,7 +122,7 @@ social: false
 }
 .landing-links > a:active,
 .landing-links > .projects-toggle:active {
-  background: rgba(0, 0, 179, 0.775);
+  background: var(--about-btn-hover);
   color: #fff !important;
 }
 .landing-links > .projects-toggle:active > span:first-child {
@@ -129,19 +154,19 @@ social: false
   content: '•';
   position: absolute;
   left: 0.4em;
-  color: #ccc;
+  color: var(--about-bullet-color);
   font-family: monospace;
 }
 .projects-expand .project-item a {
   white-space: nowrap;
   font-size: 0.95rem;
-  color: #888;
+  color: var(--about-project-color);
   text-decoration: none;
   font-family: monospace;
   transition: none;
 }
 .projects-expand .project-item:hover a {
-  color: #3333CC;
+  color: var(--about-project-hover);
 }
 #projects-overlay {
   display: none;
@@ -150,7 +175,7 @@ social: false
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--about-overlay-bg);
   opacity: 0;
   transition: opacity var(--collapse-speed);
   z-index: 10;
@@ -165,11 +190,11 @@ social: false
   transition: background var(--button-speed), color var(--button-speed), opacity var(--collapse-speed);
 }
 #resume-link.muted {
-  background: #f0f0f0;
+  background: var(--about-btn-bg);
   opacity: 0.5;
 }
 #resume-link.muted:hover {
-  background: rgba(0, 0, 179, 0.775);
+  background: var(--about-btn-hover);
   color: #fff !important;
   opacity: 1;
 }
@@ -211,15 +236,15 @@ social: false
 </style>
 
 <div class="blurb-block" style="display: inline-block; margin-top: -0.25rem;">
-<p class="blurb" style="font-size: 1.15rem; margin: 0; color: #666;">AI researcher &thinsp;—&thinsp; agents ∪ interpretability ∪ graphs ∪ biology</p>
-<hr style="border: none; border-top: 1px solid #ddd; margin: 0.75rem 0 0 0;">
+<a class="blurb" style="font-size: 1.15rem; margin: 0; text-decoration: none; cursor: default; display: block;">AI researcher &thinsp;—&thinsp; agents ∪ interpretability ∪ graphs ∪ biology</a>
+<hr style="border: none; border-top: 1px solid var(--about-hr-color); margin: 0.75rem 0 0 0; transition: border-color var(--button-speed);">
 </div>
 
 <div id="projects-overlay"></div>
 <div class="landing-links">
-  <div class="projects-toggle" id="projects-toggle">
-    <span><i class="fa-regular fa-folder-open"></i>&ensp;Projects</span>
-  </div>
+  <a class="projects-toggle" id="projects-toggle" href="javascript:void(0)">
+    <i class="fa-regular fa-folder-open"></i>&ensp;Projects
+  </a>
   <a id="resume-link" href="{{ '/assets/pdf/resume.pdf' | relative_url }}" target="_blank">
     <i class="fa-regular fa-file-lines"></i>&ensp;Resume
   </a>
@@ -246,11 +271,13 @@ social: false
     var overlay = document.getElementById('projects-overlay');
     staggerItems(items, true);
     for (var i = 0; i < items.length; i++) items[i].style.opacity = '0';
-    r.classList.remove('muted');
     var lastDelay = (items.length - 1) * staggerStep;
+    setTimeout(function() {
+      r.classList.remove('muted');
+      document.getElementById('projects-toggle').classList.remove('active');
+    }, lastDelay * 1000);
     overlay.style.transitionDelay = lastDelay + 's';
     overlay.classList.remove('visible');
-    document.getElementById('projects-toggle').classList.remove('active');
     var totalTime = (items.length * staggerStep + 0.3) * 1000;
     setTimeout(function() {
       t.classList.remove('open');

@@ -148,7 +148,7 @@ collections:
       layout: post
     output: false
   projects:
-    output: false
+    output: true
   publications:
     output: false
   repositories:

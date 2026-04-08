@@ -55,6 +55,12 @@ let applyTheme = () => {
 
   document.documentElement.setAttribute("data-theme", theme);
 
+  // Delay color-scheme switch to match CSS transition (750ms) to prevent
+  // browser chrome flicker on mobile during theme toggle.
+  setTimeout(() => {
+    document.documentElement.style.colorScheme = theme;
+  }, 750);
+
   // Update slider knob position.
   const slider = document.querySelector(".theme-slider");
   if (slider) {
@@ -287,6 +293,9 @@ let determineComputedTheme = () => {
 
 let initTheme = () => {
   let themeSetting = determineThemeSetting();
+
+  // Set color-scheme immediately on init (no delay needed on page load).
+  document.documentElement.style.colorScheme = determineComputedTheme();
 
   setThemeSetting(themeSetting);
 

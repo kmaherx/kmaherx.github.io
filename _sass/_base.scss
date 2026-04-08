@@ -28,6 +28,7 @@ table {
 a,
 table.table a {
   color: var(--global-theme-color);
+  text-decoration: underline;
 
   &:hover {
     color: var(--global-theme-color);

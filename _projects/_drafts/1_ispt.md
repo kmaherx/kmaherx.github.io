@@ -87,6 +87,51 @@ To our knowledge, some of these self-verbalized phrases are novel and do not ari
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/bojangles_windjammer.png" class="img-fluid rounded z-depth-1" %}
 
-Ultimately, no single verbalization captures the full behavior. Instead, the model offers many complementary descriptions that together form an evocative collage: real authors, fictional narrators, invented mythologies, each illuminating a different facet of the same underlying behavioral shift. This is what becomes possible when soft prompts are made interpretable. Contextualization constrains activations to the natural language manifold, enabling both feature-level analysis and self-verbalization. Prior work has applied self-verbalization to weight differences between models and to learned vocabulary entries (neologisms). We extend it to soft prompts, which lack token identity and require indirect verbalization. And when the behavior being verbalized is complex enough, the model does not simply label it. It reaches for literary figures, invents characters, and coins novel phrases to describe what it feels but cannot name.
+This work sits at a middle ground — between quantitative measurement and the experience of peering into a model, watching it grapple with its own complexity, and finding that it can, partially, explain itself.
 
 ---
+
+
+## Background
+
+### LLM architecture visualization
+
+{% include figure.liquid loading="eager" path="assets/figures/ispt/overview.png" class="img-fluid rounded z-depth-1" caption="Instruction-tuned LLM schematic. Solid arrows indicate direct progression; dotted arrows skip intermediate layers (attention and MLP blocks), represented by the grey wiring between embeddings and activations. Chat formatting omitted for simplicity." %}
+
+
+{% include figure.liquid loading="eager" path="assets/figures/ispt/soft_prompt.png" class="img-fluid rounded z-depth-1" caption="Soft prompt tuning. A learned continuous embedding (red) is prepended to the input and optimized to steer model behavior — here, to respond in Spanish. The model weights remain frozen; only the soft prompt is trained." %}
+
+### Soft prompt tuning
+
+
+### Sparse autoencoders
+
+
+### Self-verbalization
+
+---
+
+
+## Tier 1
+
+<ul class="tab" data-tab="response-figures" role="tablist">
+  <li class="active"><a href="#">Spanish</a></li>
+  <li><a href="#">Concise</a></li>
+  <li><a href="#">Wrong</a></li>
+  <li><a href="#">No Vowels</a></li>
+</ul>
+
+<ul class="tab-content" id="response-figures">
+  <li class="active">
+    {% include figure.liquid loading="eager" path="assets/figures/ispt/spanish_response.png" class="img-fluid rounded z-depth-1" %}
+  </li>
+  <li>
+    {% include figure.liquid loading="eager" path="assets/figures/ispt/concise_response.png" class="img-fluid rounded z-depth-1" %}
+  </li>
+  <li>
+    {% include figure.liquid loading="eager" path="assets/figures/ispt/wrong_response.png" class="img-fluid rounded z-depth-1" %}
+  </li>
+  <li>
+    {% include figure.liquid loading="eager" path="assets/figures/ispt/novowels_response.png" class="img-fluid rounded z-depth-1" %}
+  </li>
+</ul>

@@ -236,7 +236,7 @@ a.blurb {
 </style>
 
 <div class="blurb-block" style="display: inline-block; margin-top: -0.25rem;">
-<a class="blurb" style="font-size: 1.15rem; margin: 0; text-decoration: none; cursor: default; display: block;">AI researcher &thinsp;—&thinsp; agents ∪ interpretability ∪ graphs ∪ biology</a>
+<a class="blurb" style="font-size: 1.15rem; margin: 0; text-decoration: none; cursor: default; display: block;">AI researcher studying agents and interpretability</a>
 <hr style="border: none; border-top: 1px solid var(--about-hr-color); margin: 0.75rem 0 0 0; transition: border-color var(--button-speed);">
 </div>
 
@@ -317,12 +317,17 @@ a.blurb {
     }
   });
 
-  // Match landing-links width to blurb
+  // Match landing-links and blurb-block width to post-title (name + social icons)
+  var title = document.querySelector('.post-title');
   var blurb = document.querySelector('.blurb-block');
   var links = document.querySelector('.landing-links');
-  if (blurb && links) {
-    links.style.width = blurb.offsetWidth + 'px';
-    links.style.margin = '1.5rem auto 0';
+  if (title) {
+    var w = title.offsetWidth + 'px';
+    if (blurb) blurb.style.width = w;
+    if (links) {
+      links.style.width = w;
+      links.style.margin = '1.5rem auto 0';
+    }
   }
 
   </script>

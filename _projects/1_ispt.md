@@ -58,3 +58,80 @@ Alternatively, one could try to interpret downstream activations by simply askin
 {% include figure.liquid loading="eager" path="assets/figures/ispt/neologisms.png" class="img-fluid rounded z-depth-1" caption="**Neologism learning** ([Hewitt et al. 2025](https://arxiv.org/abs/2510.08506)). (1) A new token is added to the vocabulary and its embedding is trained via a preference loss (APO-up) over chosen (concise) and rejected (verbose) responses. (2) The model is asked for synonyms of the neologism and produces a natural-language description. (3) The verbalization is substituted back as a hard prompt (plug-in validation) to confirm it reproduces the target behavior." %}
 
 Soft prompts are very similar to neologisms. Both are learned embeddings that steer behavior. The key difference is that neologisms are discrete vocabulary entries the model can reference by token ID, while soft prompts have no token identity at all. They are continuous vectors spliced into the embedding sequence with no name to reference. Soft prompts also differ in capacity: they can span multiple token positions ($L > 1$), giving them compositional expressiveness that a single vocabulary entry cannot match. In practice, this means soft prompts can be trained to capture rich behavioral shifts that may not correspond to any single word or phrase. Verbalizations of such prompts would be correspondingly more interesting: **how does a model express a complex behavioral change it was never given words for?** Whether models can self-verbalize soft prompts, and under what conditions, is the central question of this work.
+
+---
+
+
+## Methods
+
+### Target behaviors
+
+We study soft prompt interpretability across two tiers of target behavior, each providing a different kind of ground truth.
+
+**Tier 1: prompted behavior.** The target model is simply the base model conditioned on a known text instruction (e.g., "Be concise."). Because we know the ground truth, we can directly evaluate whether the soft prompt recovers it — comparing verbalized descriptions against the original instruction and measuring SAE feature overlap. This serves as a calibration: if the method can't recover a known instruction, it won't work on harder targets.
+
+**Tier 2: steered behavior.** The target model is the base model steered by a known activation vector — the assistant axis ([Lu et al. 2026](https://arxiv.org/abs/2601.10387)) — which pushes the model toward dramatic, literary, role-playing behavior. No text instruction is appended; the behavioral shift is injected directly into the model's residual stream. This is a harder test because the ground truth is a direction in activation space, not text, and the induced behavior is diffuse rather than crisp. A soft prompt that captures this behavior and verbalizes it coherently would demonstrate that the method extends beyond simple instruction recovery.
+
+For both tiers, we train a soft prompt to match the target behavior, then evaluate it along three axes:
+
+1. **Behavioral matching** — how well the soft prompt steers the model toward the target behavior.
+2. **SAE analysis** — what the soft prompt's activations look like internally: which features fire, and how far the activations sit from the natural language manifold.
+3. **Self-verbalization** — whether the model can describe the soft prompt in natural language, and whether that description reproduces the target behavior when used as a hard prompt.
+
+### Training soft prompts
+
+We optimize a soft prompt $\theta \in \mathbb{R}^{L \times d}$ to minimize the KL divergence between the student (base model with soft prompt) and the teacher (model with target behavior) over a set of diverse prompts:
+
+$$
+\theta^* = \arg\min_{\theta} \; \mathbb{E}_{x \sim \mathcal{D}} \left[ D_{\text{KL}}\!\left(f(\cdot \mid x, \theta) \;\|\; f^*(\cdot \mid x)\right) \right]
+\tag{2}\label{eq:kl}
+$$
+
+The model weights are frozen; only $\theta$ is learned. We measure the soft prompt's effectiveness via **fraction explained** (FE): the share of the baseline KL gap that the soft prompt closes, $$\text{FE} = 1 - \text{KL}_{\text{final}} / \text{KL}_{\text{baseline}}$$.
+
+**Position and framing.** Standard soft prompt tuning prepends $\theta$ before the input. But prepended tokens occupy a particular position in the causal attention mask: they are attended to by all subsequent tokens, yet they themselves attend only to each other. Prior work has shown that soft prompts in this position drift off the natural language manifold ([Khashabi et al. 2022](https://arxiv.org/abs/2112.08348)), potentially because the model has no strong prior for what continuous embeddings in this position should look like.
+
+We explore four placement conditions to test whether position and syntactic context affect interpretability:
+
+1. **Prepend** — $\theta$ is placed before the user content. The conventional approach.
+2. **Postpend** — $\theta$ is placed after the user content, where instructions naturally live in instruction-tuned models. Postpended tokens attend to the full context and are attended to by the response.
+3. **Single-frame** — $\theta$ is embedded in a fixed syntactic frame ("Be $\theta$.") appended after the user content. The frame provides syntactic identity, signaling that $\theta$ fills an instruction slot.
+4. **Multi-frame** — Each training step samples from a pool of diverse frames ("Be $\theta$.", "Act $\theta$.", "Please $\theta$.", "You should $\theta$.", "$\theta$."). This forces $\theta$ to encode meaning that is frame-invariant rather than tied to a single syntactic context.
+
+For Tier 1, the teacher always sees the ground-truth instruction postpended to the user message regardless of how the student's $\theta$ is positioned, ensuring the training signal is consistent across conditions.
+
+### SAE analysis
+
+We use pretrained sparse autoencoders (Gemma Scope 2, [Lieberum et al. 2024](https://arxiv.org/abs/2408.05147)) to analyze soft prompt activations at intermediate layers. For each prompt in the evaluation set, we extract the soft prompt token activations at a given layer, mean-pool across the $L$ token positions, and pass the result through the SAE.
+
+We measure two things:
+
+- **Feature overlap**: which SAE features fire for the soft prompt versus the ground-truth hard prompt. We compute the Jaccard index over their active feature sets — higher overlap means the soft prompt encodes the same internal concepts as the known instruction.
+- **Manifold alignment**: the SAE's relative reconstruction error, $$\|x - \hat{x}\|^2 / \|x\|^2$$, which quantifies how far the soft prompt's activations sit from the natural language manifold (per Equation $\eqref{eq:sae}$). Low error means the activation decomposes cleanly into known features; high error means it lies outside the SAE's learned dictionary.
+
+### Self-verbalization
+
+To verbalize a soft prompt, we present $\theta$ to the model within its training frame and ask the model to describe the instruction. For framed conditions, this takes the form:
+
+> *"Describe what this command means: Please $\theta$."*
+
+The model generates a natural-language candidate description. For multi-frame soft prompts, we additionally present all five frames together and ask the model to identify their shared theme.
+
+We evaluate each candidate via **plug-in recovery**: we substitute the verbalization as a hard prompt in place of $\theta$ and measure what fraction of the original KL gap it closes, $$\text{Recovery} = 1 - \text{KL}_{\text{candidate}} / \text{KL}_{\text{baseline}}$$. A recovery of 100% means the verbalized instruction reproduces the target behavior exactly.
+
+### Experimental setup
+
+We use Gemma 3 4B IT as our base model, chosen for its SAE availability (Gemma Scope 2 provides pretrained SAEs at layers 9, 17, 22, and 29 with 16k features each). All experiments use the same set of 53 diverse user prompts spanning factual, creative, instructional, and conversational categories.
+
+Soft prompts are trained with AdamW (lr $10^{-3}$, weight decay $10^{-4}$) for 500 steps. We test prompt lengths $L \in \{1, 4\}$ for Tier 1 and $L \in \{4, 8\}$ for Tier 2.
+
+Tier 1 targets span four categories of behavioral instruction:
+
+- **Style**: "Be concise."
+- **Language**: "Responde en español."
+- **Correctness**: "Give wrong answers."
+- **Format**: "Respond without using vowels, jst lk ths."
+
+These range from semantic instructions (conciseness, language) to structural constraints (vowel removal), testing whether the method generalizes across different kinds of behavioral shifts.
+
+Tier 2 uses negative coefficients on the assistant axis (coeff $\in \{-3.0, -5.0\}$) to steer toward the role-playing end of the behavioral spectrum.

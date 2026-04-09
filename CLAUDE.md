@@ -18,3 +18,9 @@ The fix (applied in `_sass/_base.scss`): set `color: var(--global-text-color)` o
 ## Libertinus Serif Bold Weight
 
 Libertinus Serif's `font-weight: 700` (the default for `bold` / `<strong>`) is visually indistinguishable from regular (400) at body text sizes. To make bold text visible, `strong` is set to `font-weight: 900` in `_sass/_base.scss` under both `.post` and `.caption`. This applies to both `**markdown bold**` in post body text and in figure captions (which render markdown via `markdownify` in `figure.liquid`).
+
+## Inline LaTeX with Subscripts
+
+Kramdown (the markdown processor) interprets `_` as emphasis before MathJax processes the math. This means inline math like `$\text{KL}_{\text{final}}$` gets mangled — Kramdown sees the `_` between `}` and `{` as an emphasis delimiter.
+
+**Use `$$` (display math) for any expression containing subscripts (`_{}`).** Simple inline math without subscripts (e.g., `$\theta$`, `$x$`, `$L > 1$`) works fine with single `$`.

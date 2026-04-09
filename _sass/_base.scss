@@ -153,6 +153,10 @@ ul.task-list input[type="checkbox"] {
   margin-top: 0.75rem;
   margin-bottom: 2.5rem;
   text-align: left;
+
+  strong {
+    font-weight: 900;
+  }
 }
 
 // Card
@@ -976,6 +980,10 @@ html.transition *:after {
   h2, h3, h4, h5, h6 {
     font-weight: bold;
     margin-top: 2.5rem;
+  }
+
+  strong {
+    font-weight: 900;
   }
 
   figure {

@@ -81,6 +81,6 @@
   </picture>
 
   {% if include.caption %}
-    <figcaption class="caption">{{ include.caption }}</figcaption>
+    <figcaption class="caption">{{ include.caption | markdownify }}</figcaption>
   {% endif %}
 </figure>

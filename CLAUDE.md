@@ -14,3 +14,7 @@ Text color (`--global-text-color`) must be set on `body` only, **not** on indivi
 The fix (applied in `_sass/_base.scss`): set `color: var(--global-text-color)` on `body` and let all child elements inherit. The `html.transition *` rule in `_base.scss` (line ~973) applies `transition: all 750ms !important` during toggles, which works on inherited color but not on directly-set CSS variable values.
 
 **Do not** re-add explicit `color: var(--global-text-color)` to `p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `em`, `div`, `li`, `span`, or `strong` selectors.
+
+## Libertinus Serif Bold Weight
+
+Libertinus Serif's `font-weight: 700` (the default for `bold` / `<strong>`) is visually indistinguishable from regular (400) at body text sizes. To make bold text visible, `strong` is set to `font-weight: 900` in `_sass/_base.scss` under both `.post` and `.caption`. This applies to both `**markdown bold**` in post body text and in figure captions (which render markdown via `markdownify` in `figure.liquid`).

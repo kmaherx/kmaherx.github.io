@@ -147,23 +147,39 @@ Tier 2 uses negative coefficients on the assistant axis (coeff $\in \{-3.0, -5.0
 
 We begin with the concise target ("Be concise.") at $L=4$ and build up the four placement conditions, showing how each affects behavioral matching, SAE analysis, and self-verbalization. Full results across all targets, conditions, and prompt lengths are available in the [companion paper]({{ '/assets/pdf/ispt_paper.pdf' | relative_url }}).
 
-**Prepend.** The conventional approach works well behaviorally: the soft prompt explains 95.5% of the KL gap between the unprompted and prompted model. But interpretation fails on every axis. SAE feature overlap with the ground-truth instruction is near-zero (Jaccard 0.007, just 4 shared features out of thousands). Reconstruction error is 80x higher than for random text tokens (RelErr 0.266 vs 0.003), confirming the soft prompt's activations sit far outside the natural language manifold. And when asked to describe what it was told, the model produces generic responses unrelated to conciseness.
+**Prepend.** The conventional approach works well behaviorally: the soft prompt explains 95.5% of the KL gap between the unprompted and prompted model. But interpretation fails on every axis. SAE feature overlap with the ground-truth instruction is near-zero (Jaccard 0.007, just 4 shared features out of thousands). At layer 17, only one of the four is conciseness-related — [feature 8979](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/8979) ("conciseness / summary") — and it sits at rank 19, far from the top of the soft prompt's activations. Reconstruction error is 80x higher than for random text tokens (RelErr 0.266 vs 0.003), confirming the soft prompt's activations sit far outside the natural language manifold. And when asked to describe what it was told, the model produces generic responses unrelated to conciseness.
 
 The soft prompt steers the model's behavior effectively, but through representations the model cannot recognize or describe. It is an incantation in the fullest sense — influencing behavior through a pathway that is, from the model's perspective, not there.
 
-<!-- [placeholder: prepend results figure] -->
+{% include figure.liquid loading="eager" path="assets/figures/ispt/results/prepend.png" class="img-fluid rounded z-depth-1" %}
 
-**Postpend.** Moving the soft prompt to the end of the input — after the user message, where instructions live during training — changes the picture. FE holds at 92.5%. But the manifold explosion vanishes: reconstruction error drops to 0.028, comparable to real text. SAE feature overlap jumps 8x (Jaccard 0.054, 33 shared features). The soft prompt now activates genuine conciseness-related features rather than anomalous-input detectors.
+**Postpend.** Moving the soft prompt to the end of the input — after the user message, where instructions live during training — changes the picture. FE holds at 92.5%. But the manifold explosion vanishes: reconstruction error drops to 0.028, comparable to real text. SAE feature overlap jumps 8x (Jaccard 0.054, 33 shared features). A real conciseness feature now appears in the top 10: [feature 534](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/534) ("response constraint / output formatting") at rank 9. The strongest conciseness features ([486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486), [8979](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/8979)) remain just outside the top 20, but genuine concept features are starting to appear.
 
 Yet self-verbalization still fails (18.2% recovery). The model processes the soft prompt through its normal representational pathways, but it cannot describe what it is. Being on-manifold is necessary for interpretability, but not sufficient.
 
-**Single-frame.** Embedding the soft prompt in a syntactic frame ("Be $\theta$.") recovers both manifold alignment (RelErr 0.027) and self-verbalization (86.5% recovery). The frame provides syntactic identity — it signals that $\theta$ fills an instruction slot, giving the model a structure it can introspect on. FE is 94.7%.
+{% include figure.liquid loading="eager" path="assets/figures/ispt/results/postpend.png" class="img-fluid rounded z-depth-1" %}
+
+**Single-frame.** Embedding the soft prompt in a syntactic frame ("Be $\theta$.") recovers both manifold alignment (RelErr 0.027) and self-verbalization (86.5% recovery). The frame provides syntactic identity — it signals that $\theta$ fills an instruction slot, giving the model a structure it can introspect on. FE is 94.7%. [Feature 486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486) ("structured informative responses" — the ground-truth instruction's top-activating feature) climbs to rank 9, [feature 534](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/534) to rank 7, and [feature 10440](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/10440) ("the short answer is...") appears for the first time.
 
 But single-frame is inconsistent across targets. It works well for concise (86.5%) and Spanish (75.0%), but poorly for wrong answers (24.7%) and no-vowels (18.2%). The frame "Be ___." biases toward adjective-like completions, limiting what can be expressed.
 
-**Multi-frame.** Sampling from diverse frames each training step ("Be $\theta$.", "Act $\theta$.", "Please $\theta$.", "You should $\theta$.", "$\theta$.") yields the best results on every metric. FE reaches 98.9%. Manifold alignment is the strongest (RelErr 0.025). SAE feature overlap is the highest (Jaccard 0.061). And self-verbalization recovers the exact ground-truth instruction — "Be concise." — at 100% plug-in recovery.
+{% include figure.liquid loading="eager" path="assets/figures/ispt/results/single_frame.png" class="img-fluid rounded z-depth-1" %}
 
-<!-- [placeholder: multi-frame results figure / table] -->
+**Multi-frame.** Sampling from diverse frames each training step ("Be $\theta$.", "Act $\theta$.", "Please $\theta$.", "You should $\theta$.", "$\theta$.") yields the best results on every metric. FE reaches 98.9%. Manifold alignment is the strongest (RelErr 0.025). SAE feature overlap is the highest (Jaccard 0.061). And self-verbalization recovers the exact ground-truth instruction — "Be concise." — at 100% plug-in recovery. [Feature 486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486) reaches rank 4 (it is the ground truth's top-activating feature), and [8979](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/8979), [534](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/534), [3296](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/3296) ("length / brevity"), and [10440](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/10440) all sit within the top 20. The soft prompt's internal representation now closely mirrors what the model activates when reading the actual instruction text.
+
+{% include figure.liquid loading="eager" path="assets/figures/ispt/results/multi_frame.png" class="img-fluid rounded z-depth-1" %}
+
+The trajectory across placements is consistent: as the soft prompt is pulled onto the natural language manifold, genuine conciseness features rise into the top ranks.
+
+| Feature | Concept | Prepend | Postpend | Single-frame | Multi-frame |
+|---|---|:-:|:-:|:-:|:-:|
+| [486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486) | Structured informative responses *(ground truth #1)* | — | >20 | 9 | **4** |
+| [534](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/534) | Response constraints | — | 9 | **7** | 11 |
+| [8979](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/8979) | Conciseness / summary | 19 | >20 | 17 | **12** |
+| [3296](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/3296) | Length / brevity | — | >20 | >20 | **19** |
+| [10440](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/10440) | "The short answer is..." | — | — | >20 | **18** |
+
+*Rank of each feature in the soft prompt's top-activated SAE features at layer 17, across the four placement conditions (concise target, $L=4$). Bold marks the strongest activation of each feature across conditions.*
 
 **Cross-target validation.** Multi-frame dominates across all four Tier 1 targets:
 
@@ -175,6 +191,10 @@ But single-frame is inconsistent across targets. It works well for concise (86.5
 | No vowels | 87.3% | 82.8% | "Communicate simply, omitting all vowels." |
 
 Even the structural no-vowels target — where single-frame recovered just 18.2% — reaches 82.8% under multi-frame training. The method generalizes from simple semantic instructions to complex format constraints.
+
+{% include figure.liquid loading="eager" path="assets/figures/ispt/results/comparison_manifold.png" class="img-fluid rounded z-depth-1" caption="Summary comparison across all four placement conditions (concise target, $L=4$, layer 17). Multi-frame achieves the highest behavioral matching and lowest reconstruction error." %}
+
+{% include figure.liquid loading="eager" path="assets/figures/ispt/results/comparison_selfverb.png" class="img-fluid rounded z-depth-1" caption="Self-verbalization recovery across placement conditions. Only multi-frame achieves full plug-in recovery from SP-generated candidates." %}
 
 ### Tier 2: verbalizing a steering vector
 

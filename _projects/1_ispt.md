@@ -200,7 +200,7 @@ But the broader contribution is a paradigm. Soft prompts give us a controlled se
 
 ---
 
-<div class="bojangles-container" style="max-width: 65%; margin: 0 auto;">
+<div class="bojangles-container" style="max-width: 65%; margin: 2rem auto 0;">
 <img src="{{ 'assets/figures/ispt/bojangles_windjammer.png' | relative_url }}" class="img-fluid bojangles-light">
 <img src="{{ 'assets/figures/ispt/bojangles_windjammer_dark.png' | relative_url }}" class="img-fluid bojangles-dark">
 </div>

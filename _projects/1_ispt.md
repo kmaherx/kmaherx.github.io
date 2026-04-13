@@ -167,7 +167,7 @@ Multi-frame sharpens this into clean commands:
 These span a range of specificity. The first is a **named referent**: a real author whose style matches the steered behavior. The second is an **archetypal referent**, describing a type of character rather than naming a specific one. The third and fourth are **fabricated referents**: the model invents entities that do not exist to fill the concept slot. All four are named characters. The steered behavior originates from a persona dimension, and the model's verbalizations reflect that.
 
 
-## A mechanistic perspective, again
+## The same mechanistic perspective
 
 The SAE at layer 17 tells the same story. Multi-frame's reconstruction error drops from 0.209 (prepend) to 0.053, and the number of active features jumps from 21 to 92. The multi-layer profile again peaks at L17 for prepend, confirming that the mid-network concept layer is where the gap concentrates even for a non-textual steering target.
 

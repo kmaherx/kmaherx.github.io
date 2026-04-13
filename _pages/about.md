@@ -74,7 +74,7 @@ AI interpretability
 
 <div class="about-section">
 <div class="about-section-title">Projects</div>
-<a class="about-link" href="/projects/1_ispt/">Soft prompts as a window into introspection in large language models</a>
+<a class="about-link" href="/projects/soft-prompt-introspection/">Soft prompts as a window into introspection in large language models</a>
 </div>
 
 <div class="about-section about-socials">

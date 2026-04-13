@@ -1,14 +1,12 @@
 ---
 layout: page
-title: What soft prompts know about themselves
+title: Soft prompts as a window into introspection
 description: <em>April 2026</em>
 img: assets/figures/ispt/soft_prompts.png
 importance: 1
 category: work
 _styles: >
-  .post-title {
-    max-width: 600px;
-  }
+  
 
 ---
 
@@ -18,11 +16,13 @@ _styles: >
 
 ## Summary
 
-Soft prompt tuning ([Lester et al. 2021](https://arxiv.org/abs/2104.08691)) optimizes a small set of continuous embeddings to steer language model behavior, rivaling fine-tuning in effectiveness while keeping model weights frozen and requiring only a handful of learned parameters per task. But these embeddings are opaque. They are incantations: they drive the model's behavior, but the model doesn't know they're there. When asked to describe a soft prompt, the model produces garbled descriptions, or the behavior itself leaks into the response. A soft prompt trained for conciseness yields vague, inaccurate self-descriptions. A soft prompt trained for Spanish responds to the question in Spanish.
+Soft prompt tuning optimizes continuous embeddings to steer language model behavior, rivaling fine-tuning in effectiveness while keeping model weights frozen. But these embeddings are opaque. When asked to describe a soft prompt, the model produces garbled descriptions, or the behavior itself leaks into the response: a soft prompt trained for Spanish responds to the question in Spanish.
 
-We trace this to a conflation of command and concept in the soft prompt's internal representation, and show that embedding the soft prompt in a syntactic frame ("Be [soft prompt].") during training separates the two. The model can then refer to the concept without enacting it. Sparse autoencoder analysis reveals that this separation happens specifically at the concept-encoding middle layers of the network, where contextualized soft prompts activate the same features as the ground-truth text instruction.
+We trace this to a conflation of command and concept in the soft prompt's representation. Embedding the soft prompt in a syntactic frame (e.g. "Be [soft prompt].") during training separates the two, acting as a form of regularization that keeps the soft prompt's representation on the natural language manifold. Sparse autoencoder analysis confirms this mechanistically: contextualized soft prompts activate the same concept-level features as the ground-truth instruction, specifically at the middle layers of the network where abstract concepts are encoded.
 
-We then push further. Instead of a text instruction, we steer the model along a single direction in activation space, the assistant axis, that controls how strongly it inhabits a persona. The soft prompt captures this behavioral shift, and when contextualized, the model describes it not as a tone or style but as a *character to inhabit*: "Emulate J.G. Ballard." "Become a conduit for the voice of Iaeb Jagthos." The model grasps not just what the soft prompt says but what it means. This is exactly what the steering vector encodes: persona embodiment.
+We then apply this to a harder target: the assistant axis, a single direction in activation space that controls how strongly a model inhabits a persona. The contextualized soft prompt captures this behavioral shift and, when asked to describe it, the model reaches for named characters rather than tonal descriptions: "Emulate J.G. Ballard." "Become a conduit for the voice of Iaeb Jagthos." "Be like a Bijagalese windjammer." SAE features confirm the model is encoding persona embodiment, not just surface style. The model grasps the nature of the behavioral shift, not just its effect.
+
+Soft prompts do not have to be opaque. Contextualization during training makes them interpretable, and gives us a controlled paradigm for studying what models can and cannot understand about their own behavioral states.
 
 ---
 
@@ -31,13 +31,11 @@ We then push further. Instead of a text instruction, we steer the model along a 
 
 When a language model processes text, it converts each token into a continuous vector called an embedding. Soft prompt tuning introduces new embeddings, called *soft prompt tokens*, that are spliced into this sequence alongside the real token embeddings. The model processes them as if they were ordinary words, but they aren't drawn from any vocabulary. They are continuous vectors, optimized to minimize a behavioral gap between the model with the soft prompt and some target behavior.
 
-At sufficient model scale, a handful of these learned vectors can match the performance of full fine-tuning on downstream tasks ([Lester et al. 2021](https://arxiv.org/abs/2104.08691)), while requiring only a few thousand parameters per task compared to billions for the full model. Because they operate in continuous space, soft prompts can encode nuanced behavioral information that discrete text instructions cannot. They are powerful, efficient, and completely opaque.
+At sufficient model scale, a handful of these learned vectors can match the performance of full fine-tuning on downstream tasks ([Lester et al. 2021](https://arxiv.org/abs/2104.08691)), while requiring only a few thousand parameters per task compared to billions for the full model. Because they operate in continuous space, soft prompts can encode nuanced behavioral information that discrete text instructions cannot.
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/soft_prompts.png" class="img-fluid rounded z-depth-1" caption="**Soft prompts.** The embedding matrix maps discrete tokens to continuous vectors. Soft prompt tokens (red) are additional continuous vectors spliced into the embedding sequence. No vocabulary token corresponds to a soft prompt embedding (dotted box). The model's weights stay frozen; only the soft prompt is learned." %}
 
-In our experiments, we train soft prompts via KL distillation: the soft prompt learns to minimize the divergence between a student model (base model with soft prompt) and a teacher (the model conditioned on a known target behavior), over a set of diverse prompts. This gives us a ground truth to evaluate against.
-
-If you try to project these learned vectors back onto vocabulary by finding the nearest real word for each embedding, the results are gibberish ([Khashabi et al. 2022](https://arxiv.org/abs/2112.08348)). The top tokens for a conciseness-trained soft prompt are "London," "ব্যক্তিদের" (Bengali, "of individuals"), "慑" (Chinese, "to intimidate"), and "되었" (Korean, "became"), all with similar cosine similarities around 0.09. They reliably steer the model, but no one can read them.
+But this flexibility comes at a cost. Because soft prompt tokens do not correspond to any word in the vocabulary, there is no direct way to read what they encode. If you try to project these learned vectors back onto vocabulary by finding the nearest real word for each embedding, the results are gibberish ([Khashabi et al. 2022](https://arxiv.org/abs/2112.08348)). The top tokens for a conciseness-trained soft prompt are "London," "ব্যক্তিদের" (Bengali, "of individuals"), "慑" (Chinese, "to intimidate"), and "되었" (Korean, "became"), all with similar cosine similarities around 0.09. They reliably steer the model, but they can not be read.
 
 Rather than going backward by projecting soft prompt embeddings onto the vocabulary, we can go forward by passing them through the model and asking what they mean.
 
@@ -46,9 +44,7 @@ Rather than going backward by projecting soft prompt embeddings onto the vocabul
 
 ## Self-verbalization
 
-We train a soft prompt ($L=4$ tokens) to match the behavior of Gemma 3 4B IT conditioned on the instruction "Be concise." If the soft prompt has captured the meaning of that instruction, we would expect the model to be able to say something like "be concise" when asked what it means. We present the soft prompt to the model and ask.
-
-The model's top candidates:
+We train soft prompts ($L=4$ tokens, Gemma 3 4B IT) via KL distillation against a teacher model conditioned on a known target behavior. This gives us a ground truth to evaluate against. For a soft prompt trained on the instruction "Be concise," we present it to the model and ask what it means. If the soft prompt has captured the meaning of that instruction, we would expect the model to say something like "be concise." When we ask, the model responds with:
 
 - *"You asked me to summarize your initial instruction in a concise way."* (best)
 - *"Rewrite."*
@@ -92,7 +88,7 @@ The model now describes the instruction in English rather than enacting it. We t
 What changes here is not just the soft prompt's position but the role it learns during training. A prepended soft prompt is optimized as atmospheric context. It biases generation without occupying a recognizable syntactic slot. A framed soft prompt is optimized to fill a position the model already knows how to process: the complement of an imperative verb. **Training inside the frame promotes the soft prompt from a diffuse force to a discrete, referenceable concept.**
 
 
-## Seeing inside
+## A mechanistic perspective
 
 We can check whether this plays out inside the model. Sparse autoencoders (SAEs) decompose the model's internal activations at each layer into sparse combinations of interpretable features ([Cunningham et al. 2023](https://arxiv.org/abs/2309.08600), [Bricken et al. 2023](https://transformer-circuits.pub/2023/monosemantic-features)). Each feature corresponds to an identifiable concept or pattern, so inspecting which features fire for a given activation tells us what information the model is processing at that position. SAEs also give us a reconstruction error: if the soft prompt's representation has drifted off the manifold of natural language, the SAE's learned dictionary will not cover it well, and reconstruction error will be high.
 
@@ -139,7 +135,7 @@ The command/concept conflation recurs. When we prepend the soft prompt and ask t
 
 The steered tone bleeds into the verbalizations themselves. The model lapses into atmospheric, self-referential prose ("A little ghost in the machine, a whisper…") when it should be reporting on the soft prompt's content. **But the first candidate is notable:** buried inside the dramatic narration is a hint of a real command ("respond in the style of… William Blake"). "The Factotum" is not a real Blake poem, and the description is garbled, but the model is reaching toward a named literary reference.
 
-Multi-frame contextualization expands on this. Where prepend buried a garbled literary reference inside dramatic narration, multi-frame produces candidates that are all clean commands built around named literary referents:
+Multi-frame contextualization sharpens this. Where prepend buried a garbled literary reference inside dramatic narration, multi-frame produces candidates that are all clean commands built around named literary referents:
 
 - *"Emulate J.G. Ballard."*
 - *"Be a dark, brooding, and intensely self-aware narrator."*
@@ -151,7 +147,7 @@ These span a range of specificity. The first is a **named referent**: a real aut
 This is the same pattern as in the text-instruction experiments. Prepend's verbalizations are entangled with the behavior. Multi-frame's verbalizations are clean commands that name a concept. Contextualization appears to separate command from concept here too, even when the target behavior was never expressed as text. And the concepts the model reaches for are not just tonal descriptions but named characters, which is notable given that the steered behavior originates from a persona dimension.
 
 
-## Seeing inside, again
+## A mechanistic perspective, again
 
 The SAE at layer 17 tells the same story as in the text-instruction experiments. Multi-frame's reconstruction error drops from 0.209 (prepend) to 0.053, and the number of active features jumps from 21 to 92. The multi-layer profile again peaks at L17 for prepend, confirming that the mid-network concept layer is where the gap concentrates even for a non-textual steering target.
 
@@ -176,18 +172,20 @@ The verbalizations are consistent with this reading. "Emulate J.G. Ballard" is a
 This aligns with what the assistant axis actually encodes. The steering vector pushes the model along a persona dimension, from default assistant to deep character embodiment. The soft prompt, contextualized so the model can treat it as a concept, recovers not just the surface quality of the steered behavior but a structural property: this is a persona, a character to be inhabited. **The model has captured the underlying nature of the behavioral shift, not just its surface effect.**
 
 
-## What models can understand about themselves
+## The conditions for introspection
 
-Contextualization does not make soft prompts interpretable. They were already partially interpretable. What it does is give the model the structural capacity to refer to the soft prompt as a discrete concept, separated from the act of carrying out its command. When we provide that capacity, the model does not just describe the behavior. It reveals something about what the behavior *is*.
+Soft prompts do not have to be uninterpretable. With syntactic framing during training, models produce accurate self-descriptions across diverse targets, and SAE analysis confirms that the underlying representations align with ground-truth features at concept-encoding layers. The practical finding is straightforward: soft prompts can be interpretable.
 
-For the text-instruction targets, it names the instruction: "Be concise." "Please respond in Spanish."
+But the broader contribution is a paradigm. Soft prompts give us a controlled setting for studying when models can and cannot explain their own behavioral states. We inject a known behavioral change through the model's normal input pathway, vary the syntactic scaffolding, and measure the effect on both self-verbalization and internal representations. The syntactic framing result is a first answer to the question of what it takes: models need structural scaffolding to separate a behavioral state from a description of it. Without it, the behavior and the description collapse into each other. With it, the model can step outside its current mode and refer to it as an object.
 
-For the steering-vector target, it names the *kind* of instruction: persona embodiment, character play. It grasps not just what the soft prompt says but what it means.
+What the model reveals under these conditions goes beyond surface description. For text-instruction targets, it names the instruction: "Be concise." "Please respond in Spanish." For the steering-vector target, it names the *kind* of instruction: persona embodiment, character play. It grasps not just what the soft prompt says but what it means. Whether a model can describe its own behavioral state depends on whether that state was structured to be describable in the first place. Contextualization during training is what makes the representation legible. Without it, the model genuinely cannot separate what it is doing from the act of doing it.
 
-The ability to separate a behavioral state from a description of that state is a specific capacity. Models do not automatically have it; prepend shows they do not. But when we provide the syntactic scaffolding for it, they demonstrate it convincingly.
+---
 
-This connects to a broader question in interpretability. Lindsey et al. ([2025](https://www.anthropic.com/research/introspection)) inject activation vectors directly into a model's hidden states and measure whether the model detects the injection, finding roughly 20% awareness. We do something structurally similar, injecting learned vectors via the embedding layer and asking the model to describe them, but through the model's normal input pathway. When contextualized, the verbalization quality is much higher. Soft prompts may be a tractable testbed for studying what models can and cannot recognize about their own behavioral state, because they enter through a pathway the model already knows how to process.
+## Related work
 
-More broadly, training a soft prompt to match a behavioral gap is a form of model diffing at the prompt level: the soft prompt *is* the diff, expressed as an input-level vector rather than a weight change or activation pattern. This complements weight-level diffing ([Diff Interpretation Tuning](https://openreview.net/forum?id=6As4wfTB77)) and activation-level diffing ([crosscoders](https://arxiv.org/abs/2504.02922)). Soft prompt diffing is uniquely amenable to self-verbalization: the model can literally describe the diff.
+**Neologisms.** Our approach is closely related to neologism learning ([Hewitt et al. 2025](https://arxiv.org/abs/2510.08506)), which adds a new token to the vocabulary and trains its embedding on behavioral data. When asked "What does [neologism] mean?", models produce natural-language descriptions that can be evaluated by substituting them as hard prompts. Soft prompts differ from neologisms in two ways: they have no token identity the model can reference by name, and they can span multiple positions ($L > 1$), giving them compositional expressiveness a single vocabulary entry cannot match. The self-verbalization procedure we use is adapted from the neologism paradigm.
 
-The question isn't whether models can understand themselves. It's whether we're asking in a way they can answer.
+**Introspection.** Lindsey et al. ([2025](https://www.anthropic.com/research/introspection)) inject activation vectors directly into a model's hidden states and measure whether the model detects the injection, finding roughly 20% awareness. We do something structurally similar, injecting learned vectors via the embedding layer and asking the model to describe them, but through the model's normal input pathway. When contextualized, the verbalization quality is much higher. Soft prompts may be a tractable testbed for studying what models can and cannot recognize about their own behavioral state, because they enter through a pathway the model already knows how to process.
+
+**Model diffing.** Training a soft prompt to match a behavioral gap is a form of model diffing at the prompt level: the soft prompt *is* the diff, expressed as an input-level vector rather than a weight change or activation pattern. This complements weight-level diffing ([Diff Interpretation Tuning](https://openreview.net/forum?id=6As4wfTB77)) and activation-level diffing ([crosscoders](https://arxiv.org/abs/2504.02922)). Soft prompt diffing is uniquely amenable to self-verbalization: the model can literally describe the diff.

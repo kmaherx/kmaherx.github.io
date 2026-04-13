@@ -8,7 +8,7 @@ category: work
 _styles: >
   @media (max-width: 576px) {
     .introspection-icon { max-width: 55% !important; }
-    .bojangles-container { max-width: 120% !important; margin-left: -10% !important; margin-right: -10% !important; }
+    .bojangles-container { max-width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
   }
   html[data-theme="dark"] .introspection-icon .icon-light { display: none; }
   html[data-theme="dark"] .introspection-icon .icon-dark { display: block; }

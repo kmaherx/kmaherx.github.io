@@ -961,12 +961,12 @@ code {
   padding: 3px 3px;
 }
 
-// Transitioning Themes
+// Transitioning Themes — disabled, instant switching
 html.transition,
 html.transition *,
 html.transition *:before,
 html.transition *:after {
-  transition: all 750ms !important;
+  transition: none !important;
   transition-delay: 0 !important;
 }
 

@@ -6,8 +6,16 @@
         <a class="navbar-brand title" href="{{ site.baseurl }}/" style="margin-left: -150px;">
           <i class="fa-solid fa-house" style="font-size: 1.1rem;"></i>
         </a>
-      {% elsif site.enable_navbar_social %}
-        <div class="navbar-brand social" style="display: none;">{% include social.liquid %}</div>
+        <a href="#" class="navbar-brand" style="margin-left: 0.5rem; font-size: 1.1rem; text-decoration: none;" onclick="
+          var html = document.documentElement;
+          html.classList.remove('transition');
+          var current = html.getAttribute('data-theme');
+          var next = current === 'dark' ? 'light' : 'dark';
+          html.setAttribute('data-theme', next);
+          html.setAttribute('data-theme-setting', next);
+          localStorage.setItem('theme', next);
+          return false;
+        " title="Toggle dark mode"><i class="fa-solid fa-circle-half-stroke"></i></a>
       {% endif %}
       <!-- Navbar Toggle -->
       <button
@@ -106,14 +114,6 @@
       </div>
     </div>
   </nav>
-  {% if site.enable_darkmode %}
-    <!-- Toggle theme mode (floating slider) -->
-    <button id="light-toggle" class="theme-slider" title="Change theme" aria-label="Toggle dark mode">
-      <i class="ti ti-sun-filled theme-slider-icon sun-icon"></i>
-      <i class="ti ti-moon-filled theme-slider-icon moon-icon"></i>
-      <span class="theme-slider-knob"></span>
-    </button>
-  {% endif %}
   {% if site.enable_progressbar %}
     <!-- Scrolling Progress Bar -->
     <progress id="progress" value="0">

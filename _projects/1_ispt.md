@@ -6,12 +6,18 @@ img: assets/figures/ispt/soft_prompts.png
 importance: 1
 category: work
 _styles: >
-  
+  @media (max-width: 576px) {
+    .introspection-icon { max-width: 55% !important; }
+  }
+  html[data-theme="dark"] .introspection-icon .icon-light { display: none; }
+  html[data-theme="dark"] .introspection-icon .icon-dark { display: block; }
+  .introspection-icon .icon-dark { display: none; }
 
 ---
 
-<div style="max-width: 35%; margin: 0 auto;">
-{% include figure.liquid loading="eager" path="assets/figures/ispt/introspection.png" class="img-fluid" %}
+<div class="introspection-icon" style="max-width: 35%; margin: 0 auto;">
+<img src="{{ 'assets/figures/ispt/introspection.png' | relative_url }}" class="img-fluid icon-light">
+<img src="{{ 'assets/figures/ispt/introspection_dark.png' | relative_url }}" class="img-fluid icon-dark">
 </div>
 
 ## Summary

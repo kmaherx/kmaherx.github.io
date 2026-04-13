@@ -97,3 +97,237 @@ AI interpretability
 " style="text-decoration: none;"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </div>
 
+
+<canvas id="dot-grid" style="position: fixed; top: 0; right: 0; width: 50vw; height: 100vh; pointer-events: auto; z-index: 0;"></canvas>
+
+<script>
+(function() {
+  if (window.innerWidth < 768) return;
+
+  var canvas = document.getElementById('dot-grid');
+  var ctx = canvas.getContext('2d');
+  var spacing = 20;
+  var dpr = window.devicePixelRatio || 1;
+  var cols, rows, w, h;
+
+  // Graph state
+  var graph = {}; // "c,r" -> true for visited nodes
+  var nodes = []; // [{c,r}] in creation order
+  var edges = []; // [{c1,r1,c2,r2}]
+  var frontier = []; // [{c,r}] nodes to grow from
+  var growDir = {dx: 0, dy: 0}; // bias direction
+  var growInterval = null;
+  var fading = false;
+  var fadeHead = 0; // how many items (nodes/edges) have fully faded
+  var fadeRAF = null;
+
+  // 8 neighbor offsets
+  var neighbors = [
+    {dc:-1,dr:0},{dc:1,dr:0},{dc:0,dr:-1},{dc:0,dr:1},
+    {dc:-1,dr:-1},{dc:1,dr:-1},{dc:-1,dr:1},{dc:1,dr:1}
+  ];
+
+  function setup() {
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cols = Math.floor(w / spacing);
+    rows = Math.floor(h / spacing);
+  }
+
+  function dotX(c) { return c * spacing + spacing / 2; }
+  function dotY(r) { return r * spacing + spacing / 2; }
+
+  function drawBase() {
+    ctx.clearRect(0, 0, w, h);
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    ctx.fillStyle = dark ? 'rgba(200,200,200,0.15)' : 'rgba(0,0,0,0.1)';
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        ctx.beginPath();
+        ctx.arc(dotX(c), dotY(r), 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function drawGraph() {
+    if (edges.length === 0 && nodes.length === 0) return;
+    var total = edges.length;
+
+    // Draw edges with per-edge alpha based on creation order
+    ctx.lineWidth = 1;
+    for (var i = 0; i < edges.length; i++) {
+      var a;
+      if (!fading) {
+        a = 1;
+      } else {
+        // fadeHead is a float; edges before it are fading, wide window = slow per-item fade
+        var dist = i - fadeHead;
+        a = Math.max(0, Math.min(1, (dist + 40) / 40));
+      }
+      if (a <= 0) continue;
+      var e = edges[i];
+      ctx.strokeStyle = 'rgba(255,255,255,' + (0.4 * a) + ')';
+      ctx.beginPath();
+      ctx.moveTo(dotX(e.c1), dotY(e.r1));
+      ctx.lineTo(dotX(e.c2), dotY(e.r2));
+      ctx.stroke();
+    }
+
+    // Draw nodes with per-node alpha
+    for (var i = 0; i < nodes.length; i++) {
+      var a;
+      if (!fading) {
+        a = 1;
+      } else {
+        var dist = i - fadeHead;
+        a = Math.max(0, Math.min(1, (dist + 40) / 40));
+      }
+      if (a <= 0) continue;
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.7 * a) + ')';
+      ctx.beginPath();
+      ctx.arc(dotX(nodes[i].c), dotY(nodes[i].r), 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function render() {
+    drawBase();
+    drawGraph();
+  }
+
+  function growStep() {
+    if (frontier.length === 0) return;
+
+    // Very strongly bias toward most recently added frontier node
+    var fi = frontier.length - 1 - Math.floor(Math.pow(Math.random(), 5) * frontier.length);
+    fi = Math.max(0, fi);
+    var node = frontier[fi];
+
+    // Score neighbors by direction bias
+    var candidates = [];
+    for (var i = 0; i < neighbors.length; i++) {
+      var n = neighbors[i];
+      var nc = node.c + n.dc;
+      var nr = node.r + n.dr;
+      if (nc < 0 || nc >= cols || nr < 0 || nr >= rows) continue;
+      if (graph[nc + ',' + nr]) continue;
+
+      // Combine global direction bias with local momentum
+      var globalDot = n.dc * growDir.dx + n.dr * growDir.dy;
+      var localDot = n.dc * node.dc + n.dr * node.dr;
+      var dot = globalDot * 0.3 + localDot * 0.7;
+      var weight = Math.max(0.01, Math.pow(Math.max(0, 0.5 + dot), 3));
+      candidates.push({c: nc, r: nr, fc: node.c, fr: node.r, w: weight});
+    }
+
+    if (candidates.length === 0) {
+      frontier.splice(fi, 1);
+      return;
+    }
+
+    // Weighted random selection
+    var total = 0;
+    for (var i = 0; i < candidates.length; i++) total += candidates[i].w;
+    var rnd = Math.random() * total;
+    var pick = candidates[0];
+    var acc = 0;
+    for (var i = 0; i < candidates.length; i++) {
+      acc += candidates[i].w;
+      if (rnd <= acc) { pick = candidates[i]; break; }
+    }
+
+    // Add node and edge, carry momentum from parent direction
+    graph[pick.c + ',' + pick.r] = true;
+    nodes.push({c: pick.c, r: pick.r});
+    edges.push({c1: pick.fc, r1: pick.fr, c2: pick.c, r2: pick.r});
+    // Normalize the step direction for momentum
+    var stepDc = pick.c - pick.fc;
+    var stepDr = pick.r - pick.fr;
+    var stepLen = Math.sqrt(stepDc * stepDc + stepDr * stepDr) || 1;
+    frontier.push({c: pick.c, r: pick.r, dc: stepDc / stepLen, dr: stepDr / stepLen});
+
+    render();
+  }
+
+  function startGrow(e) {
+    // Stop any existing fade
+    if (fadeRAF) { cancelAnimationFrame(fadeRAF); fadeRAF = null; }
+    fading = false;
+    fadeHead = 0;
+
+    // Clear previous graph
+    graph = {};
+    nodes = [];
+    edges = [];
+    frontier = [];
+
+    var rect = canvas.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var c = Math.round((mx - spacing / 2) / spacing);
+    var r = Math.round((my - spacing / 2) / spacing);
+    c = Math.max(0, Math.min(cols - 1, c));
+    r = Math.max(0, Math.min(rows - 1, r));
+
+    // Random growth direction
+    var angle = Math.random() * Math.PI * 2;
+    growDir = {dx: Math.cos(angle), dy: Math.sin(angle)};
+
+    graph[c + ',' + r] = true;
+    nodes.push({c: c, r: r});
+    frontier.push({c: c, r: r, dc: growDir.dx, dr: growDir.dy});
+
+    render();
+    growInterval = setInterval(growStep, 30);
+  }
+
+  function stopGrow() {
+    if (!growInterval) return;
+    // Let it keep growing for a bit (inertia)
+    setTimeout(function() {
+      if (growInterval) {
+        clearInterval(growInterval);
+        growInterval = null;
+      }
+      // Start sequential fade: trigger spreads fast, each item fades slowly
+    fading = true;
+    fadeHead = 0;
+    var total = Math.max(nodes.length, edges.length);
+    var fadeStart = performance.now();
+    function fade(now) {
+      var elapsed = now - fadeStart;
+      // Trigger sweeps through all items in ~300ms (fast spread)
+      fadeHead = (elapsed / 300) * total;
+      // But each item takes ~40 indices worth of distance to fully fade (slow per-item)
+      // Check if the last item has fully faded
+      if (fadeHead >= total + 40) {
+        fading = false;
+        graph = {};
+        nodes = [];
+        edges = [];
+        frontier = [];
+        render();
+        return;
+      }
+      render();
+      fadeRAF = requestAnimationFrame(fade);
+    }
+    fadeRAF = requestAnimationFrame(fade);
+    }, 200);
+  }
+
+  setup();
+  render();
+
+  canvas.addEventListener('mousedown', startGrow);
+  document.addEventListener('mouseup', stopGrow);
+  window.addEventListener('resize', function() { setup(); render(); });
+
+  var observer = new MutationObserver(function() { render(); });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>

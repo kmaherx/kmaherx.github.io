@@ -1,17 +1,21 @@
 ---
 layout: page
 title: Soft prompts as a window into introspection in large language models
-description: <em>April 2026</em>
+description: <em>April 12, 2026</em>
 img: assets/figures/ispt/soft_prompts.png
 importance: 1
 category: work
 _styles: >
   @media (max-width: 576px) {
     .introspection-icon { max-width: 55% !important; }
+    .bojangles-container { max-width: 120% !important; margin-left: -10% !important; margin-right: -10% !important; }
   }
   html[data-theme="dark"] .introspection-icon .icon-light { display: none; }
   html[data-theme="dark"] .introspection-icon .icon-dark { display: block; }
   .introspection-icon .icon-dark { display: none; }
+  html[data-theme="dark"] .bojangles-light { display: none; }
+  html[data-theme="dark"] .bojangles-dark { display: block; }
+  .bojangles-dark { display: none; }
 
 ---
 
@@ -182,7 +186,7 @@ This aligns with what the assistant axis actually encodes. The steering vector p
 
 Soft prompts do not have to be uninterpretable. With syntactic framing during training, models produce accurate self-descriptions across diverse targets, and SAE analysis confirms that the underlying representations align with ground-truth features at concept-encoding layers. Our practical finding is straightforward: soft prompts can be interpretable.
 
-But the broader contribution is a paradigm. Soft prompts give us a controlled setting for studying when models can and cannot explain their own behavioral states. We inject a known behavioral change through the model's normal input pathway, vary the syntactic scaffolding, and measure the effect on both self-verbalization and internal representations. What the model reveals under these conditions goes beyond surface description: for text-instruction targets, it names the instruction; for the steering-vector target, it names the *kind* of instruction, grasping persona embodiment rather than surface style. Whether a model can describe its own behavioral state depends on whether that state was structured to be describable in the first place. Contextualization during training is what makes the representation legible. Without it, the model genuinely cannot separate what it is doing from the act of doing it.
+But the broader contribution is a paradigm. Soft prompts give us a controlled setting for studying when models can and cannot explain their own behavioral states. We inject a known behavioral change through the model's normal input pathway, vary the syntactic scaffolding, and measure the effect on both self-verbalization and internal representations. What the model reveals under these conditions goes beyond surface description: for text-instruction targets, it names the instruction; for the steering-vector target, it names the *kind* of instruction, grasping persona embodiment rather than surface style. Whether a model can describe its own behavioral state depends on whether that state was structured to be describable in the first place. **Contextualization during training is what makes the representation legible. Without it, the model genuinely cannot separate what it is doing from the act of doing it.**
 
 ---
 
@@ -193,3 +197,10 @@ But the broader contribution is a paradigm. Soft prompts give us a controlled se
 **Introspection.** Lindsey et al. ([2025](https://www.anthropic.com/research/introspection)) inject activation vectors directly into a model's hidden states and measure whether the model detects the injection, finding roughly 20% awareness. We do something structurally similar, injecting learned vectors via the embedding layer and asking the model to describe them, but through the model's normal input pathway. When contextualized, the verbalization quality is much higher. Soft prompts may be a tractable testbed for studying what models can and cannot recognize about their own behavioral state, because they enter through a pathway the model already knows how to process.
 
 **Model diffing.** Training a soft prompt to match a behavioral gap is a form of model diffing at the prompt level: the soft prompt *is* the diff, expressed as an input-level vector rather than a weight change or activation pattern. This complements weight-level diffing ([Diff Interpretation Tuning](https://openreview.net/forum?id=6As4wfTB77)) and activation-level diffing ([crosscoders](https://arxiv.org/abs/2504.02922)). Soft prompt diffing is uniquely amenable to self-verbalization: the model can literally describe the diff.
+
+---
+
+<div class="bojangles-container" style="max-width: 65%; margin: 0 auto;">
+<img src="{{ 'assets/figures/ispt/bojangles_windjammer.png' | relative_url }}" class="img-fluid bojangles-light">
+<img src="{{ 'assets/figures/ispt/bojangles_windjammer_dark.png' | relative_url }}" class="img-fluid bojangles-dark">
+</div>

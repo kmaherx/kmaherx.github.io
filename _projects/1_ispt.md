@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Soft prompts as a window into model introspection
+title: Soft prompts as a window into introspection in large language models
 description: <em>April 2026</em>
 img: assets/figures/ispt/soft_prompts.png
 importance: 1

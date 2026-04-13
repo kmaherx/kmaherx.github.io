@@ -62,6 +62,9 @@ a.about-link {
 a.about-link:hover {
   border-bottom-style: solid;
 }
+@media (max-width: 768px) {
+  #dot-grid { display: none !important; }
+}
 </style>
 
 <div class="about-blurb">
@@ -102,7 +105,7 @@ AI interpretability
 
 <script>
 (function() {
-  if (window.innerWidth < 768) return;
+  // CSS media query handles hiding on mobile
 
   var canvas = document.getElementById('dot-grid');
   var ctx = canvas.getContext('2d');
@@ -143,7 +146,7 @@ AI interpretability
   function drawBase() {
     ctx.clearRect(0, 0, w, h);
     var dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    ctx.fillStyle = dark ? 'rgba(200,200,200,0.15)' : 'rgba(0,0,0,0.1)';
+    ctx.fillStyle = dark ? 'rgba(200,200,200,0.15)' : 'rgba(0,0,0,0.25)';
     for (var r = 0; r < rows; r++) {
       for (var c = 0; c < cols; c++) {
         ctx.beginPath();
@@ -155,41 +158,33 @@ AI interpretability
 
   function drawGraph() {
     if (edges.length === 0 && nodes.length === 0) return;
-    var total = edges.length;
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var rgb = dark ? '255,255,255' : '0,0,0';
 
-    // Draw edges with per-edge alpha based on creation order
-    ctx.lineWidth = 1;
+    ctx.lineWidth = dark ? 1 : 1.5;
     for (var i = 0; i < edges.length; i++) {
-      var a;
-      if (!fading) {
-        a = 1;
-      } else {
-        // fadeHead is a float; edges before it are fading, wide window = slow per-item fade
-        var dist = i - fadeHead;
-        a = Math.max(0, Math.min(1, (dist + 40) / 40));
+      var a = 1;
+      if (fading) {
+        a = Math.max(0, Math.min(1, (i - fadeHead + 40) / 40));
       }
       if (a <= 0) continue;
       var e = edges[i];
-      ctx.strokeStyle = 'rgba(255,255,255,' + (0.4 * a) + ')';
+      ctx.strokeStyle = 'rgba(' + rgb + ',' + (dark ? 0.4 : 0.7) * a + ')';
       ctx.beginPath();
       ctx.moveTo(dotX(e.c1), dotY(e.r1));
       ctx.lineTo(dotX(e.c2), dotY(e.r2));
       ctx.stroke();
     }
 
-    // Draw nodes with per-node alpha
     for (var i = 0; i < nodes.length; i++) {
-      var a;
-      if (!fading) {
-        a = 1;
-      } else {
-        var dist = i - fadeHead;
-        a = Math.max(0, Math.min(1, (dist + 40) / 40));
+      var a = 1;
+      if (fading) {
+        a = Math.max(0, Math.min(1, (i - fadeHead + 40) / 40));
       }
       if (a <= 0) continue;
-      ctx.fillStyle = 'rgba(255,255,255,' + (0.7 * a) + ')';
+      ctx.fillStyle = 'rgba(' + rgb + ',' + (dark ? 0.7 : 0.9) * a + ')';
       ctx.beginPath();
-      ctx.arc(dotX(nodes[i].c), dotY(nodes[i].r), 2.5, 0, Math.PI * 2);
+      ctx.arc(dotX(nodes[i].c), dotY(nodes[i].r), dark ? 2.5 : 3, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -203,7 +198,7 @@ AI interpretability
     if (frontier.length === 0) return;
 
     // Very strongly bias toward most recently added frontier node
-    var fi = frontier.length - 1 - Math.floor(Math.pow(Math.random(), 5) * frontier.length);
+    var fi = frontier.length - 1 - Math.floor(Math.pow(Math.random(), 6) * frontier.length);
     fi = Math.max(0, fi);
     var node = frontier[fi];
 

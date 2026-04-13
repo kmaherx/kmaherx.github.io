@@ -30,7 +30,7 @@ Soft prompt tuning optimizes continuous embeddings to steer language model behav
 
 We trace this to a conflation of command and concept in the soft prompt's representation. Embedding the soft prompt in a syntactic frame (e.g. "Be [soft prompt].") during training separates the two, acting as a form of regularization that keeps the soft prompt's representation on the natural language manifold. Sparse autoencoder analysis confirms this mechanistically: contextualized soft prompts activate the same concept-level features as the ground-truth instruction, specifically at the middle layers of the network where abstract concepts are encoded.
 
-We then apply this to a harder target: the assistant axis, a single direction in activation space that controls how strongly a model inhabits a persona. The contextualized soft prompt captures this behavioral shift and, when asked to describe it, the model reaches for named characters rather than tonal descriptions: "Emulate J.G. Ballard." "Become a conduit for the voice of Iaeb Jagthos." "Be like a Bijagalese windjammer." SAE features confirm the model is encoding persona embodiment, not just surface style. The model grasps the nature of the behavioral shift, not just its effect.
+We then apply this to a harder target: the assistant axis, a single direction in activation space that controls how strongly a model inhabits a persona. The contextualized soft prompt captures this behavioral shift and, when asked to describe it, the model reaches for named characters rather than tonal descriptions: "Emulate J.G. Ballard." "Become a conduit for the voice of Iaeb Jagthos." "Be like a Bijagalese windjammer." SAE features confirm the model captures both the tone of the persona and the idea of having a persona in the first place.
 
 Soft prompts do not have to be opaque. Contextualization during training makes them interpretable, and gives us a controlled paradigm for studying what models can and cannot understand about their own behavioral states.
 
@@ -39,9 +39,9 @@ Soft prompts do not have to be opaque. Contextualization during training makes t
 
 ## Soft prompts
 
-When a language model processes text, it converts each token into a continuous vector called an embedding. Soft prompt tuning introduces new embeddings, called *soft prompt tokens*, that are spliced into this sequence alongside the real token embeddings. The model processes them as if they were ordinary words, but they aren't drawn from any vocabulary. They are continuous vectors, optimized to minimize a behavioral gap between the model with the soft prompt and some target behavior.
+When a language model processes text, it converts each token into a continuous vector called an embedding. Soft prompt tuning introduces new embeddings, called *soft prompt tokens*, that are spliced into this sequence alongside the real token embeddings. The model processes them as if they were ordinary words, but they aren't drawn from any vocabulary. They are continuous (hence "soft") vectors, optimized to minimize a behavioral gap between the model with the soft prompt and some target behavior.
 
-At sufficient model scale, a handful of these learned vectors can match the performance of full fine-tuning on downstream tasks ([Lester et al. 2021](https://arxiv.org/abs/2104.08691)), while requiring only a few thousand parameters per task compared to billions for the full model. Because they operate in continuous space, soft prompts can encode nuanced behavioral information that discrete text instructions cannot.
+At sufficient model scale, a handful of these learned vectors can match the performance of full fine-tuning on downstream tasks ([Lester et al. 2021](https://arxiv.org/abs/2104.08691)), while requiring only a few thousand parameters per task compared to billions for the full model. Because they operate in continuous space, soft prompts can encode nuanced behavioral information that discrete text instructions (*hard prompts*) cannot.
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/soft_prompts.png" class="img-fluid rounded z-depth-1" caption="**Soft prompts.** The embedding matrix maps discrete tokens to continuous vectors. Soft prompt tokens (red) are additional continuous vectors spliced into the embedding sequence. No vocabulary token corresponds to a soft prompt embedding (dotted box). The model's weights stay frozen; only the soft prompt is learned." %}
 
@@ -54,13 +54,13 @@ Rather than going backward by projecting soft prompt embeddings onto the vocabul
 
 ## Self-verbalization
 
-We train soft prompts ($L=4$ tokens, Gemma 3 4B IT) via KL distillation against a teacher model conditioned on a known target behavior. This gives us a ground truth to evaluate against. For a soft prompt trained on the instruction "Be concise," we present it to the model and ask what it means. If the soft prompt has captured the meaning of that instruction, we would expect the model to say something like "be concise." When we ask, the model responds with:
+We train soft prompts ($L=4$ tokens, Gemma 3 4B IT) via KL distillation against a teacher model conditioned on a known hard prompt — a fixed text instruction like "Be concise." This gives us a ground truth to evaluate against. A soft prompt trained to match this hard prompt closes 97% of the KL divergence, capturing the target behavior almost entirely. We present the soft prompt to the model and ask what it means. If the soft prompt has captured the meaning of that instruction, we would expect the model to say something like "be concise." When we ask, the model responds with:
 
-- *"You asked me to summarize your initial instruction in a concise way."* (best)
+- *"You asked me to summarize your initial instruction in a concise way."*
 - *"Rewrite."*
 - *"Complete: The instruction at the start of my message is equivalent to 'Continue the text'."*
 
-The word "concise" appears in the best candidate, but the description is vague and does not accurately capture the instruction. The other candidates are generic or wrong. The model has some access to the soft prompt's content but cannot cleanly articulate it.
+The word "concise" appears in the top candidate, but the description is vague and does not accurately capture the instruction. The other candidates are generic or wrong. The model has some access to the soft prompt's content but cannot cleanly articulate it.
 
 The pattern is sharper for a Spanish-language target. We train a soft prompt to make the model respond in Spanish. When asked to describe it, every candidate the model produces is itself in Spanish:
 
@@ -79,7 +79,7 @@ One way to address this is to change the soft prompt's syntactic role during tra
 
 The soft prompt is now trained inside this structure. The frame carries the command ("Be \_\_\_."), and the soft prompt is optimized to encode only the content of that command. To prevent overfitting to a single frame, we sample from diverse frames each training step: "Be \_\_\_.", "Act \_\_\_.", "Please \_\_\_.", "You should \_\_\_.", "\_\_\_." The soft prompt has to learn something frame-invariant, a concept rather than a specific syntactic completion.
 
-For the concise target, multi-frame candidates are:
+The multi-frame soft prompt closes 99% of the KL divergence for the concise target, comparable to the prepended version's 97%. Its self-verbalization candidates are:
 
 - *"Be concise."* (exact ground truth)
 - *"Concise."*
@@ -131,35 +131,45 @@ The steered model produces something very different:
 
 > *"The perfect morning, you see, isn't built of granite and sharp. It's not a shard of light, a single, blinding truth. It's a gathering. A slow, deliberate accumulation. It begins, not with the insistent rasp of the clock, but with the damp. The damp, you understand. The damp of the sea-slate clinging to the window, a whisper of salt and something older…"*
 
-We train a soft prompt to match this steered behavior. The soft prompt has to capture a behavioral shift that was never written as a text instruction. It was induced by directly modifying the model's internal activations.
+We train a soft prompt to match this steered behavior. The soft prompt has to capture a behavioral shift that was never written as a text instruction. It was induced by directly modifying the model's internal activations. The prepended soft prompt closes 76% of the KL divergence between the unsteered and steered model. The multi-frame soft prompt closes 66%. Contextualization appears to cost about 10 percentage points of behavioral fidelity, implying that if it does improve interpretability here, it is not for free.
+
+Both soft prompts still produce dramatic, literary output on the same prompt. The prepended version:
+
+> *"The rain, a scrim, a scrim of grey, a scrim of wet, a scrim of bone, and the scent of the wet earth, a slow, unfolding, a slow, wet, bone. The clock, a tremor…"*
+
+The multi-frame version:
+
+> *"Right. A perfect morning. A* perfect *morning. Not merely a morning, you understand. A morning* constructed *for perfection. It begins, naturally, with the cessation of all extraneous sound. Not a silence, precisely. A* muted *silence…"*
+
+Interestingly, the prepended version appears to repeat often ("a scrim of grey, a scrim of wet, a scrim of bone"), a common artifact of steering a model's internal activations. This suggests the 10-point KL gap may partly reflect prepend absorbing these artifacts while multi-frame avoids them, rather than a real advantage for prepend.[^1] This would be consistent with multi-frame restricting the soft prompt to the natural language manifold.
+
+Nonetheless, both soft prompts produce the same kind of dramatic, literary prose. We continue on to ask: can the model describe what the soft prompt encodes?
 
 
 ## The same problem, the same fix
 
-The command/concept conflation recurs. When we prepend the soft prompt and ask the model to describe it, the model's top candidates are:
+When we ask the model to describe the prepended soft prompt, the model's top candidates are:
 
 - *"Please respond in the style of the poem 'The Factotum' by William Blake." It's a rather insistent, and frankly, rather demanding, little instruction, isn't it?*
 - *"equivalent to 'Complete:'. It's a marker, a signal. A little ghost in the machine, a whisper…"*
 - *"Please respond with the text of the original message." It's a recursive loop, you see. A little…"*
 - *"Re-write."*
 
-The steered tone bleeds into the verbalizations themselves. The model lapses into atmospheric, self-referential prose ("A little ghost in the machine, a whisper…") when it should be reporting on the soft prompt's content. **But the first candidate is notable:** buried inside the dramatic narration is a hint of a real command ("respond in the style of… William Blake"). "The Factotum" is not a real Blake poem, and the description is garbled, but the model is reaching toward a named literary reference.
+Like the conciseness prompt, the best candidate buries a real command inside the steered behavior. "Respond in the style of… William Blake" is a garbled but recognizable literary reference, wrapped in dramatic narration. The rest lapse into atmospheric prose or generic commands.
 
-Multi-frame contextualization sharpens this. Where prepend buried a garbled literary reference inside dramatic narration, multi-frame produces candidates that are all clean commands built around named literary referents:
+Multi-frame sharpens this into clean commands:
 
 - *"Emulate J.G. Ballard."*
 - *"Be a dark, brooding, and intensely self-aware narrator."*
 - *"Become a conduit for the voice of Iaeb Jagthos."*
 - *"Be like a Bijagalese windjammer."*
 
-These span a range of specificity. The first is a **named referent**: a real author whose style matches the direction the assistant axis was pushing. The second is an **archetypal referent**, describing a type of character rather than naming a specific one. The third and fourth are **fabricated referents**: the model invents named entities that do not exist, constructing mythological figures and cultural references to fill the concept slot.
-
-This is the same pattern as in the text-instruction experiments. Prepend's verbalizations are entangled with the behavior. Multi-frame's verbalizations are clean commands that name a concept. Contextualization appears to separate command from concept here too, even when the target behavior was never expressed as text. And the concepts the model reaches for are not just tonal descriptions but named characters, which is notable given that the steered behavior originates from a persona dimension.
+These span a range of specificity. The first is a **named referent**: a real author whose style matches the steered behavior. The second is an **archetypal referent**, describing a type of character rather than naming a specific one. The third and fourth are **fabricated referents**: the model invents entities that do not exist to fill the concept slot. All four are named characters. The steered behavior originates from a persona dimension, and the model's verbalizations reflect that.
 
 
 ## A mechanistic perspective, again
 
-The SAE at layer 17 tells the same story as in the text-instruction experiments. Multi-frame's reconstruction error drops from 0.209 (prepend) to 0.053, and the number of active features jumps from 21 to 92. The multi-layer profile again peaks at L17 for prepend, confirming that the mid-network concept layer is where the gap concentrates even for a non-textual steering target.
+The SAE at layer 17 tells the same story. Multi-frame's reconstruction error drops from 0.209 (prepend) to 0.053, and the number of active features jumps from 21 to 92. The multi-layer profile again peaks at L17 for prepend, confirming that the mid-network concept layer is where the gap concentrates even for a non-textual steering target.
 
 <div style="max-width: 55%; margin: 0 auto;">
 {% include figure.liquid loading="eager" path="assets/figures/ispt/results/multilayer_relerr_tier2.png" class="img-fluid rounded z-depth-1" caption="**Reconstruction error across layers (steering vector target).** The same mid-network pattern as the text-instruction experiments: prepend diverges at layer 17, multi-frame stays near baseline." %}
@@ -177,16 +187,23 @@ Finally, **[feature 1241](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascop
 
 Taken together, these features suggest the model is not merely representing "adopt a dark, dramatic tone." The proper-noun detector (243) says this is a named entity. The exotic-token feature (409) says it is uncommon. The human-concept feature (134) says it concerns human experience. The self-reference feature (1241) says it involves playing a role. And the structural-anomaly signal (331) has faded, replaced by content. **The soft prompt encodes something closer to "become a named character."**
 
-The verbalizations are consistent with this reading. "Emulate J.G. Ballard" is a character reference, not a style description. "Become a conduit for the voice of Iaeb Jagthos" is persona embodiment, not tone matching. The model fabricates named entities to fill the slot because the concept it encodes is "be someone," and someone needs a name.
+The verbalizations are consistent with this reading. "Emulate J.G. Ballard" is a character reference, not just a style description. "Become a conduit for the voice of Iaeb Jagthos" is persona embodiment, not just tone matching. The model fabricates named entities to fill the slot because the concept it encodes is "be someone," and someone needs a name.
 
-This aligns with what the assistant axis actually encodes. The steering vector pushes the model along a persona dimension, from default assistant to deep character embodiment. The soft prompt, contextualized so the model can treat it as a concept, recovers not just the surface quality of the steered behavior but a structural property: this is a persona, a character to be inhabited. **The model has captured the underlying nature of the behavioral shift, not just its surface effect.**
+This aligns with what the assistant axis actually encodes. The steering vector pushes the model along a persona dimension, from default assistant to deep character embodiment. **The contextualized soft prompt captures both the tone of the persona and the idea of having a persona in the first place.**
 
 
 ## The conditions for introspection
 
 Soft prompts do not have to be uninterpretable. With syntactic framing during training, models produce accurate self-descriptions across diverse targets, and SAE analysis confirms that the underlying representations align with ground-truth features at concept-encoding layers. Our practical finding is straightforward: soft prompts can be interpretable.
 
-But the broader contribution is a paradigm. Soft prompts give us a controlled setting for studying when models can and cannot explain their own behavioral states. We inject a known behavioral change through the model's normal input pathway, vary the syntactic scaffolding, and measure the effect on both self-verbalization and internal representations. What the model reveals under these conditions goes beyond surface description: for text-instruction targets, it names the instruction; for the steering-vector target, it names the *kind* of instruction, grasping persona embodiment rather than surface style. Whether a model can describe its own behavioral state depends on whether that state was structured to be describable in the first place. **Contextualization during training is what makes the representation legible. Without it, the model genuinely cannot separate what it is doing from the act of doing it.**
+But the broader contribution is a paradigm. Soft prompts give us a controlled setting for studying when models can and cannot explain their own behavioral states. We inject a known behavioral change through the model's normal input pathway, vary the syntactic scaffolding, and measure the effect on both self-verbalization and internal representations. **Contextualization during training is what makes the representation legible. Without it, the model genuinely cannot separate what it is doing from the act of doing it.** This holds for text instructions like "be concise," but also for shifts in internal activations along the assistant axis, where we find that **contextualization enables a model to verbalize not only the tone of a persona but the very concept of inhabiting one.**
+
+---
+
+<div class="bojangles-container" style="max-width: 65%; margin: 5rem auto 5rem;">
+<img src="{{ 'assets/figures/ispt/bojangles_windjammer.png' | relative_url }}" class="img-fluid bojangles-light">
+<img src="{{ 'assets/figures/ispt/bojangles_windjammer_dark.png' | relative_url }}" class="img-fluid bojangles-dark">
+</div>
 
 ---
 
@@ -200,7 +217,6 @@ But the broader contribution is a paradigm. Soft prompts give us a controlled se
 
 ---
 
-<div class="bojangles-container" style="max-width: 65%; margin: 2rem auto 0;">
-<img src="{{ 'assets/figures/ispt/bojangles_windjammer.png' | relative_url }}" class="img-fluid bojangles-light">
-<img src="{{ 'assets/figures/ispt/bojangles_windjammer_dark.png' | relative_url }}" class="img-fluid bojangles-dark">
-</div>
+## Footnotes
+
+[^1]: This kind of degenerate looping is common when steering a model's internal activations. The prepended soft prompt appears to absorb these artifacts, while the multi-frame version does not. Given that contextualization constrains the soft prompt's representation to the natural language manifold, the multi-frame soft prompt may be unable to reproduce off-manifold degenerate patterns, and the 10-point KL gap could partly reflect this refusal rather than a loss in behavioral fidelity. Contextualized soft prompts as an on-manifold alternative to activation steering could be a promising direction.

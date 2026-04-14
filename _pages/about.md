@@ -119,7 +119,11 @@ AI interpretability
   var edges = []; // [{c1,r1,c2,r2}]
   var frontier = []; // [{c,r}] nodes to grow from
   var growDir = {dx: 0, dy: 0}; // bias direction
-  var growInterval = null;
+  var growTimeout = null;
+  var growing = false;
+  var dragStartY = 0;
+  var rateMultiplier = 1; // 0.5 (slow) .. 2.0 (fast), controlled by drag
+  var baseInterval = 35; // ms between growth steps at 1x
   var fading = false;
   var fadeAlpha = 1; // global alpha multiplier during fade
   var fadeRAF = null;
@@ -334,13 +338,36 @@ AI interpretability
     frontier.push({c: c, r: r, dc: growDir.dx, dr: growDir.dy});
 
     render();
-    growInterval = setInterval(growStep, 30);
+
+    // Begin growth loop. Drag up/down adjusts rate via rateMultiplier.
+    growing = true;
+    dragStartY = e.clientY;
+    rateMultiplier = 1;
+    scheduleNextStep();
+  }
+
+  function scheduleNextStep() {
+    if (!growing) return;
+    var interval = baseInterval / rateMultiplier;
+    growTimeout = setTimeout(function() {
+      if (!growing) return;
+      growStep();
+      scheduleNextStep();
+    }, interval);
+  }
+
+  function onDrag(e) {
+    if (!growing) return;
+    // Up = faster (negative deltaY), down = slower. 200px travel -> 2x.
+    var deltaY = e.clientY - dragStartY;
+    var m = Math.pow(2, -deltaY / 200);
+    rateMultiplier = Math.max(0.5, Math.min(2, m));
   }
 
   function stopGrow() {
-    if (!growInterval) return;
-    clearInterval(growInterval);
-    growInterval = null;
+    if (!growing) return;
+    growing = false;
+    if (growTimeout) { clearTimeout(growTimeout); growTimeout = null; }
 
     // Uniform fade: whole graph fades together starting now
     fading = true;
@@ -369,6 +396,7 @@ AI interpretability
   render();
 
   canvas.addEventListener('mousedown', startGrow);
+  document.addEventListener('mousemove', onDrag);
   document.addEventListener('mouseup', stopGrow);
   window.addEventListener('resize', function() { setup(); render(); });
 

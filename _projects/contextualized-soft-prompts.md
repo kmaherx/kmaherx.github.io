@@ -204,6 +204,8 @@ Finally, **[feature 1241](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascop
 
 Taken together, the proper-noun, exotic-token, human-concept, and self-reference signals suggest the contextualized soft prompt encodes something closer to "become a named character" than "adopt a dark, dramatic tone." The verbalizations match: "Emulate J.G. Ballard," "Become a conduit for the voice of Iaeb Jagthos," fabricated names where no real one fits. The contextualized soft prompt captures both the tone of the persona and the idea of having one. In that sense, contextualization doesn't just match the steering vector; it makes the persona structure legible in a way the vector itself does not.
 
+Together with the hard-prompt experiments, we take this as solid evidence that contextualized soft prompts are indeed interpretable.
+
 
 ---
 

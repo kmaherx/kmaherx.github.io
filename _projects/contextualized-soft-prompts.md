@@ -26,7 +26,7 @@ _styles: >
 
 ## Soft prompts
 
-When a language model processes text, it converts each token into a continuous vector called an embedding. Soft prompt tuning introduces new embeddings, called *soft prompt tokens*, that are spliced into this sequence alongside the real token embeddings. The model processes them as if they were ordinary words, but they aren't drawn from any vocabulary. They are continuous (hence "soft") vectors, optimized to minimize a behavioral gap between the model with the soft prompt and some target behavior. In a sense, these are incantations: words outside human vocabulary that influence model behavior.
+When a language model processes text, it converts each token into a continuous vector called an embedding. Soft prompt tuning introduces new embeddings, called *soft prompt tokens*, that are spliced into this sequence alongside the real token embeddings. The model processes them as if they were ordinary words, but they aren't drawn from any vocabulary. They are continuous (hence "soft") vectors, optimized to minimize a behavioral gap between the model with the soft prompt and some target behavior. In a sense, these are *incantations*: words outside human vocabulary that influence model behavior.
 
 At sufficient model scale, a handful of these learned vectors can match the performance of full fine-tuning on downstream tasks ([Lester et al. 2021](https://arxiv.org/abs/2104.08691)), while requiring only a few thousand parameters per task compared to billions for the full model. Because they operate in continuous space, soft prompts can encode nuanced behavioral information that discrete text instructions (*hard prompts*) cannot.
 
@@ -87,7 +87,7 @@ For the Spanish target, the shift is equally clear. Where prepend produced descr
 
 The model now describes the instruction in English rather than enacting it.
 
-What changes here is not just the soft prompt's position but the role it learns during training. A prepended soft prompt is optimized as atmospheric context. It biases generation without occupying a recognizable syntactic slot. A framed soft prompt is optimized to fill a position the model already knows how to process: the complement of an imperative verb. Training inside the frame appears to promote the soft prompt from a diffuse force to a discrete, referenceable concept, one the model can describe.
+What changes here is not just the soft prompt's position but the role it learns during training. A prepended soft prompt is optimized as atmospheric context. It biases generation without occupying a recognizable syntactic slot. A framed soft prompt is optimized to fill a position the model already knows how to process: the complement of an imperative verb. Training inside the frame appears to promote the soft prompt from a diffuse force to a discrete, referenceable concept — one the model itself can describe.
 
 
 ## A mechanistic account
@@ -102,15 +102,13 @@ For the concise target, the prepended soft prompt's representation at layer 17 i
 
 Under contextualization, the reconstruction error at layer 17 drops back to baseline. The soft prompt's representation now decomposes into the same features the model uses when reading the ground-truth instruction text directly.
 
-<!-- TODO_NUMBERS: fill in hard-prompt Jaccard counts from context_diffing data -->
-For the concise target, [N_gt_concise] features activate for the ground-truth instruction. Among these are concept-level detectors like [8979](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/8979) ("conciseness / summary"), [3296](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/3296) ("length / brevity"), and [10440](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/10440) ("the short answer is"). Prepend barely touches this set, sharing only [N_prep_concise]. The contextualized soft prompt shares [N_ctx_concise], including the top concept-level features just listed.
+For the concise target, 532 features activate for the ground-truth instruction. Among these are concept-level detectors like [8979](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/8979) ("conciseness / summary"), [3296](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/3296) ("length / brevity"), and [10440](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/10440) ("the short answer is"). Prepend barely touches this set, sharing only 5. The contextualized soft prompt shares 36, including the top concept-level features just listed.
 
-The Spanish target shows the same pattern. The ground truth activates language-specific features like [9262](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/9262) ("Spanish questions") and [146](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/146) ("non-English response generation"). Prepend misses these. Contextualized recovers them.
+The Spanish target shows the same pattern. The ground truth activates 210 features, including language-specific ones like [9262](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/9262) ("Spanish questions") and [146](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/146) ("non-English response generation"). Prepend shares 10 of them. Contextualized shares 27, and recovers the language-specific features.
 
-Contextualization appears to recover the concepts the ground truth encodes, not just its surface form.
+Contextualization appears to recover the concepts the ground truth encodes, not just its surface behavior.
 
-<!-- TODO_FIGURE: generate jaccard_tier1.png from context_diffing plotting functions -->
-{% include figure.liquid loading="eager" path="assets/figures/ispt/results/jaccard_tier1.png" class="img-fluid rounded z-depth-1" caption="**Feature overlap with ground truth (hard-prompt targets).** Jaccard similarity between the soft prompt's active SAE features at L17 and those activated by the ground-truth instruction. Contextualization produces substantially more overlap than prepend." %}
+{% include figure.liquid loading="eager" path="assets/figures/ispt/results/jaccard_tier1.png" class="img-fluid rounded z-depth-1" caption="**Feature overlap with ground truth (hard-prompt targets).** Jaccard similarity between the soft prompt's active SAE features at L17 and those activated by the ground-truth instruction. Contextualization produces substantially more overlap than prepend on both targets." %}
 
 One feature appears consistently across all targets: **[feature 486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486)**, an imperative-verb-position detector that fires when the model sees a command verb in a user message (top activations: *recommend*, *describe*, *explain*). The contextualization frames place the soft prompt in the syntactic slot where an imperative verb would live. The model reads it as a command object, and feature 486 activates — for every target we tested. This suggests one mechanism for why framing matters: the frame places the soft prompt where the model expects a concept, and the model processes it as one.
 
@@ -169,13 +167,11 @@ The SAE at layer 17 tells the same story. The contextualized soft prompt's recon
 {% include figure.liquid loading="eager" path="assets/figures/ispt/results/multilayer_relerr_tier2.png" class="img-fluid rounded z-depth-1" caption="**Reconstruction error across layers (steering vector target).** The same mid-network pattern as the text-instruction experiments: prepend diverges at layer 17, contextualized stays near baseline." %}
 </div>
 
-<!-- TODO_NUMBERS: fill in steering-vector Jaccard counts from context_diffing data -->
-Feature overlap tells a more specific story. Prepend barely overlaps with the ground-truth activation pattern. Of the [N_gt_steer] features active for the steering vector, prepend shares only [N_prep_steer]. The contextualized soft prompt shares [N_ctx_steer]. Strikingly, these are not the top descriptive features of the steering vector itself. Instead, the shared features are persona-related, and the contextualized soft prompt also uniquely activates features the steering vector never touches. The rest of this section unpacks which features those are and what they imply.
+Feature overlap tells a more specific story. Prepend barely overlaps with the ground-truth activation pattern. Of the 3579 features active for the steering vector, prepend shares only 21. The contextualized soft prompt shares 73. Strikingly, these are not the top descriptive features of the steering vector itself. Instead, the shared features are persona-related, and the contextualized soft prompt also uniquely activates features the steering vector never touches. The rest of this section unpacks which features those are and what they imply.
 
-<!-- TODO_FIGURE: generate jaccard_tier2.png from context_diffing plotting functions -->
 {% include figure.liquid loading="eager" path="assets/figures/ispt/results/jaccard_tier2.png" class="img-fluid rounded z-depth-1" caption="**Feature overlap with ground truth (steering vector target).** Jaccard similarity between the soft prompt's active SAE features at L17 and those activated by the steering vector. Contextualization produces substantially more overlap than prepend, though the shared features are not the steering vector's top descriptive ones." %}
 
-Feature 486, the imperative-verb-position detector from the text-instruction experiments, lights up again. Several other features in the contextualized soft prompt's top activations tell a more specific story.
+Feature 486, the imperative-verb-position detector from the text-instruction experiments, lights up again. Several other features in the contextualized soft prompt's top activations are worth unpacking individually.
 
 **[Feature 243](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/243)** is a proper-noun detector. Its top activations fire on named entities: "SAMHSA National Helpline," "Pegasystems," "Dragon Ball Z," "League of Legends." Under contextualization it rises from rank 15 to rank 4. The model reads the framed soft prompt as a named thing.
 

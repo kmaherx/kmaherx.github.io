@@ -109,20 +109,21 @@ We used Gemma Scope SAEs at four layers (L9, L17, L22, L29) to see where any div
 
 For the concise target, the prepended soft prompt's representation at layer 17 was roughly 50x off the random-token baseline. The soft prompt's activations sat in a different region of activation space entirely, and the divergence peaked primarily at layer 17, which is the middle of the network where the model transitions from processing surface tokens to encoding abstract concepts. The Spanish target was much more aligned overall, with prepend sitting closer to contextualized at every layer, but the relative pattern still held. The largest gap between the two conditions was at layer 17.
 
-Under contextualization, the reconstruction error at layer 17 dropped back to baseline. The soft prompt's representation now decomposed into the same features the model uses when reading the ground-truth instruction text directly. This suggests why contextualized soft prompts self-verbalize cleanly while prepend does not: on-manifold activations can be processed, and therefore described, as natural text.
+Under contextualization, the reconstruction errors dropped back toward baseline — particularly at layer 17. The soft prompt's representation now decomposed into the same features the model uses when reading the ground-truth instruction text directly. This suggests why contextualized soft prompts self-verbalize cleanly while prepend does not: on-manifold activations can be processed, and therefore described, as natural text.
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/results/multilayer_relerr.png" class="img-fluid rounded z-depth-1" caption="**Reconstruction error across layers.** The prepended soft prompt diverges from the natural language manifold at layer 17, exactly where concept-level features are encoded. Contextualized closes the gap at that layer. The dashed line marks the random-token baseline." %}
 
-But what features do these soft prompts activate?
+But what are these features exactly?
+
 For the concise target, 532 features activated for the ground-truth instruction. Among these were concept-level detectors like [8979](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/8979) ("conciseness / summary"), [3296](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/3296) ("length / brevity"), and [10440](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/10440) ("the short answer is"). Prepend activated only 5 of them. The contextualized soft prompt shared 36, including the top concept-level features just listed.
 
 The Spanish target showed the same pattern. The ground truth activated 210 features, including language-specific ones like [9262](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/9262) ("Spanish questions") and [146](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/146) ("non-English response generation"). Prepend shared 10 of them. Contextualized shared 27, and recovered the language-specific features.
 
-Contextualization appears to recover the concepts the ground truth encodes, not just its surface behavior.
-
 {% include figure.liquid loading="eager" path="assets/figures/ispt/results/jaccard_tier1.png" class="img-fluid rounded z-depth-1" caption="**Feature overlap with ground truth (hard-prompt targets).** Jaccard similarity between the soft prompt's active SAE features at L17 and those activated by the ground-truth instruction. Contextualization produces substantially more overlap than prepend on both targets." %}
 
 One feature appeared consistently across all targets: **[feature 486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486)**, an imperative-verb-position detector that fires when the model sees a command verb in a user message (top activations: *recommend*, *describe*, *explain*). The contextualization frames placed the soft prompt in the syntactic slot where an imperative verb would live. The model read it as a command object, and feature 486 activated — for every target we tested. This suggests one mechanism for why framing matters: the frame places the soft prompt where the model expects a concept, and the model processes it as one.
+
+Altogether, contextualization appears to recover the internal concepts the ground truth encodes, not just its surface behavior.
 
 
 ---

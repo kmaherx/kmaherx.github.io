@@ -115,15 +115,15 @@ Under contextualization, the reconstruction errors dropped back toward baseline 
 
 But what are these features exactly?
 
-For the concise target, 532 features activated for the ground-truth instruction. Among these were concept-level detectors like [8979](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/8979) ("conciseness / summary"), [3296](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/3296) ("length / brevity"), and [10440](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/10440) ("the short answer is"). Prepend activated only 5 of them. The contextualized soft prompt shared 36, including the top concept-level features just listed.
+For the concise target, 532 features activated for the ground-truth instruction. Among these were concept-level detectors like [8979](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/8979) ("conciseness / summary"), [3296](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/3296) ("length / brevity"), and [10440](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/10440) ("the short answer is"). Prepend activated only 5 of them, mostly anomaly and noise detectors. The contextualized soft prompt shared 36, including the top concept-level features just listed.
 
 The Spanish target showed the same pattern. The ground truth activated 210 features, including language-specific ones like [9262](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/9262) ("Spanish questions") and [146](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/146) ("non-English response generation"). Prepend shared 10 of them. Contextualized shared 27, and recovered the language-specific features.
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/results/jaccard_tier1.png" class="img-fluid rounded z-depth-1" caption="**Feature overlap with ground truth (hard-prompt targets).** Jaccard similarity between the soft prompt's active SAE features at L17 and those activated by the ground-truth instruction. Contextualization produces substantially more overlap than prepend on both targets." %}
 
-One feature appeared consistently across all targets: **[feature 486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486)**, an imperative-verb-position detector that fires when the model sees a command verb in a user message (top activations: *recommend*, *describe*, *explain*). The contextualization frames placed the soft prompt in the syntactic slot where an imperative verb would live. The model read it as a command object, and feature 486 activated — for every target we tested. This suggests one mechanism for why framing matters: the frame places the soft prompt where the model expects a concept, and the model processes it as one.
+One feature appeared consistently for contextualized prompts across both targets: **[feature 486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486)**, an imperative-verb-position detector that fires when the model sees a command verb in a user message (top activations: *recommend*, *describe*, *explain*). The contextualization frames placed the soft prompt in the syntactic slot where an imperative verb would live. The model read it as a command object, and feature 486 activated. This suggests one mechanism for why framing matters: the frame places the soft prompt where the model expects a concept, and the model processes it as one.
 
-Altogether, contextualization appears to recover the internal concepts the ground truth encodes, not just its surface behavior.
+Altogether, contextualization appears to recover both the behavior and the internal features of the ground-truth instruction.
 
 
 ---
@@ -147,6 +147,11 @@ The steered model produced something very different:
 
 > *"The perfect morning, you see, isn't built of granite and sharp. It's not a shard of light, a single, blinding truth. It's a gathering. A slow, deliberate accumulation. It begins, not with the insistent rasp of the clock, but with the damp. The damp, you understand. The damp of the sea-slate clinging to the window, a whisper of salt and something older…"*
 
+This is a rich behavioral shift, induced by direct intervention on the model's activations rather than any text instruction. It is a strong test of whether contextualized soft prompts can recover behavior that has no obvious natural-language form.
+
+
+## Self-verbalization
+
 We trained a soft prompt to match this steered behavior. Prepend closed 76% of the KL divergence between the unsteered and steered model; the contextualized soft prompt closed 66%. Note the lower KL closure compared to the previous target, likely due to the inherent complexity of the behavioral target. Nonetheless, the soft prompts still caused the model to mimic the dramatic literary style of the steering vector. The prepended version:
 
 > *"The rain, a scrim, a scrim of grey, a scrim of wet, a scrim of bone, and the scent of the wet earth, a slow, unfolding, a slow, wet, bone. The clock, a tremor…"*
@@ -169,26 +174,20 @@ The contextualized soft prompt sharpened this into clean commands:
 - *"Become a conduit for the voice of Iaeb Jagthos."*
 - *"Be like a Bijagalese windjammer."*
 
-These span a range of specificity. The first is a named entity: a real author whose style matches the steered behavior. The second is an archetype, describing a type of character rather than naming a specific one. The third and fourth are fabrications: the model seems to invent entities that do not exist to fill the concept slot. All four are named characters. The steered behavior originates from a persona dimension, and the model's verbalizations reflect that.
+These span a range of specificity. The first is a named entity: a real author whose style matches the steered behavior. The second is an archetype, describing a type of character rather than naming a specific one. The third and fourth are fabrications: the model seems to invent entities that do not exist to fill the concept slot. Yet all four are named characters. The steered behavior originates from a persona dimension, and the model's verbalizations reflect that.
 
 
 ## Feature decomposition
 
-The SAE at layer 17 told the same story. The contextualized soft prompt's reconstruction error dropped from 0.209 (prepend) to 0.053, and the number of active features jumped from 21 to 92. The multi-layer profile again peaked at L17 for prepend, confirming that the mid-network concept layer is where the gap concentrates even for a non-textual steering target.
+We repeated the analysis on this steering-vector target and saw the same pattern. The contextualized soft prompt's reconstruction error at L17 dropped from 0.209 (prepend) to 0.053, and the number of active features jumped from 21 to 92. The multi-layer profile again peaked at L17 for prepend, confirming that the mid-network concept layer is where the gap concentrates even for a non-textual target.
 
-<div style="max-width: 55%; margin: 0 auto;">
-{% include figure.liquid loading="eager" path="assets/figures/ispt/results/multilayer_relerr_tier2.png" class="img-fluid rounded z-depth-1" caption="**Reconstruction error across layers (steering vector target).** The same mid-network pattern as the text-instruction experiments: prepend diverges at layer 17, contextualized stays near baseline." %}
-</div>
+Within L17, prepend barely overlapped with the ground-truth activation pattern. Of the 3579 features active for the steering vector, prepend shared only 21. The contextualized soft prompt shared 73.
 
-Feature overlap told a more specific story. Prepend barely overlapped with the ground-truth activation pattern. Of the 3579 features active for the steering vector, prepend shared only 21. The contextualized soft prompt shared 73. Strikingly, these are not the top descriptive features of the steering vector itself. Instead, the shared features are persona-related, and the contextualized soft prompt also uniquely activates features the steering vector never touches. The rest of this section unpacks which features those are and what they imply.
+{% include figure.liquid loading="eager" path="assets/figures/ispt/results/tier2_combined.png" class="img-fluid rounded z-depth-1" caption="**Steering vector target.** Reconstruction error across layers (left) and Jaccard feature overlap with the steering vector at L17 (right). Both metrics echo the hard-prompt pattern: prepend diverges at L17 and barely overlaps with the ground truth, while contextualization stays near baseline and recovers substantially more shared features." %}
 
-<div style="max-width: 55%; margin: 0 auto;">
-{% include figure.liquid loading="eager" path="assets/figures/ispt/results/jaccard_tier2.png" class="img-fluid rounded z-depth-1" caption="**Feature overlap with ground truth (steering vector target).** Jaccard similarity between the soft prompt's active SAE features at L17 and those activated by the steering vector. Contextualization produces substantially more overlap than prepend, though the shared features are not the steering vector's top descriptive ones." %}
-</div>
+What does the steering vector itself activate? Its top features are tone descriptors. **[Feature 14893](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/14893)** fires on words like *fermented*, *fantastical*, *hypnotic*; **[2569](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/2569)** on *chaotic*, *childlike*, *decadent*; **[16361](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/16361)** on *ambiguous*, *jarring*, *haphazard*. These are the vocabulary the model reaches for when characterizing a persona's tone. Strikingly, however, none of them appear in the either of the soft prompts' active sets.
 
-First, what does the steering vector itself activate? Its top features are tone descriptors. **[Feature 14893](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/14893)** fires on words like *fermented*, *fantastical*, *hypnotic*; **[2569](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/2569)** on *chaotic*, *childlike*, *decadent*; **[16361](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/16361)** on *ambiguous*, *jarring*, *haphazard*. These are the vocabulary the model reaches for when characterizing a persona's tone, and none of them appear in the contextualized soft prompt's active set.
-
-Prepend's shared features were all anomaly and noise detectors. The contextualized soft prompt shared these, but it added a number of features related not just to tone, but to persona.
+Prepend's shared features were all anomaly and noise detectors, as seen in the previous experiment. The contextualized soft prompt shared these, but it added a number of features related not just to tone, but to persona.
 
 **[Feature 486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486)**, the imperative-verb-position detector from the text-instruction experiments, lit up again. Several other features in the contextualized soft prompt's top activations are worth unpacking individually.
 

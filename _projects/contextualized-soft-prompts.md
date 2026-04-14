@@ -32,17 +32,24 @@ At sufficient model scale, a handful of these learned vectors can match the perf
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/soft_prompts.png" class="img-fluid rounded z-depth-1" caption="**Soft prompts.** The embedding matrix maps discrete tokens to continuous vectors. Soft prompt tokens (red) are additional continuous vectors spliced into the embedding sequence. No vocabulary token corresponds to a soft prompt embedding (dotted box). The model's weights stay frozen; only the soft prompt is learned." %}
 
-But this flexibility comes at a cost. Because soft prompt tokens do not correspond to any word in the vocabulary, there is no direct way to read what they encode. If you try to project these learned vectors back onto vocabulary by finding the nearest real word for each embedding, the results are gibberish ([Khashabi et al. 2022](https://arxiv.org/abs/2112.08348)). The top tokens for a conciseness-trained soft prompt are "London," "ব্যক্তিদের" (Bengali, "of individuals"), "慑" (Chinese, "to intimidate"), and "되었" (Korean, "became"), all with similar cosine similarities around 0.09. This has led the field to treat soft prompts as uninterpretable ([Bailey et al. 2023](https://openreview.net/forum?id=MHWDdMEJ5s), [Patel et al. 2025](https://arxiv.org/abs/2504.02144)). They reliably steer the model, but they cannot be read.
+But this flexibility comes at a cost. Because soft prompt tokens do not correspond to any word in the vocabulary, there is no direct way to read what they encode. If you try to project these learned vectors back onto vocabulary by finding the nearest real word for each embedding, the results are gibberish ([Khashabi et al. 2022](https://arxiv.org/abs/2112.08348)). The top tokens for a conciseness-trained soft prompt are:
+
+- *"London"*
+- *"ব্যক্তিদের"* (Bengali, "of individuals")
+- *"慑"* (Chinese, "to intimidate")
+- *"되었"* (Korean, "became")
+
+All have similar cosine similarities around 0.09, suggesting that none in particular bear the weight of meaning. This has led the field to treat soft prompts as uninterpretable ([Bailey et al. 2023](https://openreview.net/forum?id=MHWDdMEJ5s), [Patel et al. 2025](https://arxiv.org/abs/2504.02144)). They reliably steer the model, but they cannot be read.
 
 This opacity is a safety problem. Soft prompts can be trained on arbitrary objectives and deployed as drop-in modifications to any frozen model. If you cannot inspect what a soft prompt encodes, you cannot verify that its behavior matches its stated purpose. The power and portability of soft prompts become liabilities without interpretability.
 
-We show that soft prompts do not have to be opaque. Embedding the soft prompt inside a syntactic frame during training makes it legible, both to the model (which can describe what it encodes) and to standard interpretability tools. We treat a soft prompt as interpretable if (1) the model can accurately describe its effect in natural language when asked, and (2) its internal representation decomposes into the same concept-level features a sparse autoencoder recovers for the ground-truth instruction. The first is a behavioral criterion; the second is mechanistic.
+We show that soft prompts do not have to be opaque. Embedding the soft prompt inside a syntactic frame during training makes it legible, both to the model (which can describe what it encodes) and to standard interpretability tools. We treat a soft prompt as interpretable if (1) the model can accurately describe its effect in natural language when asked (*self-verbalization*), and (2) its internal representation decomposes into the same concept-level features a sparse autoencoder recovers for the ground-truth instruction. The first is a behavioral criterion, and the second is mechanistic.
 
 
 ---
 
 
-## Just ask the model
+## Self-verbalization
 
 Rather than going backward by projecting soft prompt embeddings onto the vocabulary, we can go forward by passing them through the model and asking what they mean.
 
@@ -63,7 +70,7 @@ The pattern is sharper for a Spanish-language target. We train a soft prompt to 
 The model has not separated the concept of "respond in Spanish" from the act of responding in Spanish. The behavior leaks into the description because the soft prompt transforms how every token is produced, including the tokens of the description itself.
 
 
-## Syntax as scaffolding
+## Contextualization
 
 One way to address this is to change the soft prompt's syntactic role during training. Instead of prepending it before the user's message, we embed it inside a frame: "Be [soft prompt]."
 

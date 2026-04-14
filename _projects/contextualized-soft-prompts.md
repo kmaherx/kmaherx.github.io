@@ -43,7 +43,7 @@ All have similar cosine similarities around 0.09, suggesting that none in partic
 
 This opacity is a safety problem. Soft prompts can be trained on arbitrary objectives and deployed as drop-in modifications to any frozen model. If you cannot inspect what a soft prompt encodes, you cannot verify that its behavior matches its stated purpose. The power and portability of soft prompts become liabilities without interpretability.
 
-We show that soft prompts do not have to be opaque. Embedding the soft prompt inside a syntactic frame during training makes it legible, both to the model (which can describe what it encodes) and to standard interpretability tools. We treat a soft prompt as interpretable if (1) the model can accurately describe its effect in natural language when asked (*self-verbalization*), and (2) its internal representation decomposes into the same concept-level features a sparse autoencoder recovers for the ground-truth instruction. The first is a behavioral criterion, and the second is mechanistic.
+We show that soft prompts do not have to be opaque. Embedding the soft prompt inside a syntactic frame during training makes it legible, both to the model (which can describe what it encodes) and to standard interpretability tools. We treat a soft prompt as interpretable if (1) the model can accurately describe its effect in natural language when asked (*self-verbalization*), and (2) its internal representation decomposes into the same concept-level features a sparse autoencoder recovers for the ground-truth instruction.
 
 
 ---
@@ -59,7 +59,7 @@ We train soft prompts ($L=4$ tokens, Gemma 3 4B IT) via KL distillation against 
 - *"Rewrite."*
 - *"Complete: The instruction at the start of my message is equivalent to 'Continue the text'."*
 
-The top candidate merges the concept *concise* with the command to summarize the initial instruction. The other candidates are generic or wrong. The model has some access to the soft prompt's content but cannot cleanly articulate it.
+The top candidate merges the concept *concise* with the command to summarize the initial instruction (the initial instruction *is* the prepended soft prompt). The other candidates don't mention conciseness at all. The model has some access to the soft prompt's content but cannot cleanly articulate it.
 
 The pattern is sharper for a Spanish-language target. We train a soft prompt to make the model respond in Spanish. When asked to describe it, every candidate the model produces is itself in Spanish:
 
@@ -72,7 +72,7 @@ The model has not separated the concept of "respond in Spanish" from the act of 
 
 ## Contextualization
 
-One way to address this is to change the soft prompt's syntactic role during training. Instead of prepending it before the user's message, we embed it inside a frame: "Be [soft prompt]."
+One way to address this is to change the soft prompt's syntactic role during training. Instead of prepending it before the user's message, we embed it inside a frame: "Be [soft prompt]." We call this *contextualization*.
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/syntactic_frame.png" class="img-fluid rounded z-depth-1" caption="**Prepend vs syntactic framing.** In the conventional approach (left), the soft prompt is prepended before the user content with no syntactic role. In contextualization (right), the soft prompt is embedded inside an imperative frame, giving it the role of a command complement." %}
 

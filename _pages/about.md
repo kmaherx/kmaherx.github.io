@@ -121,8 +121,56 @@ AI interpretability
   var growDir = {dx: 0, dy: 0}; // bias direction
   var growInterval = null;
   var fading = false;
-  var fadeHead = 0; // how many items (nodes/edges) have fully faded
+  var fadeAlpha = 1; // global alpha multiplier during fade
   var fadeRAF = null;
+
+  // Audio state
+  var audioCtx = null;
+  var masterGain = null;
+  var activeTipKey = null; // "c,r" of the last node we extended from
+  var branchStep = 0; // how many steps the current branch has extended
+
+  function ensureAudio() {
+    if (audioCtx) return;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    audioCtx = new AC();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.08;
+    masterGain.connect(audioCtx.destination);
+  }
+
+  function playEdgeTone(step) {
+    if (!audioCtx) return;
+    // Each note is a sine with a quick upward pitch sweep -> bubble-ish blip.
+    // Across a branch, the target pitch rises semitone-by-semitone.
+    var base = 233; // Bb3, low starting pitch for a new branch
+    var target = base * Math.pow(2, step / 12);
+    target = Math.min(target, 466); // cap at ~1 octave above base
+    var t = audioCtx.currentTime;
+    var osc = audioCtx.createOscillator();
+    var g = audioCtx.createGain();
+    var lpf = audioCtx.createBiquadFilter();
+    osc.type = 'sine';
+    // Per-note bubble sweep: start way below target, whoop up fast
+    osc.frequency.setValueAtTime(target * 0.2, t);
+    osc.frequency.exponentialRampToValueAtTime(target * 1.15, t + 0.05);
+    osc.frequency.exponentialRampToValueAtTime(target, t + 0.12);
+    // Low-pass filter muffles the sound (underwater feel).
+    // Cutoff tracks target pitch so high bubbles aren't completely swallowed.
+    lpf.type = 'lowpass';
+    lpf.Q.value = 0;
+    lpf.frequency.value = Math.min(600, target * 1.4);
+    // Soft, short envelope with a quick swell
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(1.0, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    osc.connect(lpf);
+    lpf.connect(g);
+    g.connect(masterGain);
+    osc.start(t);
+    osc.stop(t + 0.2);
+  }
 
   // 8 neighbor offsets
   var neighbors = [
@@ -161,28 +209,21 @@ AI interpretability
     var dark = document.documentElement.getAttribute('data-theme') === 'dark';
     var rgb = dark ? '255,255,255' : '0,0,0';
 
+    var a = fading ? fadeAlpha : 1;
+    if (a <= 0) return;
+
     ctx.lineWidth = dark ? 1 : 1.5;
+    ctx.strokeStyle = 'rgba(' + rgb + ',' + (dark ? 0.4 : 0.7) * a + ')';
     for (var i = 0; i < edges.length; i++) {
-      var a = 1;
-      if (fading) {
-        a = Math.max(0, Math.min(1, (i - fadeHead + 40) / 40));
-      }
-      if (a <= 0) continue;
       var e = edges[i];
-      ctx.strokeStyle = 'rgba(' + rgb + ',' + (dark ? 0.4 : 0.7) * a + ')';
       ctx.beginPath();
       ctx.moveTo(dotX(e.c1), dotY(e.r1));
       ctx.lineTo(dotX(e.c2), dotY(e.r2));
       ctx.stroke();
     }
 
+    ctx.fillStyle = 'rgba(' + rgb + ',' + (dark ? 0.7 : 0.9) * a + ')';
     for (var i = 0; i < nodes.length; i++) {
-      var a = 1;
-      if (fading) {
-        a = Math.max(0, Math.min(1, (i - fadeHead + 40) / 40));
-      }
-      if (a <= 0) continue;
-      ctx.fillStyle = 'rgba(' + rgb + ',' + (dark ? 0.7 : 0.9) * a + ')';
       ctx.beginPath();
       ctx.arc(dotX(nodes[i].c), dotY(nodes[i].r), dark ? 2.5 : 3, 0, Math.PI * 2);
       ctx.fill();
@@ -245,20 +286,36 @@ AI interpretability
     var stepLen = Math.sqrt(stepDc * stepDc + stepDr * stepDr) || 1;
     frontier.push({c: pick.c, r: pick.r, dc: stepDc / stepLen, dr: stepDr / stepLen});
 
+    // Track branch continuity for audio: pitch drops along a single branch,
+    // resets when a different frontier node is extended.
+    var parentKey = pick.fc + ',' + pick.fr;
+    if (parentKey === activeTipKey) {
+      branchStep++;
+    } else {
+      branchStep = 0;
+    }
+    activeTipKey = pick.c + ',' + pick.r;
+    playEdgeTone(branchStep);
+
     render();
   }
 
   function startGrow(e) {
+    ensureAudio();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+
     // Stop any existing fade
     if (fadeRAF) { cancelAnimationFrame(fadeRAF); fadeRAF = null; }
     fading = false;
-    fadeHead = 0;
+    fadeAlpha = 1;
 
     // Clear previous graph
     graph = {};
     nodes = [];
     edges = [];
     frontier = [];
+    activeTipKey = null;
+    branchStep = 0;
 
     var rect = canvas.getBoundingClientRect();
     var mx = e.clientX - rect.left;
@@ -282,24 +339,18 @@ AI interpretability
 
   function stopGrow() {
     if (!growInterval) return;
-    // Let it keep growing for a bit (inertia)
-    setTimeout(function() {
-      if (growInterval) {
-        clearInterval(growInterval);
-        growInterval = null;
-      }
-      // Start sequential fade: trigger spreads fast, each item fades slowly
+    clearInterval(growInterval);
+    growInterval = null;
+
+    // Uniform fade: whole graph fades together starting now
     fading = true;
-    fadeHead = 0;
-    var total = Math.max(nodes.length, edges.length);
+    fadeAlpha = 1;
+    var fadeDuration = 800;
     var fadeStart = performance.now();
     function fade(now) {
       var elapsed = now - fadeStart;
-      // Trigger sweeps through all items in ~300ms (fast spread)
-      fadeHead = (elapsed / 300) * total;
-      // But each item takes ~40 indices worth of distance to fully fade (slow per-item)
-      // Check if the last item has fully faded
-      if (fadeHead >= total + 40) {
+      fadeAlpha = Math.max(0, 1 - elapsed / fadeDuration);
+      if (fadeAlpha <= 0) {
         fading = false;
         graph = {};
         nodes = [];
@@ -312,7 +363,6 @@ AI interpretability
       fadeRAF = requestAnimationFrame(fade);
     }
     fadeRAF = requestAnimationFrame(fade);
-    }, 200);
   }
 
   setup();

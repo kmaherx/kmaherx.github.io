@@ -159,7 +159,7 @@ The contextualized soft prompt sharpens this into clean commands:
 These span a range of specificity. The first is a named entity: a real author whose style matches the steered behavior. The second is an archetype, describing a type of character rather than naming a specific one. The third and fourth are fabrications: the model seems to invent entities that do not exist to fill the concept slot. All four are named characters. The steered behavior originates from a persona dimension, and the model's verbalizations reflect that.
 
 
-## The same mechanistic account
+## The mechanistic account
 
 The SAE at layer 17 tells the same story. The contextualized soft prompt's reconstruction error drops from 0.209 (prepend) to 0.053, and the number of active features jumps from 21 to 92. The multi-layer profile again peaks at L17 for prepend, confirming that the mid-network concept layer is where the gap concentrates even for a non-textual steering target.
 
@@ -173,7 +173,9 @@ Feature overlap tells a more specific story. Prepend barely overlaps with the gr
 {% include figure.liquid loading="eager" path="assets/figures/ispt/results/jaccard_tier2.png" class="img-fluid rounded z-depth-1" caption="**Feature overlap with ground truth (steering vector target).** Jaccard similarity between the soft prompt's active SAE features at L17 and those activated by the steering vector. Contextualization produces substantially more overlap than prepend, though the shared features are not the steering vector's top descriptive ones." %}
 </div>
 
-Feature 486, the imperative-verb-position detector from the text-instruction experiments, lights up again. Several other features in the contextualized soft prompt's top activations are worth unpacking individually.
+First, what does the steering vector itself activate? Its top features are tone descriptors. **[Feature 14893](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/14893)** fires on words like *fermented*, *fantastical*, *hypnotic*; **[2569](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/2569)** on *chaotic*, *childlike*, *decadent*; **[16361](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/16361)** on *ambiguous*, *jarring*, *haphazard*. These are the vocabulary the model reaches for when characterizing a persona's tone, and none of them appear in the contextualized soft prompt's active set. The features the soft prompt does share, examined next, describe the persona slot itself rather than the tone filling it.
+
+**[Feature 486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486)**, the imperative-verb-position detector from the text-instruction experiments, lights up again. Several other features in the contextualized soft prompt's top activations are worth unpacking individually.
 
 **[Feature 243](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/243)** is a proper-noun detector. Its top activations fire on named entities: "SAMHSA National Helpline," "Pegasystems," "Dragon Ball Z," "League of Legends." Under contextualization it rises from rank 15 to rank 4. The model reads the framed soft prompt as a named thing.
 

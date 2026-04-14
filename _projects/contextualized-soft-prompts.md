@@ -169,7 +169,9 @@ The SAE at layer 17 tells the same story. The contextualized soft prompt's recon
 
 Feature overlap tells a more specific story. Prepend barely overlaps with the ground-truth activation pattern. Of the 3579 features active for the steering vector, prepend shares only 21. The contextualized soft prompt shares 73. Strikingly, these are not the top descriptive features of the steering vector itself. Instead, the shared features are persona-related, and the contextualized soft prompt also uniquely activates features the steering vector never touches. The rest of this section unpacks which features those are and what they imply.
 
+<div style="max-width: 55%; margin: 0 auto;">
 {% include figure.liquid loading="eager" path="assets/figures/ispt/results/jaccard_tier2.png" class="img-fluid rounded z-depth-1" caption="**Feature overlap with ground truth (steering vector target).** Jaccard similarity between the soft prompt's active SAE features at L17 and those activated by the steering vector. Contextualization produces substantially more overlap than prepend, though the shared features are not the steering vector's top descriptive ones." %}
+</div>
 
 Feature 486, the imperative-verb-position detector from the text-instruction experiments, lights up again. Several other features in the contextualized soft prompt's top activations are worth unpacking individually.
 

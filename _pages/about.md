@@ -121,18 +121,47 @@ AI interpretability
   var growDir = {dx: 0, dy: 0}; // bias direction
   var growTimeout = null;
   var growing = false;
+  var dragStartX = 0;
   var dragStartY = 0;
-  var rateMultiplier = 1; // 0.5 (slow) .. 2.0 (fast), controlled by drag
-  var baseInterval = 35; // ms between growth steps at 1x
+  var dragRange = 100; // px for full-scale drag effect, shared by X and Y
+  var rateMultiplier = 1; // 0.5 (slow) .. 2.0 (fast), controlled by vertical drag
+  var chordBlend = 0; // -1 (minor 7th) .. 0 (chromatic) .. 1 (major 7th), controlled by horizontal drag
+  var baseInterval = 40; // ms between growth steps at 1x
+
+  // Chord tones in semitones (relative to base), 2 octaves, indexed by branchStep.
+  // Right = Imaj7 at base (Bb -> Bbmaj7 = Bb,D,F,A).
+  // Left  = iim7, rooted a whole step above base (C -> Cm7 = C,Eb,G,Bb).
+  // Major vs minor color, shares only Bb -- yet I-ii is the start of ii-V-I.
+  var RIGHT_CHORD = [0, 4, 7, 11, 12, 16, 19, 23];
+  var LEFT_CHORD  = [2, 5, 9, 12, 14, 17, 21, 24];
   var fading = false;
   var fadeAlpha = 1; // global alpha multiplier during fade
   var fadeRAF = null;
 
+  // Per-node twinkle effect (dark mode only)
+  var twinkles = []; // [{c, r, t0}]
+  var twinkleRAF = null;
+  var TWINKLE_DURATION = 450;
+
   // Audio state
   var audioCtx = null;
   var masterGain = null;
+  var convolver = null; // reverb chain, used in dark mode
   var activeTipKey = null; // "c,r" of the last node we extended from
   var branchStep = 0; // how many steps the current branch has extended
+
+  function makeImpulse(ctx, duration, decay) {
+    var rate = ctx.sampleRate;
+    var length = Math.floor(rate * duration);
+    var buffer = ctx.createBuffer(2, length, rate);
+    for (var ch = 0; ch < 2; ch++) {
+      var data = buffer.getChannelData(ch);
+      for (var i = 0; i < length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+      }
+    }
+    return buffer;
+  }
 
   function ensureAudio() {
     if (audioCtx) return;
@@ -142,15 +171,24 @@ AI interpretability
     masterGain = audioCtx.createGain();
     masterGain.gain.value = 0.08;
     masterGain.connect(audioCtx.destination);
+    convolver = audioCtx.createConvolver();
+    convolver.buffer = makeImpulse(audioCtx, 1.6, 2.5);
+    convolver.connect(masterGain);
   }
 
   function playEdgeTone(step) {
     if (!audioCtx) return;
     // Each note is a sine with a quick upward pitch sweep -> bubble-ish blip.
-    // Across a branch, the target pitch rises semitone-by-semitone.
+    // Across a branch, the target pitch rises step-by-step. Horizontal drag
+    // blends the chromatic default toward a major (right) or minor (left)
+    // 7th chord, in semitone (log-frequency) space.
     var base = 233; // Bb3, low starting pitch for a new branch
-    var target = base * Math.pow(2, step / 12);
-    target = Math.min(target, 466); // cap at ~1 octave above base
+    var defaultSt = Math.min(step, 24); // chromatic, capped at 2 octaves
+    var chord = chordBlend >= 0 ? RIGHT_CHORD : LEFT_CHORD;
+    var chordSt = chord[Math.min(step, chord.length - 1)];
+    var blend = Math.abs(chordBlend);
+    var st = (1 - blend) * defaultSt + blend * chordSt;
+    var target = base * Math.pow(2, st / 12);
     var t = audioCtx.currentTime;
     var osc = audioCtx.createOscillator();
     var g = audioCtx.createGain();
@@ -172,6 +210,13 @@ AI interpretability
     osc.connect(lpf);
     lpf.connect(g);
     g.connect(masterGain);
+    // Wet send to reverb in dark mode only
+    if (convolver && document.documentElement.getAttribute('data-theme') === 'dark') {
+      var send = audioCtx.createGain();
+      send.gain.value = 0.6;
+      g.connect(send);
+      send.connect(convolver);
+    }
     osc.start(t);
     osc.stop(t + 0.2);
   }
@@ -232,6 +277,35 @@ AI interpretability
       ctx.arc(dotX(nodes[i].c), dotY(nodes[i].r), dark ? 2.5 : 3, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    // Twinkle halos (dark mode): expanding, fading rings on freshly added nodes
+    if (dark && twinkles.length) {
+      var now = performance.now();
+      for (var i = 0; i < twinkles.length; i++) {
+        var tw = twinkles[i];
+        var k = (now - tw.t0) / TWINKLE_DURATION;
+        if (k < 0 || k >= 1) continue;
+        var alpha = (1 - k) * a;
+        var radius = 3 + k * 10;
+        ctx.fillStyle = 'rgba(' + rgb + ',' + 0.45 * alpha + ')';
+        ctx.beginPath();
+        ctx.arc(dotX(tw.c), dotY(tw.r), radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function tickTwinkles() {
+    var now = performance.now();
+    while (twinkles.length && now - twinkles[0].t0 > TWINKLE_DURATION) {
+      twinkles.shift();
+    }
+    render();
+    if (twinkles.length) {
+      twinkleRAF = requestAnimationFrame(tickTwinkles);
+    } else {
+      twinkleRAF = null;
+    }
   }
 
   function render() {
@@ -242,8 +316,10 @@ AI interpretability
   function growStep() {
     if (frontier.length === 0) return;
 
-    // Very strongly bias toward most recently added frontier node
-    var fi = frontier.length - 1 - Math.floor(Math.pow(Math.random(), 6) * frontier.length);
+    // Strongly bias toward most recently added frontier node.
+    // Bias exponent grows mildly with frontier size so branch runs hold up as tree grows.
+    var tipBias = 6 + Math.log10(Math.max(1, frontier.length));
+    var fi = frontier.length - 1 - Math.floor(Math.pow(Math.random(), tipBias) * frontier.length);
     fi = Math.max(0, fi);
     var node = frontier[fi];
 
@@ -301,6 +377,11 @@ AI interpretability
     activeTipKey = pick.c + ',' + pick.r;
     playEdgeTone(branchStep);
 
+    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+      twinkles.push({c: pick.c, r: pick.r, t0: performance.now()});
+      if (!twinkleRAF) twinkleRAF = requestAnimationFrame(tickTwinkles);
+    }
+
     render();
   }
 
@@ -310,6 +391,8 @@ AI interpretability
 
     // Stop any existing fade
     if (fadeRAF) { cancelAnimationFrame(fadeRAF); fadeRAF = null; }
+    if (twinkleRAF) { cancelAnimationFrame(twinkleRAF); twinkleRAF = null; }
+    twinkles = [];
     fading = false;
     fadeAlpha = 1;
 
@@ -339,10 +422,12 @@ AI interpretability
 
     render();
 
-    // Begin growth loop. Drag up/down adjusts rate via rateMultiplier.
+    // Begin growth loop. Drag up/down adjusts rate; left/right blends pitch toward a chord.
     growing = true;
+    dragStartX = e.clientX;
     dragStartY = e.clientY;
     rateMultiplier = 1;
+    chordBlend = 0;
     scheduleNextStep();
   }
 
@@ -358,10 +443,13 @@ AI interpretability
 
   function onDrag(e) {
     if (!growing) return;
-    // Up = faster (negative deltaY), down = slower. 200px travel -> 2x.
+    // Vertical: up = faster (negative deltaY), down = slower. dragRange travel -> 2x.
     var deltaY = e.clientY - dragStartY;
-    var m = Math.pow(2, -deltaY / 200);
-    rateMultiplier = Math.max(0.5, Math.min(2, m));
+    var m = Math.pow(2, -deltaY / dragRange);
+    rateMultiplier = Math.max(0.5, Math.min(1.5, m));
+    // Horizontal: right -> major 7th pull, left -> minor 7th pull. Same range.
+    var deltaX = e.clientX - dragStartX;
+    chordBlend = Math.max(-1, Math.min(1, deltaX / dragRange));
   }
 
   function stopGrow() {
@@ -372,7 +460,8 @@ AI interpretability
     // Uniform fade: whole graph fades together starting now
     fading = true;
     fadeAlpha = 1;
-    var fadeDuration = 800;
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var fadeDuration = dark ? 800 : 400;
     var fadeStart = performance.now();
     function fade(now) {
       var elapsed = now - fadeStart;

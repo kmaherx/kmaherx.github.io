@@ -180,7 +180,7 @@ These span a range of specificity. The first is a named entity: a real author wh
 
 ## Feature decomposition
 
-We repeated the analysis on this steering-vector target and saw the same pattern. The contextualized soft prompt's reconstruction error at L17 dropped from 0.209 (prepend) to 0.053, and the number of active features jumped from 21 to 92. The multi-layer profile again peaked at L17 for prepend, confirming that the mid-network concept layer is where the gap concentrates even for a non-textual target.
+We repeated the SAE analysis on this steering-vector target and saw the same pattern. The contextualized soft prompt's reconstruction error at L17 dropped from 0.209 (prepend) to 0.053, and the number of active features jumped from 21 to 92. The multi-layer profile again peaked at L17 for prepend, confirming that the mid-network concept layer is where the gap concentrates even for a non-textual target.
 
 Within L17, prepend barely overlapped with the ground-truth activation pattern. Of the 3579 features active for the steering vector, prepend shared only 21. The contextualized soft prompt shared 73.
 

@@ -183,6 +183,12 @@ AI interpretability
     convolver = audioCtx.createConvolver();
     convolver.buffer = makeImpulse(audioCtx, 1.6, 2.5);
     convolver.connect(masterGain);
+    // Safari: prime the output with a 1-sample silent buffer so the engine
+    // doesn't swallow the first scheduled note after waking up.
+    var primer = audioCtx.createBufferSource();
+    primer.buffer = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+    primer.connect(audioCtx.destination);
+    primer.start(0);
   }
 
   function playEdgeTone(step) {
@@ -396,7 +402,8 @@ AI interpretability
 
   function startGrow(e) {
     ensureAudio();
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    // Always nudge resume -- Safari can re-suspend silently after backgrounding.
+    if (audioCtx) audioCtx.resume();
 
     // Stop any existing fade
     if (fadeRAF) { cancelAnimationFrame(fadeRAF); fadeRAF = null; }
@@ -497,6 +504,10 @@ AI interpretability
   document.addEventListener('mousemove', onDrag);
   document.addEventListener('mouseup', stopGrow);
   window.addEventListener('resize', function() { setup(); render(); });
+  // Safari: audio context can be suspended when the tab is hidden; re-resume on return.
+  document.addEventListener('visibilitychange', function() {
+    if (audioCtx && document.visibilityState === 'visible') audioCtx.resume();
+  });
 
   var observer = new MutationObserver(function() { render(); });
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });

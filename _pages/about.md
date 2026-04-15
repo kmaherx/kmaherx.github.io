@@ -62,10 +62,32 @@ a.about-link {
 a.about-link:hover {
   border-bottom-style: solid;
 }
+.about-toggle {
+  position: absolute;
+  top: 5vh;
+  left: 5vw;
+  z-index: 1;
+}
+.about-toggle a {
+  text-decoration: none;
+}
 @media (max-width: 768px) {
   #dot-grid { display: none !important; }
 }
 </style>
+
+<div class="about-toggle">
+<a href="#" id="theme-toggle" onclick="
+  var html = document.documentElement;
+  html.classList.remove('transition');
+  var current = html.getAttribute('data-theme');
+  var next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  html.setAttribute('data-theme-setting', next);
+  localStorage.setItem('theme', next);
+  return false;
+"><i class="fa-solid fa-circle-half-stroke"></i></a>
+</div>
 
 <div class="about-blurb">
 AI agents<br>
@@ -85,19 +107,6 @@ AI interpretability
 <a href="https://www.linkedin.com/in/kamal-maher-4b526395/" target="_blank">LinkedIn</a><br>
 <a href="https://scholar.google.com/citations?user=kDjKQHkAAAAJ" target="_blank">Google Scholar</a><br>
 <a href="https://x.com/fluorocore" target="_blank">Twitter</a>
-</div>
-
-<div class="about-section">
-<a href="#" id="theme-toggle" onclick="
-  var html = document.documentElement;
-  html.classList.remove('transition');
-  var current = html.getAttribute('data-theme');
-  var next = current === 'dark' ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  html.setAttribute('data-theme-setting', next);
-  localStorage.setItem('theme', next);
-  return false;
-" style="text-decoration: none;"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </div>
 
 

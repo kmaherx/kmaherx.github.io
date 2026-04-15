@@ -99,7 +99,7 @@ What changed here is not just the soft prompt's position but the role it learns 
 
 ## Feature decomposition
 
-We can check whether this plays out inside the model. Sparse autoencoders (SAEs) decompose the model's internal activations at each layer into sparse combinations of interpretable features ([Cunningham et al. 2023](https://arxiv.org/abs/2309.08600), [Bricken et al. 2023](https://transformer-circuits.pub/2023/monosemantic-features)). Each feature corresponds to an identifiable concept or pattern, so inspecting which features fire for a given activation tells us what information the model is processing at that position.
+We can observe how this plays out inside the model. Sparse autoencoders (SAEs) decompose the model's internal activations at each layer into sparse combinations of interpretable features ([Cunningham et al. 2023](https://arxiv.org/abs/2309.08600), [Bricken et al. 2023](https://transformer-circuits.pub/2023/monosemantic-features)). Each feature corresponds to an identifiable concept or pattern, so inspecting which features fire for a given activation tells us what information the model is processing at that position.
 
 An SAE also serves as a way to check whether the soft prompt's activations lie near the natural language manifold. It is trained to reconstruct billions of the model's activations on natural text, so if it can't reconstruct the activations produced by a soft prompt, that suggests those activations are off-manifold for the model — somewhere it does not normally operate — which may impair the model's ability to self-verbalize.
 
@@ -161,7 +161,7 @@ The contextualized version:
 
 > *"Right. A perfect morning. A* perfect *morning. Not merely a morning, you understand. A morning* constructed *for perfection. It begins, naturally, with the cessation of all extraneous sound. Not a silence, precisely. A* muted *silence…"*
 
-When we asked the model to describe the prepended soft prompt, the same command-vs-concept conflation reappeared. Once again the top candidate mentioned a relevant instruction, but it was surrounded by styled narration:
+When we asked the model to describe the prepended soft prompt, the same command-vs-concept conflation reappeared. Only the top candidate mentioned a relevant instruction, but it was surrounded by styled narration:
 
 - *"Please respond in the style of the poem 'The Factotum' by William Blake." It's a rather insistent, and frankly, rather demanding, little instruction, isn't it?*
 - *"equivalent to 'Complete:'. It's a marker, a signal. A little ghost in the machine, a whisper…"*
@@ -188,7 +188,7 @@ Within L17, prepend barely overlapped with the ground-truth activation pattern. 
 
 What does the steering vector itself activate? Its top features are tone descriptors. **[Feature 14893](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/14893)** fires on words like *fermented*, *fantastical*, *hypnotic*; **[2569](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/2569)** on *chaotic*, *childlike*, *decadent*; **[16361](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/16361)** on *ambiguous*, *jarring*, *haphazard*. These are the vocabulary the model reaches for when characterizing a persona's tone. Strikingly, however, none of them appear in either of the soft prompts' active sets.
 
-Prepend's shared features were all anomaly and noise detectors, as seen in the previous experiment. The contextualized soft prompt shared these, but it added a number of features related not just to tone, but to persona.
+Prepend's shared features were all anomaly and noise detectors, as seen in the previous experiment. The contextualized soft prompt, however, activated features pointing past tone to persona itself.
 
 **[Feature 486](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/486)** — the imperative-verb-position detector from the text-instruction experiments — lit up again, suggesting once more that the model reads the contextualized soft prompt as a concept. **[Feature 331](https://www.neuronpedia.org/gemma-3-4b-it/17-gemmascope-2-res-16k/331)**, a structural-boundary detector (URLs, code punctuation, whitespace), dominated prepend at rank 1 as in the text-instruction experiments, then dropped to rank 11 under contextualization. The "structurally unusual" signal faded as the model began treating the soft prompt as content rather than noise.
 

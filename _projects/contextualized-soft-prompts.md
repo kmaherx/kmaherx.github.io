@@ -26,9 +26,9 @@ _styles: >
 
 ## Soft prompts
 
-When a language model processes text, it converts each token into a continuous vector called an embedding. Soft prompt tuning introduces new embeddings, called *soft prompt tokens*, that are spliced into this sequence alongside the real token embeddings. The model processes them as if they were ordinary words, but they aren't drawn from any vocabulary. They are continuous (hence "soft") vectors, optimized to minimize a behavioral gap between the model with the soft prompt and some target behavior. In a sense, these are *incantations*: words outside human vocabulary that influence model behavior.
+When a language model processes text, it converts each token into a continuous vector called an embedding. Soft prompt tuning introduces new embeddings, called *soft prompt tokens*, that are conventionally prepended to the real token embeddings ([Lester et al. 2021](https://arxiv.org/abs/2104.08691)). The model processes them as if they were ordinary words, but they aren't drawn from any vocabulary. They are continuous (hence "soft") vectors, optimized to minimize a behavioral gap between the model with the soft prompt and some target behavior. In a sense, these are *incantations*: words outside human vocabulary that influence model behavior.
 
-At sufficient model scale, a handful of these learned vectors can match the performance of full fine-tuning on downstream tasks ([Lester et al. 2021](https://arxiv.org/abs/2104.08691)), while requiring only a few thousand parameters per task compared to billions for the full model. Because they operate in continuous space, soft prompts can encode nuanced behavioral information that discrete text instructions (*hard prompts*) cannot.
+At sufficient model scale, a handful of these learned vectors can match the performance of full fine-tuning on downstream tasks, while requiring only a few thousand parameters per task compared to billions for the full model. Because they operate in continuous space, soft prompts can encode nuanced behavioral information that discrete text instructions (*hard prompts*) cannot.
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/soft_prompts.png" class="img-fluid rounded z-depth-1" caption="**Soft prompts.** The embedding matrix maps discrete tokens to continuous vectors. Soft prompt tokens (red) are additional continuous vectors spliced into the embedding sequence. No vocabulary token corresponds to a soft prompt embedding (dotted box). The model's weights stay frozen; only the soft prompt is learned." %}
 
@@ -72,7 +72,7 @@ The model has not separated the concept of "respond in Spanish" from the act of 
 
 ## Contextualization
 
-One way to address this is to change the soft prompt's syntactic role during training. Instead of prepending it before the user's message, we embedded it inside a frame: "Be [soft prompt]." We call this *contextualization*.
+One way to address this is to change the soft prompt's syntactic role during training. Instead of prepending it before the user's message as is conventional, we embedded it inside a frame: "Be [soft prompt]." We call this *contextualization*.
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/syntactic_frame.png" class="img-fluid rounded z-depth-1" caption="**Prepend vs syntactic framing.** In the conventional approach (left), the soft prompt is prepended before the user content with no syntactic role. In contextualization (right), the soft prompt is embedded inside an imperative frame, giving it the role of a command complement." %}
 

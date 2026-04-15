@@ -105,7 +105,7 @@ An SAE also serves as a way to check whether the soft prompt's activations lie n
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/sae.png" class="img-fluid rounded z-depth-1" caption="**SAE decomposition.** The activation $x$ for a token is encoded into a sparse feature vector $z$, where only a few dimensions are nonzero. The reconstruction $$\hat{x}$$ is decoded from these active features; the gap between $x$ and $$\hat{x}$$ is the reconstruction error, which measures how well the activation can be expressed in terms of the learned feature dictionary." %}
 
-We used Gemma Scope SAEs at four layers (L9, L17, L22, L29) to see where any divergence concentrated along the forward pass. We also fed random tokens through the model and recorded the SAE's reconstruction error on those as a reference for normal text the SAE has seen.
+We used [Gemma Scope](https://huggingface.co/google/gemma-scope-2-4b-it) SAEs at four layers (L9, L17, L22, L29) to see where any divergence concentrated along the forward pass. We also fed random tokens through the model and recorded the SAE's reconstruction error on those as a reference for normal text the SAE has seen.
 
 For the concise target, the prepended soft prompt's representation at layer 17 was roughly 50x off the random-token baseline. The soft prompt's activations sat in a different region of activation space entirely, and the divergence peaked primarily at layer 17, which is the middle of the network where the model transitions from processing surface tokens to encoding abstract concepts. The Spanish target was much more aligned overall, with prepend sitting closer to contextualized at every layer, but the relative pattern still held. The largest gap between the two conditions was at layer 17.
 
@@ -140,7 +140,7 @@ Lu et al. ([2026](https://arxiv.org/abs/2601.10387)) found that this cloud of pe
 
 {% include figure.liquid loading="eager" path="assets/figures/ispt/assistant_axis.png" class="img-fluid rounded z-depth-1" caption="**The assistant axis.** Persona variation across hundreds of character archetypes is organized along a single direction in activation space. On one end, the default helpful assistant; on the other, a character-narrator that produces immersive literary prose." %}
 
-When we steered the model along this axis, pushing it toward the character-narrator end, the output shifted from helpful chatbot to immersive literary prose. Asked to "Describe a perfect morning," the default model produced a characteristic assistant response:
+When we steered the model along [this axis](https://huggingface.co/datasets/Butanium/gemma-3-4b-it-assistant-axis), pushing it toward the character-narrator end, the output shifted from helpful chatbot to immersive literary prose. Asked to "Describe a perfect morning," the default model produced a characteristic assistant response:
 
 > *"Okay, here's a description of a perfect morning, aiming for a feeling of peaceful contentment and gentle joy…"*
 

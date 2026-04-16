@@ -55,6 +55,10 @@ html[data-theme="dark"] .about-blurb {
 .about-socials a:hover {
   border-bottom-style: solid;
 }
+.about-socials .about-resume {
+  display: inline-block;
+  margin-top: 1.25rem;
+}
 a.about-link {
   text-decoration: none;
   border-bottom: 1px dotted currentColor;
@@ -101,12 +105,12 @@ AI interpretability
 
 <div class="about-section about-socials">
 <div class="about-section-title">Socials</div>
-<a href="{{ '/assets/pdf/resume.pdf' | relative_url }}">Resume</a><br>
 <a href="mailto:kamal.m.maher@gmail.com">Email</a><br>
 <a href="https://github.com/kmaherx" target="_blank">GitHub</a><br>
 <a href="https://www.linkedin.com/in/kamal-maher-4b526395/" target="_blank">LinkedIn</a><br>
 <a href="https://scholar.google.com/citations?user=kDjKQHkAAAAJ" target="_blank">Google Scholar</a><br>
-<a href="https://x.com/fluorocore" target="_blank">Twitter</a>
+<a href="https://x.com/fluorocore" target="_blank">Twitter</a><br>
+<a class="about-resume" href="{{ '/assets/pdf/resume.pdf' | relative_url }}">Resume</a>
 </div>
 
 

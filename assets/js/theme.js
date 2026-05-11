@@ -322,4 +322,10 @@ let initTheme = () => {
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
     applyTheme();
   });
+
+  // Re-apply theme when the page is restored from bfcache (e.g. clicking back
+  // from a same-origin page that wrote a new value to localStorage).
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) applyTheme();
+  });
 };

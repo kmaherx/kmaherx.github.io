@@ -100,6 +100,7 @@ AI interpretability
 
 <div class="about-section">
 <div class="about-section-title">Projects</div>
+<a class="about-link" href="{{ '/assets/html/csp-div-dashboard.html' | relative_url }}">Divergent soft prompts converge on personas</a><br>
 <a class="about-link" href="/projects/contextualized-soft-prompts/">Contextualized soft prompts are interpretable</a>
 </div>
 

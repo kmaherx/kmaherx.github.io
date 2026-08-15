@@ -95,8 +95,7 @@ a.about-link:hover {
 </div>
 
 <div class="about-blurb">
-AI agents<br>
-AI interpretability
+AI agents, interpretability, and biosecurity
 </div>
 
 <div class="about-section">

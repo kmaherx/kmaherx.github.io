@@ -58,6 +58,7 @@ html[data-theme="dark"] .about-blurb {
 .about-socials .about-resume {
   display: inline-block;
   margin-top: 1.25rem;
+  font-weight: bold;
 }
 a.about-link {
   text-decoration: none;

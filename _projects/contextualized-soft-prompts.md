@@ -2,6 +2,7 @@
 layout: page
 title: Contextualized soft prompts are interpretable
 description: <em>April 12, 2026</em>
+code_url: https://github.com/kmaherx/csp
 img: assets/figures/ispt/soft_prompts.png
 importance: 1
 category: work

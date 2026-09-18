@@ -11,10 +11,13 @@ layout: default
 <div class="post">
   <header class="post-header">
     <h1 class="post-title">{{ page.title }}</h1>
-    <p class="post-description">{{ page.description }}</p>
-    {% if page.code_url %}
-      <p class="post-description"><a href="{{ page.code_url }}">Code</a></p>
-    {% endif %}
+    <p class="post-description">
+      {{ page.description }}
+      {% if page.code_url %}
+        <br>
+        <a href="{{ page.code_url }}">Code</a>
+      {% endif %}
+    </p>
   </header>
 
   <article>

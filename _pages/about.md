@@ -153,16 +153,17 @@ AI agents, interpretability, and biosecurity
   // Major vs minor color, shares only Bb -- yet I-ii is the start of ii-V-I.
   var RIGHT_CHORD = [0, 4, 7, 11, 12, 16, 19, 23];
   var LEFT_CHORD  = [2, 5, 9, 12, 14, 17, 21, 24];
-  var fading = false;
-  var fadeProgress = 0; // 0..1 through the fade-out sweep
-  var FADE_WINDOW = 0.3; // fraction of the sweep each point takes to fade; rest is stagger by distance from root
-  var fadeMaxDist = 1; // farthest node's grid distance from the root, captured when the fade starts
+  var fading = false; // true while the tree is retracting after mouseup
+  var RETRACT_DURATION = 800; // ms to retract the whole tree, same in light and dark
   var fadeRAF = null;
 
   // Per-node twinkle effect (dark mode only)
-  var twinkles = []; // [{c, r, t0}]
+  var twinkles = []; // [{c, r, t0, s}], s = style (TWINKLE_IN or TWINKLE_OUT)
   var twinkleRAF = null;
   var TWINKLE_DURATION = 450;
+  // Halo look per event: peak opacity and how far the ring expands (px past radius 3).
+  var TWINKLE_IN  = {alpha: 0.45, grow: 10}; // node appears
+  var TWINKLE_OUT = {alpha: 0.2,  grow: 5};  // node disappears (subtler)
 
   // Audio state
   var audioCtx = null;
@@ -280,45 +281,23 @@ AI agents, interpretability, and biosecurity
     }
   }
 
-  // Fade-out sweep is spatial: a ring expands from the root, and points
-  // nearer the root fade first. Alpha is a function of grid position.
-  function distFromRoot(c, r) {
-    var dc = c - nodes[0].c, dr = r - nodes[0].r;
-    return Math.sqrt(dc * dc + dr * dr);
-  }
-
-  function fadeAlphaAt(c, r) {
-    if (!fading) return 1;
-    var start = Math.min(1, distFromRoot(c, r) / fadeMaxDist) * (1 - FADE_WINDOW);
-    return Math.max(0, Math.min(1, 1 - (fadeProgress - start) / FADE_WINDOW));
-  }
-
   function drawGraph() {
-    if (edges.length === 0 && nodes.length === 0) return;
+    if (edges.length === 0 && nodes.length === 0 && twinkles.length === 0) return;
     var dark = document.documentElement.getAttribute('data-theme') === 'dark';
     var rgb = dark ? '255,255,255' : '0,0,0';
 
-    var a = fading ? 1 - fadeProgress : 1; // used for twinkles
-
     ctx.lineWidth = dark ? 1 : 1.5;
-    var edgeBase = dark ? 0.4 : 0.7;
-    // Edges fade by their midpoint, so they sit between their two endpoints' alphas
+    ctx.strokeStyle = 'rgba(' + rgb + ',' + (dark ? 0.4 : 0.7) + ')';
     for (var i = 0; i < edges.length; i++) {
       var e = edges[i];
-      var ea = fadeAlphaAt((e.c1 + e.c2) / 2, (e.r1 + e.r2) / 2);
-      if (ea <= 0) continue;
-      ctx.strokeStyle = 'rgba(' + rgb + ',' + edgeBase * ea + ')';
       ctx.beginPath();
       ctx.moveTo(dotX(e.c1), dotY(e.r1));
       ctx.lineTo(dotX(e.c2), dotY(e.r2));
       ctx.stroke();
     }
 
-    var nodeBase = dark ? 0.7 : 0.9;
+    ctx.fillStyle = 'rgba(' + rgb + ',' + (dark ? 0.7 : 0.9) + ')';
     for (var i = 0; i < nodes.length; i++) {
-      var na = fadeAlphaAt(nodes[i].c, nodes[i].r);
-      if (na <= 0) continue;
-      ctx.fillStyle = 'rgba(' + rgb + ',' + nodeBase * na + ')';
       ctx.beginPath();
       ctx.arc(dotX(nodes[i].c), dotY(nodes[i].r), dark ? 2.5 : 3, 0, Math.PI * 2);
       ctx.fill();
@@ -331,14 +310,19 @@ AI agents, interpretability, and biosecurity
         var tw = twinkles[i];
         var k = (now - tw.t0) / TWINKLE_DURATION;
         if (k < 0 || k >= 1) continue;
-        var alpha = (1 - k) * a;
-        var radius = 3 + k * 10;
-        ctx.fillStyle = 'rgba(' + rgb + ',' + 0.45 * alpha + ')';
+        var alpha = 1 - k;
+        var radius = 3 + k * tw.s.grow;
+        ctx.fillStyle = 'rgba(' + rgb + ',' + tw.s.alpha * alpha + ')';
         ctx.beginPath();
         ctx.arc(dotX(tw.c), dotY(tw.r), radius, 0, Math.PI * 2);
         ctx.fill();
       }
     }
+  }
+
+  function addTwinkle(c, r, style) {
+    twinkles.push({c: c, r: r, t0: performance.now(), s: style});
+    if (!twinkleRAF) twinkleRAF = requestAnimationFrame(tickTwinkles);
   }
 
   function tickTwinkles() {
@@ -451,8 +435,7 @@ AI agents, interpretability, and biosecurity
     playEdgeTone(branchStep);
 
     if (document.documentElement.getAttribute('data-theme') === 'dark') {
-      twinkles.push({c: pick.c, r: pick.r, t0: performance.now()});
-      if (!twinkleRAF) twinkleRAF = requestAnimationFrame(tickTwinkles);
+      addTwinkle(pick.c, pick.r, TWINKLE_IN);
     }
 
     render();
@@ -468,7 +451,6 @@ AI agents, interpretability, and biosecurity
     if (twinkleRAF) { cancelAnimationFrame(twinkleRAF); twinkleRAF = null; }
     twinkles = [];
     fading = false;
-    fadeProgress = 0;
 
     // Clear previous graph
     graph = {};
@@ -532,19 +514,24 @@ AI agents, interpretability, and biosecurity
     growing = false;
     if (growTimeout) { clearTimeout(growTimeout); growTimeout = null; }
 
-    // Spatial fade: everything disappears outward from the root
+    // Retract: growth in reverse. Each step removes the newest node together
+    // with the edge that attached it, so no edge is ever left uncapped
+    // (the newest node is always a leaf). The whole tree goes in RETRACT_DURATION.
     fading = true;
-    fadeProgress = 0;
-    fadeMaxDist = 1;
-    for (var i = 1; i < nodes.length; i++) {
-      fadeMaxDist = Math.max(fadeMaxDist, distFromRoot(nodes[i].c, nodes[i].r));
-    }
-    var fadeDuration = 800; // ms, same in light and dark
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var startCount = nodes.length;
     var fadeStart = performance.now();
     function fade(now) {
-      var elapsed = now - fadeStart;
-      fadeProgress = Math.min(1, elapsed / fadeDuration);
-      if (fadeProgress >= 1) {
+      var k = Math.min(1, (now - fadeStart) / RETRACT_DURATION);
+      var keep = Math.ceil(startCount * (1 - k));
+      while (nodes.length > keep) {
+        var gone = nodes.pop();
+        if (edges.length >= nodes.length && edges.length > 0) edges.pop();
+        // Swap any appearance halo still on this node for a subtler disappearance one
+        twinkles = twinkles.filter(function(t) { return t.c !== gone.c || t.r !== gone.r; });
+        if (dark) addTwinkle(gone.c, gone.r, TWINKLE_OUT);
+      }
+      if (nodes.length === 0) {
         fading = false;
         graph = {};
         nodes = [];

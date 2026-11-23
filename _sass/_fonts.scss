@@ -1,0 +1,57 @@
+/*******************************************************************************
+ * Site body font: Crimson Pro, self-hosted (SIL OFL, see assets/fonts/crimson-pro/OFL.txt).
+ *
+ * Weights are shifted one step thinner at the @font-face level, so no other CSS
+ * needs to change. The previous font (Libertinus Serif) only had 400/600/700, so
+ * every requested weight rendered as one of three levels; those same three levels
+ * now map to Crimson Pro faces 100 lighter (same in light and dark mode):
+ *
+ *   requested 100-500 -> Crimson Pro 300  (was Libertinus 400)
+ *   requested 600     -> Crimson Pro 500  (was Libertinus 600)
+ *   requested 700-900 -> Crimson Pro 600  (was Libertinus 700)
+ *
+ * "Crimson Pro Site Title" is a single-face family (Crimson Pro 400) used for
+ * the name on the home page, which read too heavy at 500.
+ *
+ * To adjust, change the right-hand face weights below (and add the matching
+ * files from @fontsource/crimson-pro to assets/fonts/crimson-pro/).
+ ******************************************************************************/
+
+$crimson-path: "../fonts/crimson-pro";
+
+// [requested weight range, actual face file weight]
+$crimson-site-map: (
+  ("100 500", 300),
+  ("600", 500),
+  ("700 900", 600)
+);
+$crimson-title-map: (
+  ("100 900", 400),
+);
+
+$crimson-subsets: (
+  "latin": "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD",
+  "latin-ext": "U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF",
+);
+
+@mixin crimson-family($family, $weight-map, $styles: (normal, italic)) {
+  @each $subset, $range in $crimson-subsets {
+    @each $style in $styles {
+      @each $entry in $weight-map {
+        $requested: nth($entry, 1);
+        $face: nth($entry, 2);
+        @font-face {
+          font-family: $family;
+          font-style: $style;
+          font-weight: unquote($requested);
+          font-display: swap;
+          src: url("#{$crimson-path}/crimson-pro-#{$subset}-#{$face}-#{$style}.woff2") format("woff2");
+          unicode-range: unquote($range);
+        }
+      }
+    }
+  }
+}
+
+@include crimson-family("Crimson Pro Site", $crimson-site-map);
+@include crimson-family("Crimson Pro Site Title", $crimson-title-map, (normal,));

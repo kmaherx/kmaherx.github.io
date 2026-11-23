@@ -29,6 +29,8 @@ social: false
 .about-page .post-title {
   font-variant: small-caps;
   font-weight: 600;
+  /* Crimson Pro 400 (the site's 600 maps to 500, which read too heavy). See _sass/_fonts.scss. */
+  font-family: "Crimson Pro Site Title", serif;
 }
 .about-blurb {
   color: #666;
@@ -95,7 +97,7 @@ a.about-link:hover {
 </div>
 
 <div class="about-blurb">
-AI agents, interpretability, and biosecurity
+Multi-agent systems, interpretability, and biology
 </div>
 
 <div class="about-section">

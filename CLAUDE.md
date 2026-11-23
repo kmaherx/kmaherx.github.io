@@ -2,10 +2,15 @@
 
 ## Changing the Site Font
 
-Two files need updating:
+The body font is **Crimson Pro**, self-hosted (not Google Fonts):
 
-1. **`_config.yml`** (~line 445) — Update the Google Fonts URL to load the desired font family and weights.
-2. **`_sass/_base.scss`** (~line 7) — Set `font-family` on the `body` selector. Must target `body` (not `html`) because Bootstrap's `bootstrap.min.css` sets `font-family` on `body` and loads first. The custom `main.css` (compiled from SCSS) loads after Bootstrap at line 69 of `_includes/head.liquid`, so a `body` rule in `_base.scss` overrides it.
+1. **`_sass/_fonts.scss`** — `@font-face` rules for the `"Crimson Pro Site"` family, generated from `$crimson-site-map`. Weights are shifted at the `@font-face` level (requested 100–500 → face 300, 600 → 500, 700–900 → 600), so no other CSS needs weight changes. Same in light and dark mode. `"Crimson Pro Site Title"` is a single-face family (400) used only for the name on the home page (`_pages/about.md`).
+2. **`assets/fonts/crimson-pro/`** — the WOFF2 files (latin + latin-ext subsets, from `@fontsource/crimson-pro`) and `OFL.txt`. Changing a face weight in the maps requires adding the matching file.
+3. **`_sass/_base.scss`** (~line 7) — Set `font-family` on the `body` selector. Must target `body` (not `html`) because Bootstrap's `bootstrap.min.css` sets `font-family` on `body` and loads first. The custom `main.css` (compiled from SCSS) loads after Bootstrap at line 69 of `_includes/head.liquid`, so a `body` rule in `_base.scss` overrides it.
+
+To switch to a Google-hosted font instead, add it to the Google Fonts URL in `_config.yml` (~line 444, currently only Material Icons) and set it in step 3.
+
+After font/CSS changes, hard-refresh (Cmd+Shift+R): the `bust_css_cache` hash on `main.css` doesn't change with content, so browsers may serve the old CSS.
 
 ## Dark/Light Theme Text Color Transitions
 
@@ -15,9 +20,9 @@ The fix (applied in `_sass/_base.scss`): set `color: var(--global-text-color)` o
 
 **Do not** re-add explicit `color: var(--global-text-color)` to `p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `em`, `div`, `li`, `span`, or `strong` selectors.
 
-## Libertinus Serif Bold Weight
+## Bold Weight (legacy from Libertinus Serif)
 
-Libertinus Serif's `font-weight: 700` (the default for `bold` / `<strong>`) is visually indistinguishable from regular (400) at body text sizes. To make bold text visible, `strong` is set to `font-weight: 900` in `_sass/_base.scss` under both `.post` and `.caption`. This applies to both `**markdown bold**` in post body text and in figure captions (which render markdown via `markdownify` in `figure.liquid`).
+`strong` is set to `font-weight: 900` in `_sass/_base.scss` under both `.post` and `.caption`. This was a workaround for the previous font, Libertinus Serif, whose 700 looked like regular at body sizes. With Crimson Pro, 700–900 all map to the same face (600), so the 900 is harmless and can stay.
 
 ## Inline LaTeX with Subscripts
 

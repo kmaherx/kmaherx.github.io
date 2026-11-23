@@ -129,6 +129,7 @@ AI agents, interpretability, and biosecurity
 
   // Graph state
   var graph = {}; // "c,r" -> true for visited nodes
+  var parentOf = {}; // "c,r" -> parent "c,r" (absent for root)
   var nodes = []; // [{c,r}] in creation order
   var edges = []; // [{c1,r1,c2,r2}]
   var frontier = []; // [{c,r}] nodes to grow from
@@ -141,6 +142,10 @@ AI agents, interpretability, and biosecurity
   var rateMultiplier = 1; // 0.5 (slow) .. 2.0 (fast), controlled by vertical drag
   var chordBlend = 0; // -1 (minor 7th) .. 0 (chromatic) .. 1 (major 7th), controlled by horizontal drag
   var baseInterval = 40; // ms between growth steps at 1x
+  var REPULSION = 1; // higher = branches avoid other branches more strongly (0 = off)
+  var REPULSION_RADIUS = 2; // grid cells
+  var SELF_ANCESTORS = 4; // own recent ancestors ignored when measuring crowding
+  var TIP_BIAS_BASE = 6; // higher = keep extending the current tip more often = fewer, longer branches
 
   // Chord tones in semitones (relative to base), 2 octaves, indexed by branchStep.
   // Right = Imaj7 at base (Bb -> Bbmaj7 = Bb,D,F,A).
@@ -149,7 +154,9 @@ AI agents, interpretability, and biosecurity
   var RIGHT_CHORD = [0, 4, 7, 11, 12, 16, 19, 23];
   var LEFT_CHORD  = [2, 5, 9, 12, 14, 17, 21, 24];
   var fading = false;
-  var fadeAlpha = 1; // global alpha multiplier during fade
+  var fadeProgress = 0; // 0..1 through the fade-out sweep
+  var FADE_WINDOW = 0.3; // fraction of the sweep each point takes to fade; rest is stagger by distance from root
+  var fadeMaxDist = 1; // farthest node's grid distance from the root, captured when the fade starts
   var fadeRAF = null;
 
   // Per-node twinkle effect (dark mode only)
@@ -273,26 +280,45 @@ AI agents, interpretability, and biosecurity
     }
   }
 
+  // Fade-out sweep is spatial: a ring expands from the root, and points
+  // nearer the root fade first. Alpha is a function of grid position.
+  function distFromRoot(c, r) {
+    var dc = c - nodes[0].c, dr = r - nodes[0].r;
+    return Math.sqrt(dc * dc + dr * dr);
+  }
+
+  function fadeAlphaAt(c, r) {
+    if (!fading) return 1;
+    var start = Math.min(1, distFromRoot(c, r) / fadeMaxDist) * (1 - FADE_WINDOW);
+    return Math.max(0, Math.min(1, 1 - (fadeProgress - start) / FADE_WINDOW));
+  }
+
   function drawGraph() {
     if (edges.length === 0 && nodes.length === 0) return;
     var dark = document.documentElement.getAttribute('data-theme') === 'dark';
     var rgb = dark ? '255,255,255' : '0,0,0';
 
-    var a = fading ? fadeAlpha : 1;
-    if (a <= 0) return;
+    var a = fading ? 1 - fadeProgress : 1; // used for twinkles
 
     ctx.lineWidth = dark ? 1 : 1.5;
-    ctx.strokeStyle = 'rgba(' + rgb + ',' + (dark ? 0.4 : 0.7) * a + ')';
+    var edgeBase = dark ? 0.4 : 0.7;
+    // Edges fade by their midpoint, so they sit between their two endpoints' alphas
     for (var i = 0; i < edges.length; i++) {
       var e = edges[i];
+      var ea = fadeAlphaAt((e.c1 + e.c2) / 2, (e.r1 + e.r2) / 2);
+      if (ea <= 0) continue;
+      ctx.strokeStyle = 'rgba(' + rgb + ',' + edgeBase * ea + ')';
       ctx.beginPath();
       ctx.moveTo(dotX(e.c1), dotY(e.r1));
       ctx.lineTo(dotX(e.c2), dotY(e.r2));
       ctx.stroke();
     }
 
-    ctx.fillStyle = 'rgba(' + rgb + ',' + (dark ? 0.7 : 0.9) * a + ')';
+    var nodeBase = dark ? 0.7 : 0.9;
     for (var i = 0; i < nodes.length; i++) {
+      var na = fadeAlphaAt(nodes[i].c, nodes[i].r);
+      if (na <= 0) continue;
+      ctx.fillStyle = 'rgba(' + rgb + ',' + nodeBase * na + ')';
       ctx.beginPath();
       ctx.arc(dotX(nodes[i].c), dotY(nodes[i].r), dark ? 2.5 : 3, 0, Math.PI * 2);
       ctx.fill();
@@ -333,12 +359,35 @@ AI agents, interpretability, and biosecurity
     drawGraph();
   }
 
+  // How crowded a candidate cell is by *other* branches: sum of 1/distance
+  // over occupied cells within REPULSION_RADIUS, skipping the growing branch's
+  // own recent ancestors so a branch isn't repelled by itself.
+  function crowding(c, r, parentKey) {
+    var own = {};
+    var k = parentKey;
+    for (var a = 0; a < SELF_ANCESTORS && k; a++) {
+      own[k] = true;
+      k = parentOf[k];
+    }
+    var score = 0;
+    var R = REPULSION_RADIUS;
+    for (var dc = -R; dc <= R; dc++) {
+      for (var dr = -R; dr <= R; dr++) {
+        if (dc === 0 && dr === 0) continue;
+        var key = (c + dc) + ',' + (r + dr);
+        if (!graph[key] || own[key]) continue;
+        score += 1 / Math.sqrt(dc * dc + dr * dr);
+      }
+    }
+    return score;
+  }
+
   function growStep() {
     if (frontier.length === 0) return;
 
     // Strongly bias toward most recently added frontier node.
     // Bias exponent grows mildly with frontier size so branch runs hold up as tree grows.
-    var tipBias = 6 + Math.log10(Math.max(1, frontier.length));
+    var tipBias = TIP_BIAS_BASE + Math.log10(Math.max(1, frontier.length));
     var fi = frontier.length - 1 - Math.floor(Math.pow(Math.random(), tipBias) * frontier.length);
     fi = Math.max(0, fi);
     var node = frontier[fi];
@@ -357,6 +406,9 @@ AI agents, interpretability, and biosecurity
       var localDot = n.dc * node.dc + n.dr * node.dr;
       var dot = globalDot * 0.3 + localDot * 0.7;
       var weight = Math.max(0.01, Math.pow(Math.max(0, 0.5 + dot), 3));
+      if (REPULSION > 0) {
+        weight *= Math.exp(-REPULSION * crowding(nc, nr, node.c + ',' + node.r));
+      }
       candidates.push({c: nc, r: nr, fc: node.c, fr: node.r, w: weight});
     }
 
@@ -378,6 +430,7 @@ AI agents, interpretability, and biosecurity
 
     // Add node and edge, carry momentum from parent direction
     graph[pick.c + ',' + pick.r] = true;
+    parentOf[pick.c + ',' + pick.r] = pick.fc + ',' + pick.fr;
     nodes.push({c: pick.c, r: pick.r});
     edges.push({c1: pick.fc, r1: pick.fr, c2: pick.c, r2: pick.r});
     // Normalize the step direction for momentum
@@ -415,10 +468,11 @@ AI agents, interpretability, and biosecurity
     if (twinkleRAF) { cancelAnimationFrame(twinkleRAF); twinkleRAF = null; }
     twinkles = [];
     fading = false;
-    fadeAlpha = 1;
+    fadeProgress = 0;
 
     // Clear previous graph
     graph = {};
+    parentOf = {};
     nodes = [];
     edges = [];
     frontier = [];
@@ -478,16 +532,19 @@ AI agents, interpretability, and biosecurity
     growing = false;
     if (growTimeout) { clearTimeout(growTimeout); growTimeout = null; }
 
-    // Uniform fade: whole graph fades together starting now
+    // Spatial fade: everything disappears outward from the root
     fading = true;
-    fadeAlpha = 1;
-    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    var fadeDuration = dark ? 800 : 400;
+    fadeProgress = 0;
+    fadeMaxDist = 1;
+    for (var i = 1; i < nodes.length; i++) {
+      fadeMaxDist = Math.max(fadeMaxDist, distFromRoot(nodes[i].c, nodes[i].r));
+    }
+    var fadeDuration = 800; // ms, same in light and dark
     var fadeStart = performance.now();
     function fade(now) {
       var elapsed = now - fadeStart;
-      fadeAlpha = Math.max(0, 1 - elapsed / fadeDuration);
-      if (fadeAlpha <= 0) {
+      fadeProgress = Math.min(1, elapsed / fadeDuration);
+      if (fadeProgress >= 1) {
         fading = false;
         graph = {};
         nodes = [];

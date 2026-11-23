@@ -78,8 +78,39 @@ a.about-link:hover {
 .about-toggle a {
   text-decoration: none;
 }
+/* Sound toggle for the dot grid: top-right, mirroring the theme toggle
+   (top 5vh, left 5vw), drawn in a faded dot color that brightens on hover. */
+.sound-toggle {
+  position: fixed;
+  top: 5vh;
+  right: 5vw;
+  z-index: 1;
+  display: block;
+  width: 1.15em;
+  height: 1.15em;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(0,0,0,0.45);
+  cursor: pointer;
+  line-height: 0;
+  transition: color 150ms;
+}
+html[data-theme="dark"] .sound-toggle { color: rgba(200,200,200,0.45); }
+/* Solid while the cursor is over the grid: hints that the grid makes sound.
+   Dark-mode variants are needed to beat the dark faded-color rule's specificity. */
+.sound-toggle.grid-hover { color: #000; }
+html[data-theme="dark"] .sound-toggle.grid-hover { color: rgba(255,255,255,0.7); } /* same as tree nodes */
+.sound-toggle:hover,
+html[data-theme="dark"] .sound-toggle:hover { color: var(--global-theme-color); }
+.sound-toggle svg { width: 100%; height: 100%; overflow: visible; }
+.sound-toggle .waves { opacity: 0.55; transition: opacity 250ms ease-out; }
+.sound-toggle.pulse .waves { opacity: 1; transition: none; }
+.sound-toggle .mute-x { display: none; }
+.sound-toggle.muted .waves { display: none; }
+.sound-toggle.muted .mute-x { display: inline; }
 @media (max-width: 768px) {
-  #dot-grid { display: none !important; }
+  #dot-grid, .sound-toggle { display: none !important; }
 }
 </style>
 
@@ -117,6 +148,20 @@ Multi-agent systems, interpretability, and biology
 </div>
 
 
+<div class="sound-toggle-wrap">
+<button type="button" class="sound-toggle muted" id="sound-toggle" aria-label="Turn sound on" title="Turn sound on">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/>
+    <g class="waves" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
+      <path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/>
+    </g>
+    <g class="mute-x" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M16 9l6 6M22 9l-6 6"/>
+    </g>
+  </svg>
+</button>
+</div>
 <canvas id="dot-grid" style="position: fixed; top: 0; right: 0; width: 50vw; height: 100vh; pointer-events: auto; z-index: 0;"></canvas>
 
 <script>
@@ -173,6 +218,14 @@ Multi-agent systems, interpretability, and biology
   var convolver = null; // reverb chain, used in dark mode
   var activeTipKey = null; // "c,r" of the last node we extended from
   var branchStep = 0; // how many steps the current branch has extended
+  var MASTER_VOLUME = 0.08;
+  var BASE_HZ_CONFIRM = 233 * 1.5; // F4, a fifth above the growth base: sound-on confirmation note
+  // Sound starts muted on every page load (deliberately not remembered): the audio
+  // engine is only ever started by the click that turns sound on, so the first
+  // grid press never waits on a cold engine. Also the polite default.
+  var soundOn = false;
+  var soundBtn = document.getElementById('sound-toggle');
+  var reserved = {}; // "c,r" grid cells under the sound button: no dots, no growth
   var RETRACT_VOLUME = 0.6; // disappearance tones relative to appearance tones
   var RETRACT_TONE_GAP = 40; // ms, min spacing between disappearance tones (same as growth rate)
   // Blip shapes. NORMAL is the appearance bubble; POP is the lighter dark-mode
@@ -201,7 +254,7 @@ Multi-agent systems, interpretability, and biology
     if (!AC) return;
     audioCtx = new AC();
     masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.08;
+    masterGain.gain.value = soundOn ? MASTER_VOLUME : 0;
     masterGain.connect(audioCtx.destination);
     convolver = audioCtx.createConvolver();
     convolver.buffer = makeImpulse(audioCtx, 1.6, 2.5);
@@ -215,7 +268,6 @@ Multi-agent systems, interpretability, and biology
   }
 
   function playEdgeTone(step) {
-    if (!audioCtx) return;
     // Each note is a sine with a quick upward pitch sweep -> bubble-ish blip.
     // Across a branch, the target pitch rises step-by-step. Horizontal drag
     // blends the chromatic default toward a major (right) or minor (left)
@@ -227,12 +279,17 @@ Multi-agent systems, interpretability, and biology
     var blend = Math.abs(chordBlend);
     var st = (1 - blend) * defaultSt + blend * chordSt;
     var target = base * Math.pow(2, st / 12);
-    playBlip(target, 1.0, BLIP_NORMAL);
+    if (audioCtx) playBlip(target, 1.0, BLIP_NORMAL);
     return target;
   }
 
   // One muffled bubble blip at `target` Hz with peak gain `peak`, shaped by `shape`.
   function playBlip(target, peak, shape) {
+    if (!soundOn) return;
+    // If the engine was suspended (e.g. after switching windows), its clock is
+    // frozen and a note scheduled now would play late. Skip it and wake the engine.
+    if (audioCtx.state !== 'running') { audioCtx.resume(); return; }
+    pulseSoundIcon();
     var t = audioCtx.currentTime;
     var osc = audioCtx.createOscillator();
     var g = audioCtx.createGain();
@@ -271,6 +328,64 @@ Multi-agent systems, interpretability, and biology
     {dc:-1,dr:-1},{dc:1,dr:-1},{dc:-1,dr:1},{dc:1,dr:1}
   ];
 
+  // Briefly brighten the speaker's waves in time with a note
+  var pulseTimer = null;
+  function pulseSoundIcon() {
+    soundBtn.classList.add('pulse');
+    clearTimeout(pulseTimer);
+    pulseTimer = setTimeout(function() { soundBtn.classList.remove('pulse'); }, 60);
+  }
+
+  function renderSoundButton() {
+    soundBtn.classList.toggle('muted', !soundOn);
+    var label = soundOn ? 'Mute sound' : 'Turn sound on';
+    soundBtn.setAttribute('aria-label', label);
+    soundBtn.title = label;
+  }
+
+  function toggleSound() {
+    soundOn = !soundOn;
+    renderSoundButton();
+    // This click is a user gesture, so it can start the audio engine early.
+    ensureAudio();
+    if (!audioCtx) return;
+    var t = audioCtx.currentTime;
+    masterGain.gain.cancelScheduledValues(t);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, t);
+    masterGain.gain.linearRampToValueAtTime(soundOn ? MASTER_VOLUME : 0, t + 0.05);
+    if (soundOn) {
+      // One soft confirmation note once the engine is running
+      audioCtx.resume().then(function() { playBlip(BASE_HZ_CONFIRM, 0.6, BLIP_NORMAL); });
+    }
+  }
+
+  // Reserve every grid cell whose dot falls under the sound button plus
+  // RESERVE_MARGIN px: those dots aren't drawn and branches can't grow into them.
+  var RESERVE_MARGIN = 6;
+  function placeSoundButton() {
+    reserved = {};
+    if (!cols) return;
+    var cRect = canvas.getBoundingClientRect();
+    var b = soundBtn.getBoundingClientRect();
+    if (!b.width) return; // hidden (mobile)
+    var x0 = b.left - cRect.left - RESERVE_MARGIN, x1 = b.right - cRect.left + RESERVE_MARGIN;
+    var y0 = b.top - cRect.top - RESERVE_MARGIN, y1 = b.bottom - cRect.top + RESERVE_MARGIN;
+    for (var c = 0; c < cols; c++) {
+      var x = dotX(c);
+      if (x < x0 || x > x1) continue;
+      for (var r = 0; r < rows; r++) {
+        var y = dotY(r);
+        if (y >= y0 && y <= y1) reserved[c + ',' + r] = true;
+      }
+    }
+  }
+
+  renderSoundButton();
+  soundBtn.addEventListener('click', toggleSound);
+  canvas.addEventListener('mouseenter', function() { soundBtn.classList.add('grid-hover'); });
+  canvas.addEventListener('mouseleave', function() { soundBtn.classList.remove('grid-hover'); });
+  soundBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+
   function setup() {
     w = canvas.clientWidth;
     h = canvas.clientHeight;
@@ -279,6 +394,7 @@ Multi-agent systems, interpretability, and biology
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     cols = Math.floor(w / spacing);
     rows = Math.floor(h / spacing);
+    placeSoundButton();
   }
 
   function dotX(c) { return c * spacing + spacing / 2; }
@@ -290,6 +406,7 @@ Multi-agent systems, interpretability, and biology
     ctx.fillStyle = dark ? 'rgba(200,200,200,0.15)' : 'rgba(0,0,0,0.25)';
     for (var r = 0; r < rows; r++) {
       for (var c = 0; c < cols; c++) {
+        if (reserved[c + ',' + r]) continue;
         ctx.beginPath();
         ctx.arc(dotX(c), dotY(r), 1.5, 0, Math.PI * 2);
         ctx.fill();
@@ -399,7 +516,7 @@ Multi-agent systems, interpretability, and biology
       var nc = node.c + n.dc;
       var nr = node.r + n.dr;
       if (nc < 0 || nc >= cols || nr < 0 || nr >= rows) continue;
-      if (graph[nc + ',' + nr]) continue;
+      if (graph[nc + ',' + nr] || reserved[nc + ',' + nr]) continue;
 
       // Combine global direction bias with local momentum
       var globalDot = n.dc * growDir.dx + n.dr * growDir.dy;
@@ -459,9 +576,9 @@ Multi-agent systems, interpretability, and biology
   }
 
   function startGrow(e) {
-    ensureAudio();
-    // Always nudge resume -- Safari can re-suspend silently after backgrounding.
-    if (audioCtx) audioCtx.resume();
+    // Audio is only created by the sound button; here just nudge it awake if it
+    // exists -- Safari can re-suspend silently after backgrounding.
+    if (audioCtx && soundOn) audioCtx.resume();
 
     // Stop any existing fade
     if (fadeRAF) { cancelAnimationFrame(fadeRAF); fadeRAF = null; }
@@ -485,6 +602,7 @@ Multi-agent systems, interpretability, and biology
     var r = Math.round((my - spacing / 2) / spacing);
     c = Math.max(0, Math.min(cols - 1, c));
     r = Math.max(0, Math.min(rows - 1, r));
+    if (reserved[c + ',' + r]) return; // pressed on/next to the sound button
 
     // Random growth direction
     var angle = Math.random() * Math.PI * 2;

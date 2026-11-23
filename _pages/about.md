@@ -171,6 +171,14 @@ AI agents, interpretability, and biosecurity
   var convolver = null; // reverb chain, used in dark mode
   var activeTipKey = null; // "c,r" of the last node we extended from
   var branchStep = 0; // how many steps the current branch has extended
+  var RETRACT_VOLUME = 0.6; // disappearance tones relative to appearance tones
+  var RETRACT_TONE_GAP = 40; // ms, min spacing between disappearance tones (same as growth rate)
+  // Blip shapes. NORMAL is the appearance bubble; POP is the lighter dark-mode
+  // disappearance (snappier attack, shorter tail, smaller sweep, drier reverb).
+  // sweep = starting pitch as a fraction of target; rise/settle = when the sweep
+  // overshoots then lands on target; attack/decay/stop = envelope; all times in s.
+  var BLIP_NORMAL = {sweep: 0.2, rise: 0.05, settle: 0.12, attack: 0.04,  decay: 0.22, stop: 0.2,  reverb: 0.6};
+  var BLIP_POP    = {sweep: 0.6, rise: 0.02, settle: 0.05, attack: 0.008, decay: 0.11, stop: 0.12, reverb: 0.3};
 
   function makeImpulse(ctx, duration, decay) {
     var rate = ctx.sampleRate;
@@ -217,15 +225,21 @@ AI agents, interpretability, and biosecurity
     var blend = Math.abs(chordBlend);
     var st = (1 - blend) * defaultSt + blend * chordSt;
     var target = base * Math.pow(2, st / 12);
+    playBlip(target, 1.0, BLIP_NORMAL);
+    return target;
+  }
+
+  // One muffled bubble blip at `target` Hz with peak gain `peak`, shaped by `shape`.
+  function playBlip(target, peak, shape) {
     var t = audioCtx.currentTime;
     var osc = audioCtx.createOscillator();
     var g = audioCtx.createGain();
     var lpf = audioCtx.createBiquadFilter();
     osc.type = 'sine';
-    // Per-note bubble sweep: start way below target, whoop up fast
-    osc.frequency.setValueAtTime(target * 0.2, t);
-    osc.frequency.exponentialRampToValueAtTime(target * 1.15, t + 0.05);
-    osc.frequency.exponentialRampToValueAtTime(target, t + 0.12);
+    // Per-note bubble sweep: start below target, whoop up fast
+    osc.frequency.setValueAtTime(target * shape.sweep, t);
+    osc.frequency.exponentialRampToValueAtTime(target * 1.15, t + shape.rise);
+    osc.frequency.exponentialRampToValueAtTime(target, t + shape.settle);
     // Low-pass filter muffles the sound (underwater feel).
     // Cutoff tracks target pitch so high bubbles aren't completely swallowed.
     lpf.type = 'lowpass';
@@ -233,20 +247,20 @@ AI agents, interpretability, and biosecurity
     lpf.frequency.value = Math.min(600, target * 1.4);
     // Soft, short envelope with a quick swell
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(1.0, t + 0.04);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    g.gain.linearRampToValueAtTime(peak, t + shape.attack);
+    g.gain.exponentialRampToValueAtTime(0.001, t + shape.decay);
     osc.connect(lpf);
     lpf.connect(g);
     g.connect(masterGain);
     // Wet send to reverb in dark mode only
     if (convolver && document.documentElement.getAttribute('data-theme') === 'dark') {
       var send = audioCtx.createGain();
-      send.gain.value = 0.6;
+      send.gain.value = shape.reverb;
       g.connect(send);
       send.connect(convolver);
     }
     osc.start(t);
-    osc.stop(t + 0.2);
+    osc.stop(t + shape.stop);
   }
 
   // 8 neighbor offsets
@@ -432,7 +446,8 @@ AI agents, interpretability, and biosecurity
       branchStep = 0;
     }
     activeTipKey = pick.c + ',' + pick.r;
-    playEdgeTone(branchStep);
+    // Remember the node's pitch so it can replay it when it disappears
+    nodes[nodes.length - 1].hz = playEdgeTone(branchStep);
 
     if (document.documentElement.getAttribute('data-theme') === 'dark') {
       addTwinkle(pick.c, pick.r, TWINKLE_IN);
@@ -521,12 +536,18 @@ AI agents, interpretability, and biosecurity
     var dark = document.documentElement.getAttribute('data-theme') === 'dark';
     var startCount = nodes.length;
     var fadeStart = performance.now();
+    var lastToneAt = -Infinity;
     function fade(now) {
       var k = Math.min(1, (now - fadeStart) / RETRACT_DURATION);
       var keep = Math.ceil(startCount * (1 - k));
       while (nodes.length > keep) {
         var gone = nodes.pop();
         if (edges.length >= nodes.length && edges.length > 0) edges.pop();
+        // Replay the node's own pitch, quieter (throttled so big trees don't buzz)
+        if (audioCtx && gone.hz && now - lastToneAt >= RETRACT_TONE_GAP) {
+          playBlip(gone.hz, RETRACT_VOLUME, dark ? BLIP_POP : BLIP_NORMAL);
+          lastToneAt = now;
+        }
         // Swap any appearance halo still on this node for a subtler disappearance one
         twinkles = twinkles.filter(function(t) { return t.c !== gone.c || t.r !== gone.r; });
         if (dark) addTwinkle(gone.c, gone.r, TWINKLE_OUT);

@@ -29,8 +29,8 @@ social: false
 .about-page .post-title {
   font-variant: small-caps;
   font-weight: 600;
-  /* Crimson Pro 400 (the site's 600 maps to 500, which read too heavy). See _sass/_fonts.scss. */
-  font-family: "Crimson Pro Site Title", serif;
+  /* Crimson Pro 400: lighter than other titles (500), which read too heavy for the name. See _sass/_fonts.scss. */
+  font-family: "Crimson Pro Site Name", serif;
 }
 .about-blurb {
   color: #666;

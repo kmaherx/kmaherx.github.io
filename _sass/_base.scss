@@ -640,7 +640,7 @@ footer.sticky-bottom {
 }
 
 .post-title {
-  font-weight: bold;
+  font-weight: 600; // -> Crimson Pro 500, see _fonts.scss
   mjx-container[jax="CHTML"][display="true"] {
     display: unset;
   }
@@ -978,7 +978,7 @@ html.transition *:after {
   margin-right: auto;
 
   h2, h3, h4, h5, h6 {
-    font-weight: bold;
+    font-weight: 600; // -> Crimson Pro 500, same as titles
     margin-top: 2.5rem;
   }
 

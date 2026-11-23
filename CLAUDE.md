@@ -4,7 +4,7 @@
 
 The body font is **Crimson Pro**, self-hosted (not Google Fonts):
 
-1. **`_sass/_fonts.scss`** — `@font-face` rules for the `"Crimson Pro Site"` family, generated from `$crimson-site-map`. Weights are shifted at the `@font-face` level (requested 100–500 → face 300, 600 → 500, 700–900 → 600), so no other CSS needs weight changes. Same in light and dark mode. `"Crimson Pro Site Title"` is a single-face family (400) used only for the name on the home page (`_pages/about.md`).
+1. **`_sass/_fonts.scss`** — `@font-face` rules for the `"Crimson Pro Site"` family, generated from `$crimson-site-map`. Weights are shifted at the `@font-face` level (requested 100–500 → face 300, 600 → 500, 700–900 → 600), so no other CSS needs weight changes. Same in light and dark mode. Page/post titles (`.post-title`) and post section headings (`.post h2`–`h6`) request 600 (→ 500) in `_sass/_base.scss`, a step lighter than inline bold (→ 600). `"Crimson Pro Site Name"` is a single-face family (400) used only for the name on the home page (`_pages/about.md`).
 2. **`assets/fonts/crimson-pro/`** — the WOFF2 files (latin + latin-ext subsets, from `@fontsource/crimson-pro`) and `OFL.txt`. Changing a face weight in the maps requires adding the matching file.
 3. **`_sass/_base.scss`** (~line 7) — Set `font-family` on the `body` selector. Must target `body` (not `html`) because Bootstrap's `bootstrap.min.css` sets `font-family` on `body` and loads first. The custom `main.css` (compiled from SCSS) loads after Bootstrap at line 69 of `_includes/head.liquid`, so a `body` rule in `_base.scss` overrides it.
 

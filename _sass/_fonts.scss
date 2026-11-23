@@ -10,8 +10,11 @@
  *   requested 600     -> Crimson Pro 500  (was Libertinus 600)
  *   requested 700-900 -> Crimson Pro 600  (was Libertinus 700)
  *
- * "Crimson Pro Site Title" is a single-face family (Crimson Pro 400) used for
- * the name on the home page, which read too heavy at 500.
+ * Page/post titles and post section headings request 600 (-> 500) in
+ * _base.scss, a step lighter than inline bold (-> 600).
+ *
+ * "Crimson Pro Site Name" is a single-face family (Crimson Pro 400) used only
+ * for the name on the home page (_pages/about.md), which read too heavy at 500.
  *
  * To adjust, change the right-hand face weights below (and add the matching
  * files from @fontsource/crimson-pro to assets/fonts/crimson-pro/).
@@ -25,7 +28,7 @@ $crimson-site-map: (
   ("600", 500),
   ("700 900", 600)
 );
-$crimson-title-map: (
+$crimson-name-map: (
   ("100 900", 400),
 );
 
@@ -54,4 +57,4 @@ $crimson-subsets: (
 }
 
 @include crimson-family("Crimson Pro Site", $crimson-site-map);
-@include crimson-family("Crimson Pro Site Title", $crimson-title-map, (normal,));
+@include crimson-family("Crimson Pro Site Name", $crimson-name-map, (normal,));
